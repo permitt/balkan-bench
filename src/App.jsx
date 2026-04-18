@@ -52,18 +52,6 @@ function App() {
           ))}
         </div>
       </main>
-
-      <footer className="footer">
-        <span className="powered-label">Powered by</span>
-        <a
-          href="https://recrewty.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="powered-mark"
-        >
-          <img src="/recrewty-logo-white.png" alt="Recrewty" />
-        </a>
-      </footer>
     </div>
   )
 }

@@ -160,49 +160,13 @@
   font-weight: 600;
 }
 
-/* ===== Footer ===== */
-.footer {
-  position: relative;
-  z-index: 3;
-  padding: 28px clamp(24px, 5vw, 72px) 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  animation: fade-up 1s 0.8s ease-out both;
-}
-
-.powered-label {
-  font-size: 11px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.45);
-  font-weight: 600;
-}
-
-.powered-mark {
-  display: inline-flex;
-  align-items: center;
-  opacity: 0.88;
-  transition: opacity 0.25s;
-}
-
-.powered-mark:hover { opacity: 1; }
-
-.powered-mark img {
-  height: 34px;
-  width: auto;
-  display: block;
-}
-
 /* ===== Responsive ===== */
 @media (max-width: 720px) {
   .countdown { gap: 8px; }
   .cd-block { padding: 20px 8px 16px; border-radius: 16px; }
-  .footer { flex-direction: column; gap: 12px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .mesh { animation: none; }
-  .headline .line, .lede, .countdown, .footer { animation: none; }
+  .headline .line, .lede, .countdown { animation: none; }
 }

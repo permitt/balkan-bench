@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <rect width="64" height="64" rx="14" fill="#0e4a3a"></rect>
-  <rect x="10" y="10" width="44" height="44" rx="9" fill="#ffd84d"></rect>
-  <text x="32" y="45" text-anchor="middle" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace" font-size="34" font-weight="700" fill="#07291f" letter-spacing="-1">β</text>
+  <rect width="64" height="64" fill="#0b0b0e"></rect>
+  <text x="32" y="44" text-anchor="middle" font-family="&#39;JetBrains Mono&#39;, ui-monospace, monospace" font-size="34" font-weight="700" fill="#f2efe8" letter-spacing="-1">B</text>
+  <circle cx="50" cy="14" r="5" fill="#ff3b30"></circle>
 </svg>

@@ -172,7 +172,7 @@ function App() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
           <span className="sponsor-k">§ SPONSORED BY</span>
           <a href="https://recrewty.com" target="_blank" rel="noopener noreferrer" className="recrewty">
-            <span className="rc-mark">R</span>Recrewty
+            <img src="/recrewty-logo.png" alt="Recrewty" />
           </a>
         </div>
         <div className="bottom-meta">

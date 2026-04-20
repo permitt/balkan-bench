@@ -122,8 +122,8 @@ h1 .dot-acc { color: var(--signal); }
   text-transform: uppercase; text-align: right;
   display: inline-flex; align-items: center; gap: 6px; justify-content: flex-end;
 }
-.sb-status.live { color: var(--signal); }
-.sb-status.live::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--signal); animation: pulse 1.6s infinite; }
+.sb-status.live { color: #4ade80; }
+.sb-status.live::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #4ade80; animation: pulse 1.6s infinite; }
 .sb-status.prog { color: #ffb84d; }
 .sb-status.prog::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #ffb84d; }
 .sb-status.planned { color: rgba(242,239,232,0.4); }

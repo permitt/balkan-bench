@@ -53,6 +53,11 @@ def predict_cmd(
         revision=dataset_revision,
     )
 
+    # Predict-only path: the public test split has no label column (hidden
+    # test labels, see docs/methodology/data_provenance.md) and there is no
+    # train split here, so we must explicitly opt out of both training and
+    # metric computation. Scoring happens separately via `balkanbench score`
+    # with the private labels, in the official scoring environment.
     seed_result = run_single_seed(
         model_cfg=model_cfg,
         task_cfg=task_cfg,
@@ -61,6 +66,8 @@ def predict_cmd(
         seed=seed,
         output_dir=out / "work",
         eval_split="test",
+        train=False,
+        compute_metrics=False,
     )
 
     out.mkdir(parents=True, exist_ok=True)

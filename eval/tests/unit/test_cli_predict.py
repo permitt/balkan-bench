@@ -26,7 +26,10 @@ def _fake_test_dataset() -> DatasetDict:
 
 
 def test_predict_emits_predictions_jsonl(tmp_path, monkeypatch) -> None:
+    captured_kwargs: dict[str, Any] = {}
+
     def fake_run_single_seed(**kwargs: Any) -> SeedResult:
+        captured_kwargs.update(kwargs)
         # Predict always class 1 for 3 test examples
         return SeedResult(
             seed=42,
@@ -78,3 +81,14 @@ def test_predict_emits_predictions_jsonl(tmp_path, monkeypatch) -> None:
     assert meta["task"] == "boolq"
     assert meta["language"] == "sr"
     assert meta["num_predictions"] == 3
+
+    # Regression guard for the review finding: predict must opt into the
+    # no-train + no-metrics path. Otherwise the evaluator will try to score
+    # the unlabeled public test split.
+    assert captured_kwargs["compute_metrics"] is False, (
+        "predict CLI must pass compute_metrics=False (unlabeled public test split)"
+    )
+    assert captured_kwargs["train"] is False, (
+        "predict CLI must pass train=False (no train split, no training wanted)"
+    )
+    assert captured_kwargs["eval_split"] == "test"

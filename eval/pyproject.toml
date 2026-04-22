@@ -29,6 +29,14 @@ dev = [
     "mypy>=1.10",
     "types-PyYAML",
     "types-jsonschema",
+    # publish extras are in dev so the CLI subcommand is importable in tests
+    "datasets>=2.20",
+    "huggingface_hub>=0.24",
+]
+publish = [
+    "datasets>=2.20",
+    "huggingface_hub>=0.24",
+    "hf-transfer>=0.1",
 ]
 
 [project.scripts]

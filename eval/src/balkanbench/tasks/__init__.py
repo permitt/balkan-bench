@@ -66,3 +66,17 @@ __all__ = [
     "get_task_class",
     "list_task_types",
 ]
+
+
+def _autoregister_builtin_tasks() -> None:
+    """Import every builtin task module so their decorators populate the registry."""
+    # Imports have side effects (the @register_task decorator runs at import time).
+    # Keep this list sorted and in sync with new builtin task modules.
+    from balkanbench.tasks import classification as _classification  # noqa: F401
+    from balkanbench.tasks import diagnostic as _diagnostic  # noqa: F401
+    from balkanbench.tasks import multiple_choice as _multiple_choice  # noqa: F401
+    from balkanbench.tasks import multirc as _multirc  # noqa: F401
+    from balkanbench.tasks import wsc as _wsc  # noqa: F401
+
+
+_autoregister_builtin_tasks()

@@ -169,9 +169,7 @@ def run_hp_search(
 
     best = study.best_trial
     if best.value is None:
-        raise HPSearchError(
-            f"sweep {sweep_id}: best trial has no value (all trials failed?)"
-        )
+        raise HPSearchError(f"sweep {sweep_id}: best trial has no value (all trials failed?)")
     best_value = float(best.value)
     best_model_cfg = _apply_training_overrides(model_cfg, best.params)
     best_config_path = sweep_dir / f"{model_cfg['name']}_best.yaml"

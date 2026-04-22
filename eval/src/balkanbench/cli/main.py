@@ -13,6 +13,7 @@ from balkanbench.cli.listcmd import list_app
 from balkanbench.cli.predict import predict_cmd
 from balkanbench.cli.publish import publish_dataset_cmd
 from balkanbench.cli.score import score_cmd
+from balkanbench.cli.throughput import throughput_cmd
 
 app = typer.Typer(
     name="balkanbench",
@@ -46,6 +47,10 @@ app.command(
     "hp-search",
     help="Optuna TPE search on train -> validation; writes the winning model YAML.",
 )(hp_search_cmd)
+app.command(
+    "throughput",
+    help="Measure inference throughput on reference hardware; writes per-task + aggregate JSON.",
+)(throughput_cmd)
 
 
 def _version_callback(value: bool) -> None:

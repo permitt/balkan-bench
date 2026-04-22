@@ -6,7 +6,7 @@ from pathlib import Path
 
 import typer
 
-from balkanbench.cli._paths import resolve_task_config, schemas_root
+from balkanbench.cli._paths import schemas_root
 from balkanbench.config import load_yaml_with_schema
 from balkanbench.leaderboard.export import ExportError, write_leaderboard_export
 

@@ -29,7 +29,9 @@
         "binary_classification",
         "multiclass_classification",
         "multiple_choice",
-        "grouped_binary_classification"
+        "grouped_binary_classification",
+        "wsc",
+        "diagnostic"
       ]
     },
     "languages": {
@@ -98,9 +100,12 @@
       "additionalProperties": {
         "type": "object",
         "required": ["template_id"],
-        "additionalProperties": false,
+        "additionalProperties": true,
         "properties": {
-          "template_id": { "type": "string", "minLength": 1 }
+          "template_id":    { "type": "string", "minLength": 1 },
+          "template":       { "type": "string" },
+          "cause_prompt":   { "type": "string" },
+          "effect_prompt":  { "type": "string" }
         }
       }
     },

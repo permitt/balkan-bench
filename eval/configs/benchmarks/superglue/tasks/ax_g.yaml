@@ -1,0 +1,36 @@
+benchmark: superglue
+task: ax_g
+status: diagnostic
+task_type: diagnostic
+languages:
+  available: [sr]
+  ranked: []
+  roadmap: [hr, cnr, bs]
+dataset:
+  source_type: huggingface
+  public_repo: permitt/superglue-serbian
+  private_repo: permitt/superglue-private
+  config: ax_g
+  splits:
+    public: [test]
+    labeled_public: [test]
+    labeled_private: []
+inputs:
+  fields: [premise, hypothesis]
+  id_field: example_id
+metrics:
+  primary: [accuracy]
+  report: [accuracy, gender_parity]
+  task_score: accuracy
+prompts:
+  sr:
+    template_id: ax_g_sr_v1
+tokenizer:
+  max_length: 256
+  padding: longest
+  truncation: true
+training:
+  learning_rate: 2.0e-5
+  batch_size: 16
+  num_epochs: 1
+  metric_for_best_model: accuracy

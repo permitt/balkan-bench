@@ -1,0 +1,39 @@
+benchmark: superglue
+task: boolq
+status: ranked
+task_type: binary_classification
+languages:
+  available: [sr]
+  ranked: [sr]
+  roadmap: [hr, cnr, bs]
+dataset:
+  source_type: huggingface
+  public_repo: permitt/superglue-serbian
+  private_repo: permitt/superglue-private
+  config: boolq
+  splits:
+    public: [train, validation, test]
+    labeled_public: [train, validation]
+    labeled_private: [test]
+inputs:
+  fields: [question, passage]
+  id_field: example_id
+metrics:
+  primary: [accuracy]
+  report: [accuracy]
+  task_score: accuracy
+prompts:
+  sr:
+    template_id: boolq_sr_v1
+tokenizer:
+  max_length: 384
+  padding: longest
+  truncation: true
+training:
+  learning_rate: 2.0e-5
+  batch_size: 16
+  num_epochs: 10
+  warmup_ratio: 0.1
+  weight_decay: 0.01
+  early_stopping_patience: 5
+  metric_for_best_model: accuracy

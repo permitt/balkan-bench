@@ -1,0 +1,40 @@
+benchmark: superglue
+task: cb
+status: ranked
+task_type: multiclass_classification
+num_labels: 3
+languages:
+  available: [sr]
+  ranked: [sr]
+  roadmap: [hr, cnr, bs]
+dataset:
+  source_type: huggingface
+  public_repo: permitt/superglue-serbian
+  private_repo: permitt/superglue-private
+  config: cb
+  splits:
+    public: [train, validation, test]
+    labeled_public: [train, validation]
+    labeled_private: [test]
+inputs:
+  fields: [premise, hypothesis]
+  id_field: example_id
+metrics:
+  primary: [f1_macro]
+  report: [accuracy, f1_macro]
+  task_score: f1_macro
+prompts:
+  sr:
+    template_id: cb_sr_v1
+tokenizer:
+  max_length: 256
+  padding: longest
+  truncation: true
+training:
+  learning_rate: 2.0e-5
+  batch_size: 16
+  num_epochs: 30
+  warmup_ratio: 0.1
+  weight_decay: 0.01
+  early_stopping_patience: 10
+  metric_for_best_model: f1_macro

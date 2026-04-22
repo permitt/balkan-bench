@@ -1,0 +1,42 @@
+benchmark: superglue
+task: copa
+status: ranked
+task_type: multiple_choice
+num_choices: 2
+languages:
+  available: [sr]
+  ranked: [sr]
+  roadmap: [hr, cnr, bs]
+dataset:
+  source_type: huggingface
+  public_repo: permitt/superglue-serbian
+  private_repo: permitt/superglue-private
+  config: copa
+  splits:
+    public: [train, validation, test]
+    labeled_public: [train, validation]
+    labeled_private: [test]
+inputs:
+  fields: [premise, choice1, choice2, question]
+  id_field: example_id
+metrics:
+  primary: [accuracy]
+  report: [accuracy]
+  task_score: accuracy
+prompts:
+  sr:
+    template_id: copa_sr_v1
+    cause_prompt: "{premise} Šta je bio uzrok?"
+    effect_prompt: "{premise} Šta se desilo kao rezultat?"
+tokenizer:
+  max_length: 128
+  padding: longest
+  truncation: true
+training:
+  learning_rate: 2.0e-5
+  batch_size: 16
+  num_epochs: 30
+  warmup_ratio: 0.1
+  weight_decay: 0.01
+  early_stopping_patience: 10
+  metric_for_best_model: accuracy

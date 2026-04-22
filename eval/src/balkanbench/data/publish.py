@@ -97,10 +97,18 @@ def publish_dataset(
 
     prepared: dict[str, DatasetDict] = {}
     for config in configs_to_publish:
-        source = load_dataset(source_repo, config)
-        prepared[config] = _prepare_config(
-            source, config_name=config, benchmark=benchmark, language=language
-        )
+        try:
+            source = load_dataset(source_repo, config)
+        except Exception as exc:
+            raise PublishError(
+                f"failed to load config {config!r} from {source_repo!r}: {exc}"
+            ) from exc
+        try:
+            prepared[config] = _prepare_config(
+                source, config_name=config, benchmark=benchmark, language=language
+            )
+        except ValueError as exc:
+            raise PublishError(f"failed to normalize config {config!r}: {exc}") from exc
 
     try:
         manifest = build_manifest(
@@ -149,6 +157,7 @@ def publish_dataset(
         path_in_repo="README.md",
         repo_id=public_repo,
         repo_type="dataset",
+        revision=dataset_revision,
     )
     manifest_bytes = io.BytesIO(json.dumps(manifest, indent=2).encode("utf-8"))
     api.upload_file(
@@ -156,6 +165,7 @@ def publish_dataset(
         path_in_repo="dataset_manifest.json",
         repo_id=public_repo,
         repo_type="dataset",
+        revision=dataset_revision,
     )
 
     return PublishReport(

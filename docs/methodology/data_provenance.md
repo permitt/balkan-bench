@@ -101,8 +101,15 @@ balkanbench publish-dataset \
   --dry-run
 ```
 
-Drop `--dry-run` to actually create the public repo and push. `--dry-run`
-returns the built manifest and dataset card without touching HuggingFace.
+Drop `--dry-run` to actually create the public repo and push.
+
+`--dry-run` is **non-mutating**, not network-free: it still requires
+`HF_OFFICIAL_TOKEN` (because `load_dataset` has to pull the source
+snapshot) and it still calls `datasets.load_dataset` for every config.
+What it skips is every mutating side effect: no `HfApi.create_repo`, no
+`DatasetDict.push_to_hub`, no `upload_file`. You get the manifest dict
+and the rendered dataset card returned in the `PublishReport` for local
+inspection.
 
 ## Adding languages and new benchmarks
 

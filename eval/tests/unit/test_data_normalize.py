@@ -116,3 +116,40 @@ def test_attach_task_metadata_fills_example_id_if_missing() -> None:
     out = attach_task_metadata(dd, task_id="superglue.boolq.sr", language="sr")
     assert "example_id" in out["train"].column_names
     assert out["train"][0]["example_id"]
+
+
+def test_attach_task_metadata_overwrites_stale_task_id() -> None:
+    ds = Dataset.from_dict(
+        {
+            "question": ["a", "b"],
+            "passage": ["x", "y"],
+            "label": [0, 1],
+            "task_id": ["wrong.task.en", "wrong.task.en"],
+        }
+    )
+    dd = DatasetDict({"train": ds})
+    out = attach_task_metadata(dd, task_id="superglue.boolq.sr", language="sr")
+    assert all(v == "superglue.boolq.sr" for v in out["train"]["task_id"])
+
+
+def test_attach_task_metadata_overwrites_stale_language() -> None:
+    ds = Dataset.from_dict({"question": ["a"], "passage": ["x"], "label": [0], "language": ["en"]})
+    dd = DatasetDict({"train": ds})
+    out = attach_task_metadata(dd, task_id="superglue.boolq.sr", language="sr")
+    assert list(out["train"]["language"]) == ["sr"]
+
+
+def test_attach_task_metadata_preserves_upstream_example_id() -> None:
+    ds = Dataset.from_dict(
+        {
+            "question": ["a", "b"],
+            "passage": ["x", "y"],
+            "label": [0, 1],
+            "example_id": ["upstream-0", "upstream-1"],
+        }
+    )
+    dd = DatasetDict({"train": ds})
+    out = attach_task_metadata(dd, task_id="superglue.boolq.sr", language="sr")
+    # example_id is the stable key for matching predictions to private labels.
+    # Only fill if missing; never overwrite.
+    assert list(out["train"]["example_id"]) == ["upstream-0", "upstream-1"]

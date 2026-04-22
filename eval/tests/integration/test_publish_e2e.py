@@ -95,7 +95,7 @@ class _RecordingApi:
         path_in_repo: str,
         repo_id: str,
         repo_type: str,
-        **_: Any,
+        **kwargs: Any,
     ) -> None:
         content = path_or_fileobj.read() if hasattr(path_or_fileobj, "read") else path_or_fileobj
         if isinstance(content, bytes):
@@ -106,6 +106,7 @@ class _RecordingApi:
                 "repo_id": repo_id,
                 "repo_type": repo_type,
                 "content": content,
+                "revision": kwargs.get("revision"),
             }
         )
 
@@ -172,10 +173,14 @@ def test_publish_superglue_sr_end_to_end(wired_publish) -> None:
         test_cols = push["splits"]["test"].column_names
         assert "label" not in test_cols, f"{push['config_name']}: test still has label"
 
-    # Manifest and README uploaded at the top level
+    # Manifest and README uploaded at the top level, tagged with dataset revision
     paths = {f["path_in_repo"]: f["content"] for f in api.uploaded_files}
     assert "README.md" in paths
     assert "dataset_manifest.json" in paths
+    for uploaded in api.uploaded_files:
+        assert uploaded["revision"] == "v0.1.0-data", (
+            f"{uploaded['path_in_repo']} was uploaded without the dataset revision tag"
+        )
 
     # Manifest matches the report
     uploaded_manifest = json.loads(paths["dataset_manifest.json"])

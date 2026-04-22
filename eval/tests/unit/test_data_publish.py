@@ -85,6 +85,7 @@ class _FakeHfApi:
                 "repo_id": repo_id,
                 "repo_type": repo_type,
                 "content": content,
+                "revision": kwargs.get("revision"),
             }
         )
 
@@ -247,3 +248,69 @@ def test_idempotent_rename_when_copa_already_has_validation(monkeypatch) -> None
         dry_run=True,
     )
     assert "validation" in report.manifest["configs"]["copa"]["splits"]
+
+
+def test_upload_file_is_tagged_with_dataset_revision(monkeypatch, fake_source, fake_api) -> None:
+    monkeypatch.setenv("HF_OFFICIAL_TOKEN", "fake-token")
+    api, _ = fake_api
+    publish_dataset(
+        source_repo="permitt/superglue",
+        public_repo="permitt/superglue-serbian",
+        private_repo=None,
+        language="sr",
+        license="CC-BY-4.0",
+        dataset_revision="v0.1.0-data",
+        configs_to_publish=["boolq"],
+    )
+    # README.md and dataset_manifest.json must land on the same revision as
+    # the data, not on the default branch. Otherwise consumers checking out
+    # v0.1.0-data see stale or missing metadata.
+    for uploaded in api.uploaded_files:
+        assert uploaded["revision"] == "v0.1.0-data", (
+            f"{uploaded['path_in_repo']} was not tagged with dataset_revision"
+        )
+
+
+def test_load_dataset_failure_bubbles_as_publish_error(monkeypatch) -> None:
+    def exploding_load(_repo: str, _config: str, **__: Any) -> DatasetDict:
+        raise OSError("network down")
+
+    monkeypatch.setattr("balkanbench.data.publish.load_dataset", exploding_load)
+    monkeypatch.setenv("HF_OFFICIAL_TOKEN", "fake-token")
+
+    with pytest.raises(PublishError, match="network down|failed to load"):
+        publish_dataset(
+            source_repo="permitt/superglue",
+            public_repo="permitt/superglue-serbian",
+            private_repo=None,
+            language="sr",
+            license="CC-BY-4.0",
+            dataset_revision="v0.1.0-data",
+            configs_to_publish=["boolq"],
+            dry_run=True,
+        )
+
+
+def test_split_collision_bubbles_as_publish_error(monkeypatch) -> None:
+    # Source has BOTH dev and validation on COPA so rename_splits raises.
+    conflicting = _mini_superglue_source(has_dev_on_copa=True)
+    copa = conflicting["copa"]
+    conflicting["copa"] = DatasetDict({**copa, "validation": copa["dev"]})
+
+    def fake_load(_: str, config: str, **__: Any) -> DatasetDict:
+        return conflicting[config]
+
+    monkeypatch.setattr("balkanbench.data.publish.load_dataset", fake_load)
+    monkeypatch.setenv("HF_OFFICIAL_TOKEN", "fake-token")
+
+    with pytest.raises(PublishError, match="copa|collision"):
+        publish_dataset(
+            source_repo="permitt/superglue",
+            public_repo="permitt/superglue-serbian",
+            private_repo=None,
+            language="sr",
+            license="CC-BY-4.0",
+            dataset_revision="v0.1.0-data",
+            configs_to_publish=["copa"],
+            dry_run=True,
+        )

@@ -63,27 +63,30 @@ def attach_task_metadata(
 ) -> DatasetDict:
     """Ensure every row carries ``task_id``, ``language``, and ``example_id``.
 
-    - ``task_id`` and ``language`` are constant strings added as columns.
-    - ``example_id``: if absent, a stable ``{split}-{i}`` identifier is added.
+    - ``task_id`` and ``language`` are the canonical values derived from the
+      caller's benchmark config; any preexisting columns are **overwritten**
+      with these values so upstream drift cannot silently ship wrong IDs.
+    - ``example_id`` is a stable key used later to match predictions to
+      private labels. If upstream provides one, it is preserved; otherwise a
+      stable ``{split}-{i}`` identifier is generated.
     """
     out: dict[str, Dataset] = {}
     for split_name, ds in dataset.items():
         num_rows = ds.num_rows
-        with_task = (
-            ds.add_column("task_id", [task_id] * num_rows)
-            if "task_id" not in ds.column_names
-            else ds
-        )
-        with_lang = (
-            with_task.add_column("language", [language] * num_rows)
-            if "language" not in with_task.column_names
-            else with_task
-        )
-        if "example_id" in with_lang.column_names:
-            with_id = with_lang
-        else:
-            with_id = with_lang.add_column(
+
+        working = ds
+        if "task_id" in working.column_names:
+            working = working.remove_columns(["task_id"])
+        working = working.add_column("task_id", [task_id] * num_rows)
+
+        if "language" in working.column_names:
+            working = working.remove_columns(["language"])
+        working = working.add_column("language", [language] * num_rows)
+
+        if "example_id" not in working.column_names:
+            working = working.add_column(
                 "example_id", [f"{split_name}-{i}" for i in range(num_rows)]
             )
-        out[split_name] = cast(Dataset, with_id)
+
+        out[split_name] = cast(Dataset, working)
     return DatasetDict(out)

@@ -89,7 +89,12 @@ def publish_dataset_cmd(
     if report.pushed:
         typer.echo(_green(f"Pushed {len(report.configs)} configs to {report.public_repo}"))
     else:
-        typer.echo(_green(f"Dry run complete for {len(report.configs)} configs"))
+        typer.echo(
+            _green(
+                f"Dry run complete for {len(report.configs)} configs "
+                "(source downloaded, no HF mutations)"
+            )
+        )
 
     typer.echo("")
     typer.echo("Configs:")

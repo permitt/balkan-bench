@@ -116,7 +116,7 @@ def write_result_artifact(
 
     target_dir = Path(out_dir) / f"{benchmark}-{language}" / model
     target_dir.mkdir(parents=True, exist_ok=True)
-    target_path = target_dir / "result.json"
+    target_path: Path = target_dir / "result.json"
     target_path.write_text(json.dumps(artifact, indent=2))
     return target_path
 
@@ -128,7 +128,6 @@ def _validate_against_schema(artifact: dict[str, Any]) -> None:
     errors = sorted(validator.iter_errors(artifact), key=lambda e: list(e.path))
     if errors:
         messages = [
-            f"  - {'.'.join(str(p) for p in err.path) or '<root>'}: {err.message}"
-            for err in errors
+            f"  - {'.'.join(str(p) for p in err.path) or '<root>'}: {err.message}" for err in errors
         ]
         raise ValueError("result artifact failed schema:\n" + "\n".join(messages))

@@ -6,7 +6,9 @@ import typer
 
 from balkanbench import __version__
 from balkanbench.cli import validate as validate_cmds
+from balkanbench.cli.eval import eval_cmd
 from balkanbench.cli.listcmd import list_app
+from balkanbench.cli.predict import predict_cmd
 from balkanbench.cli.publish import publish_dataset_cmd
 
 app = typer.Typer(
@@ -27,6 +29,11 @@ app.command(
     "publish-dataset",
     help="Normalise a source HF dataset and publish the public BalkanBench variant.",
 )(publish_dataset_cmd)
+app.command("eval", help="Train + evaluate a model, emit a result artifact.")(eval_cmd)
+app.command(
+    "predict",
+    help="Predict on the public test split; emit predictions.jsonl + run_metadata.json.",
+)(predict_cmd)
 
 
 def _version_callback(value: bool) -> None:

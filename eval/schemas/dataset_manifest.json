@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://balkanbench.com/schemas/dataset_manifest.json",
+  "title": "BalkanBench Dataset Manifest",
+  "type": "object",
+  "required": [
+    "benchmark",
+    "language",
+    "public_repo",
+    "dataset_revision",
+    "configs",
+    "license",
+    "hidden_test_labels"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "benchmark":         { "type": "string", "minLength": 1 },
+    "language":          { "type": "string", "minLength": 1 },
+    "public_repo":       { "type": "string", "minLength": 1 },
+    "private_repo":      { "type": "string" },
+    "dataset_revision":  { "type": "string", "minLength": 1 },
+    "license":           { "type": "string", "minLength": 1 },
+    "hidden_test_labels": { "type": "boolean" },
+    "configs": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["splits", "fields"],
+        "additionalProperties": false,
+        "properties": {
+          "splits": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {
+              "type": "object",
+              "required": ["num_rows"],
+              "additionalProperties": false,
+              "properties": {
+                "num_rows":   { "type": "integer", "minimum": 0 },
+                "has_labels": { "type": "boolean" }
+              }
+            }
+          },
+          "fields": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+        }
+      }
+    }
+  }
+}

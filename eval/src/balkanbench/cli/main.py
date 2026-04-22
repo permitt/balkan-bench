@@ -1,4 +1,5 @@
 """Root typer app for balkanbench."""
+
 from __future__ import annotations
 
 import typer
@@ -20,9 +21,7 @@ app.command("validate-env", help="Check Python + deps + env vars.")(validate_cmd
 app.command("validate-config", help="Validate a YAML config against a JSON Schema.")(
     validate_cmds.validate_config
 )
-app.command("validate-data", help="Validate a dataset manifest JSON.")(
-    validate_cmds.validate_data
-)
+app.command("validate-data", help="Validate a dataset manifest JSON.")(validate_cmds.validate_data)
 
 
 def _version_callback(value: bool) -> None:

@@ -1,4 +1,5 @@
 """Validate model YAMLs against `schemas/model_spec.json`."""
+
 from __future__ import annotations
 
 import json

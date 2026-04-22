@@ -1,4 +1,5 @@
 """Tests for the unified YAML + JSON Schema loader."""
+
 from __future__ import annotations
 
 from pathlib import Path

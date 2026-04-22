@@ -1,4 +1,5 @@
 """Validate benchmark_results.json payloads."""
+
 from __future__ import annotations
 
 import json
@@ -29,11 +30,11 @@ def test_partial_row_allowed() -> None:
             "params": 149000000,
             "params_display": "149M",
             "results": {
-                "cb":      {"mean": 76.96, "stdev": 3.19},
-                "copa":    {"mean": 65.76, "stdev": 2.42},
-                "rte":     {"mean": 65.82, "stdev": 1.14},
-                "wsc":     {"mean": 64.11, "stdev": 1.11},
-                "boolq":   {"mean": 76.02, "stdev": 0.63},
+                "cb": {"mean": 76.96, "stdev": 3.19},
+                "copa": {"mean": 65.76, "stdev": 2.42},
+                "rte": {"mean": 65.82, "stdev": 1.14},
+                "wsc": {"mean": 64.11, "stdev": 1.11},
+                "boolq": {"mean": 76.02, "stdev": 0.63},
                 "multirc": None,
             },
             "avg": 69.73,

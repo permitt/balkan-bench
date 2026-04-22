@@ -1,4 +1,5 @@
 """Validate task YAMLs against `schemas/task_spec.json`."""
+
 from __future__ import annotations
 
 import json

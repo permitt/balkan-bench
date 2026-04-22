@@ -1,4 +1,5 @@
 """Validate dataset manifests against `schemas/dataset_manifest.json`."""
+
 from __future__ import annotations
 
 import json

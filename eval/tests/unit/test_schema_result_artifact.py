@@ -1,4 +1,5 @@
 """Validate per-run result artifacts against `schemas/result_artifact.json`."""
+
 from __future__ import annotations
 
 import json

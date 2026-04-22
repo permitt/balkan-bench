@@ -51,6 +51,9 @@ ignore = []
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["B"]
+# typer uses function calls in argument defaults as the canonical idiom; B008 would
+# force awkward module-level sentinels for every Option/Argument.
+"src/balkanbench/cli/**" = ["B008"]
 
 [tool.ruff.format]
 quote-style = "double"

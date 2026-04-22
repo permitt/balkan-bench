@@ -1,4 +1,5 @@
 """Shared YAML + JSON Schema loader."""
+
 from __future__ import annotations
 
 import json
@@ -37,12 +38,9 @@ def load_yaml_with_schema(yaml_path: Path, schema_path: Path) -> dict[str, Any]:
     errors = sorted(validator.iter_errors(data), key=lambda e: list(e.path))
     if errors:
         messages = [
-            f"  - {'.'.join(str(p) for p in err.path) or '<root>'}: {err.message}"
-            for err in errors
+            f"  - {'.'.join(str(p) for p in err.path) or '<root>'}: {err.message}" for err in errors
         ]
-        raise ConfigError(
-            f"{yaml_path} failed schema {schema_path.name}:\n" + "\n".join(messages)
-        )
+        raise ConfigError(f"{yaml_path} failed schema {schema_path.name}:\n" + "\n".join(messages))
 
     if not isinstance(data, dict):
         raise ConfigError(f"top-level YAML must be a mapping, got {type(data).__name__}")

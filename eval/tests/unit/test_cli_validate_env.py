@@ -1,4 +1,5 @@
 """Smoke tests for `balkanbench validate-env`."""
+
 from __future__ import annotations
 
 from typer.testing import CliRunner

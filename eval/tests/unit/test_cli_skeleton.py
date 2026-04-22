@@ -1,4 +1,5 @@
 """Smoke tests for the typer CLI skeleton."""
+
 from __future__ import annotations
 
 from typer.testing import CliRunner

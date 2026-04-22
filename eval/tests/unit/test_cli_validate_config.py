@@ -1,4 +1,5 @@
 """Smoke tests for `balkanbench validate-config` and `validate-data`."""
+
 from __future__ import annotations
 
 from pathlib import Path

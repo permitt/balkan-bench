@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://balkanbench.com/schemas/leaderboard_export.json",
+  "title": "BalkanBench Leaderboard Export",
+  "type": "object",
+  "required": [
+    "benchmark",
+    "language",
+    "benchmark_version",
+    "generated_at",
+    "sponsor",
+    "seeds",
+    "ranked_tasks",
+    "task_primary_metrics",
+    "rows"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "benchmark":         { "type": "string", "minLength": 1 },
+    "language":          { "type": "string", "minLength": 1 },
+    "benchmark_version": { "type": "string", "minLength": 1 },
+    "generated_at":      { "type": "string", "format": "date-time" },
+    "sponsor":           { "type": "string", "minLength": 1 },
+    "seeds":             { "type": "integer", "minimum": 1 },
+    "ranked_tasks":      { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "task_primary_metrics": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "type": "string" }
+    },
+    "throughput": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "hardware":            { "type": "string" },
+        "precision":           { "type": "string" },
+        "batch_size_policy":   { "type": "string" },
+        "warmup_batches":      { "type": "integer" },
+        "measurement_batches": { "type": "integer" }
+      }
+    },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "model",
+          "model_id",
+          "params",
+          "results",
+          "avg",
+          "complete",
+          "tasks_completed",
+          "tasks_total"
+        ],
+        "additionalProperties": true,
+        "properties": {
+          "rank":            { "type": ["integer", "null"] },
+          "model":           { "type": "string", "minLength": 1 },
+          "model_id":        { "type": "string", "minLength": 1 },
+          "model_revision":  { "type": "string" },
+          "params":          { "type": "integer", "minimum": 0 },
+          "params_display":  { "type": "string" },
+          "results": {
+            "type": "object",
+            "additionalProperties": {
+              "anyOf": [
+                { "type": "null" },
+                {
+                  "type": "object",
+                  "required": ["mean", "stdev"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "mean":  { "type": "number" },
+                    "stdev": { "type": "number" }
+                  }
+                }
+              ]
+            }
+          },
+          "avg":              { "type": "number" },
+          "complete":         { "type": "boolean" },
+          "tasks_completed":  { "type": "integer", "minimum": 0 },
+          "tasks_total":      { "type": "integer", "minimum": 1 },
+          "partial_flag":     { "type": "string" },
+          "throughput": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "ex_per_sec":    { "type": "number" },
+              "peak_vram_mib": { "type": "number" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

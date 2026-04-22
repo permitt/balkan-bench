@@ -1,0 +1,46 @@
+{
+  "benchmark": "superglue",
+  "language": "sr",
+  "benchmark_version": "0.1.0",
+  "generated_at": "2026-04-27T09:00:00Z",
+  "sponsor": "Recrewty",
+  "seeds": 5,
+  "ranked_tasks": ["boolq", "cb", "copa", "rte", "multirc", "wsc"],
+  "task_primary_metrics": {
+    "boolq": "accuracy",
+    "cb": "f1_macro",
+    "copa": "accuracy",
+    "rte": "accuracy",
+    "multirc": "f1_a",
+    "wsc": "accuracy"
+  },
+  "throughput": {
+    "hardware": "NVIDIA L4 24GB",
+    "precision": "fp16",
+    "batch_size_policy": "from_task_config",
+    "warmup_batches": 2,
+    "measurement_batches": 50
+  },
+  "rows": [
+    {
+      "rank": 1,
+      "model": "BERTić",
+      "model_id": "classla/bcms-bertic",
+      "params": 110000000,
+      "params_display": "110M",
+      "results": {
+        "cb":      { "mean": 78.61, "stdev": 2.90 },
+        "copa":    { "mean": 68.87, "stdev": 0.52 },
+        "rte":     { "mean": 71.70, "stdev": 0.87 },
+        "wsc":     { "mean": 65.07, "stdev": 0.00 },
+        "boolq":   { "mean": 77.79, "stdev": 0.18 },
+        "multirc": { "mean": 66.75, "stdev": 0.87 }
+      },
+      "avg": 71.46,
+      "complete": true,
+      "tasks_completed": 6,
+      "tasks_total": 6,
+      "throughput": { "ex_per_sec": 234.5, "peak_vram_mib": 4820 }
+    }
+  ]
+}

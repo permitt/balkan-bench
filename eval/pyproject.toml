@@ -29,14 +29,25 @@ dev = [
     "mypy>=1.10",
     "types-PyYAML",
     "types-jsonschema",
-    # publish extras are in dev so the CLI subcommand is importable in tests
+    # publish extras: in dev so tests can exercise the subcommand
     "datasets>=2.20",
     "huggingface_hub>=0.24",
+    # ml extras: in dev so CI runs the eval pipeline tests end to end
+    "torch>=2.1",
+    "transformers>=4.40",
+    "scikit-learn>=1.4",
+    "numpy>=1.26",
 ]
 publish = [
     "datasets>=2.20",
     "huggingface_hub>=0.24",
     "hf-transfer>=0.1",
+]
+ml = [
+    "torch>=2.1",
+    "transformers>=4.40",
+    "scikit-learn>=1.4",
+    "numpy>=1.26",
 ]
 
 [project.scripts]
@@ -73,7 +84,19 @@ packages = ["balkanbench"]
 mypy_path = "src"
 
 [[tool.mypy.overrides]]
-module = ["jsonschema.*", "datasets", "datasets.*", "huggingface_hub", "huggingface_hub.*"]
+module = [
+    "jsonschema.*",
+    "datasets",
+    "datasets.*",
+    "huggingface_hub",
+    "huggingface_hub.*",
+    "torch",
+    "torch.*",
+    "transformers",
+    "transformers.*",
+    "sklearn",
+    "sklearn.*",
+]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

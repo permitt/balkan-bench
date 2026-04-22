@@ -1,0 +1,39 @@
+{
+  "benchmark_name": "balkanbench",
+  "benchmark_version": "0.1.0",
+  "run_type": "official",
+  "task_id": "superglue.boolq.sr",
+  "language": "sr",
+  "model": "bertic",
+  "model_id": "classla/bcms-bertic",
+  "model_revision": "abc123def456abc123def456abc123def4567890",
+  "code_revision": "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+  "dataset_revision": "v0.1.0-data",
+  "image_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "config_hash": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "selection_metric": "accuracy",
+  "hp_search": {
+    "tool": "optuna",
+    "sampler": "TPESampler",
+    "sampler_seed": 42,
+    "num_trials": 20,
+    "search_space_id": "superglue-encoder-v1",
+    "early_stopping_policy": "patience=5 on accuracy"
+  },
+  "seeds": [42, 43, 44, 45, 46],
+  "seed_results": [
+    { "seed": 42, "primary": { "accuracy": 0.7766 }, "secondary": {} },
+    { "seed": 43, "primary": { "accuracy": 0.7812 }, "secondary": {} },
+    { "seed": 44, "primary": { "accuracy": 0.7779 }, "secondary": {} },
+    { "seed": 45, "primary": { "accuracy": 0.7805 }, "secondary": {} },
+    { "seed": 46, "primary": { "accuracy": 0.7733 }, "secondary": {} }
+  ],
+  "aggregate": {
+    "mean": { "accuracy": 0.7779 },
+    "stdev": { "accuracy": 0.0018 }
+  },
+  "task_score": 0.7779,
+  "rankable": true,
+  "test_predictions_hash": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "sponsor": "Recrewty"
+}

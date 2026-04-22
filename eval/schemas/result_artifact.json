@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://balkanbench.com/schemas/result_artifact.json",
+  "title": "BalkanBench Per-Run Result Artifact",
+  "type": "object",
+  "required": [
+    "benchmark_name",
+    "benchmark_version",
+    "run_type",
+    "task_id",
+    "language",
+    "model",
+    "model_id",
+    "model_revision",
+    "code_revision",
+    "dataset_revision",
+    "image_digest",
+    "config_hash",
+    "selection_metric",
+    "hp_search",
+    "seeds",
+    "seed_results",
+    "aggregate",
+    "task_score",
+    "rankable",
+    "test_predictions_hash",
+    "sponsor"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "benchmark_name":    { "type": "string", "minLength": 1 },
+    "benchmark_version": { "type": "string", "minLength": 1 },
+    "run_type":          { "type": "string", "enum": ["official", "experimental"] },
+    "task_id":           { "type": "string", "minLength": 1 },
+    "language":          { "type": "string", "minLength": 1 },
+    "model":             { "type": "string", "minLength": 1 },
+    "model_id":          { "type": "string", "minLength": 1 },
+    "model_revision":    { "type": "string", "minLength": 1 },
+    "code_revision":     { "type": "string", "minLength": 1 },
+    "dataset_revision":  { "type": "string", "minLength": 1 },
+    "image_digest":      { "type": "string", "minLength": 1 },
+    "config_hash":       { "type": "string", "minLength": 1 },
+    "selection_metric":  { "type": "string", "minLength": 1 },
+    "hp_search": {
+      "type": "object",
+      "required": ["tool", "sampler", "sampler_seed", "num_trials", "search_space_id"],
+      "additionalProperties": false,
+      "properties": {
+        "tool":                  { "type": "string" },
+        "sampler":               { "type": "string" },
+        "sampler_seed":          { "type": "integer" },
+        "num_trials":            { "type": "integer", "minimum": 0 },
+        "search_space_id":       { "type": "string" },
+        "early_stopping_policy": { "type": "string" }
+      }
+    },
+    "seeds": {
+      "type": "array",
+      "items": { "type": "integer" },
+      "minItems": 1
+    },
+    "seed_results": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["seed", "primary", "secondary"],
+        "additionalProperties": false,
+        "properties": {
+          "seed": { "type": "integer" },
+          "primary": {
+            "type": "object",
+            "additionalProperties": { "type": "number" },
+            "minProperties": 1
+          },
+          "secondary": {
+            "type": "object",
+            "additionalProperties": { "type": "number" }
+          }
+        }
+      }
+    },
+    "aggregate": {
+      "type": "object",
+      "required": ["mean", "stdev"],
+      "additionalProperties": false,
+      "properties": {
+        "mean":  { "type": "object", "additionalProperties": { "type": "number" } },
+        "stdev": { "type": "object", "additionalProperties": { "type": "number" } }
+      }
+    },
+    "task_score":            { "type": "number" },
+    "rankable":              { "type": "boolean" },
+    "test_predictions_hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "throughput": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "ex_per_sec":     { "type": "number" },
+        "tok_per_sec":    { "type": "number" },
+        "peak_vram_mib":  { "type": "number" },
+        "hardware":       { "type": "string" },
+        "batch_size":     { "type": "integer" },
+        "max_seq_len":    { "type": "integer" },
+        "precision":      { "type": "string" },
+        "torch_version":  { "type": "string" },
+        "driver_version": { "type": "string" }
+      }
+    },
+    "sponsor": { "type": "string", "minLength": 1 }
+  }
+}

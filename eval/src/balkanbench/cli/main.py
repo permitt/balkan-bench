@@ -7,6 +7,7 @@ import typer
 from balkanbench import __version__
 from balkanbench.cli import validate as validate_cmds
 from balkanbench.cli.eval import eval_cmd
+from balkanbench.cli.hp_search import hp_search_cmd
 from balkanbench.cli.leaderboard import leaderboard_app
 from balkanbench.cli.listcmd import list_app
 from balkanbench.cli.predict import predict_cmd
@@ -41,6 +42,10 @@ app.command(
     "score",
     help="Score predictions.jsonl against private test labels (requires HF_OFFICIAL_TOKEN).",
 )(score_cmd)
+app.command(
+    "hp-search",
+    help="Optuna TPE search on train -> validation; writes the winning model YAML.",
+)(hp_search_cmd)
 
 
 def _version_callback(value: bool) -> None:

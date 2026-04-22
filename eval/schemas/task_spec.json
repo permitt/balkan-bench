@@ -73,8 +73,13 @@
       "required": ["fields", "id_field"],
       "additionalProperties": false,
       "properties": {
-        "fields":   { "type": "array", "items": { "type": "string" }, "minItems": 1 },
-        "id_field": { "type": "string", "minLength": 1 }
+        "fields":        { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "id_field":      { "type": "string", "minLength": 1 },
+        "group_fields":  {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Columns that identify a group for grouped-metric tasks (e.g. MultiRC paragraph_id + question_id)."
+        }
       }
     },
     "metrics": {
@@ -116,6 +121,18 @@
         "weight_decay":            { "type": "number", "minimum": 0 },
         "early_stopping_patience": { "type": "integer", "minimum": 0 },
         "metric_for_best_model":   { "type": "string", "minLength": 1 }
+      }
+    },
+    "num_labels":  { "type": "integer", "minimum": 2 },
+    "num_choices": { "type": "integer", "minimum": 2 },
+    "label_field": { "type": "string" },
+    "tokenizer": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "max_length": { "type": "integer", "minimum": 1 },
+        "padding":    { "type": "string" },
+        "truncation": { "type": "boolean" }
       }
     }
   }

@@ -1,0 +1,81 @@
+{
+  "benchmark_name": "balkanbench",
+  "benchmark_version": "0.1.0",
+  "run_type": "official",
+  "task_id": "superglue.rte.sr",
+  "language": "sr",
+  "model": "crosloengual_bert",
+  "model_display_name": "CroSloEngual BERT",
+  "model_id": "EMBEDDIA/crosloengual-bert",
+  "params": 124000000,
+  "model_revision": "launch-seed-v0.1.0",
+  "code_revision": "feature-code-for-eval-launch-seed",
+  "dataset_revision": "v0.1.0-data",
+  "image_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "config_hash": "sha256:487df67dfaddb49f884de8ba1f933cb8e244a043ebede20114d3a740d1db429e",
+  "selection_metric": "accuracy",
+  "hp_search": {
+    "tool": "optuna",
+    "sampler": "TPESampler",
+    "sampler_seed": 42,
+    "num_trials": 0,
+    "search_space_id": "v0.1-launch-seed",
+    "early_stopping_policy": "reproduced from prior-pipeline aggregates; seeded for v0.1 launch, regenerated in v0.2 when all 9 models re-run through the public harness"
+  },
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "seed_results": [
+    {
+      "seed": 42,
+      "primary": {
+        "accuracy": 62.85035725279773
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 43,
+      "primary": {
+        "accuracy": 65.70846509393832
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 44,
+      "primary": {
+        "accuracy": 64.51105427858984
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 45,
+      "primary": {
+        "accuracy": 67.0285853615701
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 46,
+      "primary": {
+        "accuracy": 66.40153801310399
+      },
+      "secondary": {}
+    }
+  ],
+  "aggregate": {
+    "mean": {
+      "accuracy": 65.3
+    },
+    "stdev": {
+      "accuracy": 1.65766567948468
+    }
+  },
+  "task_score": 65.3,
+  "rankable": true,
+  "test_predictions_hash": "sha256:abd4331a0849e3a3e8a787189a276cd16c345e5c02754cdf739cfc52a7266a48",
+  "sponsor": "Recrewty"
+}

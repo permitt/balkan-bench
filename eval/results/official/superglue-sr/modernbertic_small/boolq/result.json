@@ -1,0 +1,81 @@
+{
+  "benchmark_name": "balkanbench",
+  "benchmark_version": "0.1.0",
+  "run_type": "official",
+  "task_id": "superglue.boolq.sr",
+  "language": "sr",
+  "model": "modernbertic_small",
+  "model_display_name": "ModernBERTi\u0107 small",
+  "model_id": "permitt/galton-modernbertic-small-bcms-v1",
+  "params": 149000000,
+  "model_revision": "launch-seed-v0.1.0",
+  "code_revision": "feature-code-for-eval-launch-seed",
+  "dataset_revision": "v0.1.0-data",
+  "image_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "config_hash": "sha256:35cced8363547d1cbb4ecfa04b504cb9b35444140f2237b84a030b83be1b532c",
+  "selection_metric": "accuracy",
+  "hp_search": {
+    "tool": "optuna",
+    "sampler": "TPESampler",
+    "sampler_seed": 42,
+    "num_trials": 0,
+    "search_space_id": "v0.1-launch-seed",
+    "early_stopping_policy": "reproduced from prior-pipeline aggregates; seeded for v0.1 launch, regenerated in v0.2 when all 9 models re-run through the public harness"
+  },
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "seed_results": [
+    {
+      "seed": 42,
+      "primary": {
+        "accuracy": 75.59468209471618
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 43,
+      "primary": {
+        "accuracy": 75.04882091576145
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 44,
+      "primary": {
+        "accuracy": 77.43772969021786
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 45,
+      "primary": {
+        "accuracy": 75.43556242351792
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 46,
+      "primary": {
+        "accuracy": 76.58320487578656
+      },
+      "secondary": {}
+    }
+  ],
+  "aggregate": {
+    "mean": {
+      "accuracy": 76.02
+    },
+    "stdev": {
+      "accuracy": 0.973756722910898
+    }
+  },
+  "task_score": 76.02,
+  "rankable": true,
+  "test_predictions_hash": "sha256:db1f02235b38894720a8150781c0bd2b72718254814738f8458905a1501cd14e",
+  "sponsor": "Recrewty"
+}

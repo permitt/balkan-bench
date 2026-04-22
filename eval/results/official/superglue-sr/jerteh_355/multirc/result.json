@@ -1,0 +1,81 @@
+{
+  "benchmark_name": "balkanbench",
+  "benchmark_version": "0.1.0",
+  "run_type": "official",
+  "task_id": "superglue.multirc.sr",
+  "language": "sr",
+  "model": "jerteh_355",
+  "model_display_name": "Jerteh-355",
+  "model_id": "jerteh/Jerteh-355",
+  "params": 354000000,
+  "model_revision": "launch-seed-v0.1.0",
+  "code_revision": "feature-code-for-eval-launch-seed",
+  "dataset_revision": "v0.1.0-data",
+  "image_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "config_hash": "sha256:129f2ae853916d11d5edd8774f94f5551d846677b2aa6c93e676368ed8deb7ec",
+  "selection_metric": "f1_a",
+  "hp_search": {
+    "tool": "optuna",
+    "sampler": "TPESampler",
+    "sampler_seed": 42,
+    "num_trials": 0,
+    "search_space_id": "v0.1-launch-seed",
+    "early_stopping_policy": "reproduced from prior-pipeline aggregates; seeded for v0.1 launch, regenerated in v0.2 when all 9 models re-run through the public harness"
+  },
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "seed_results": [
+    {
+      "seed": 42,
+      "primary": {
+        "f1_a": 61.19731419393253
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 43,
+      "primary": {
+        "f1_a": 61.46292382812106
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 44,
+      "primary": {
+        "f1_a": 60.60453832164439
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 45,
+      "primary": {
+        "f1_a": 60.10321026116464
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 46,
+      "primary": {
+        "f1_a": 60.03201339513737
+      },
+      "secondary": {}
+    }
+  ],
+  "aggregate": {
+    "mean": {
+      "f1_a": 60.67999999999999
+    },
+    "stdev": {
+      "f1_a": 0.6400881196544752
+    }
+  },
+  "task_score": 60.67999999999999,
+  "rankable": true,
+  "test_predictions_hash": "sha256:03dfcf9352b5c065024aff775e89c6933bf71ce40c371ca78b507ecbdf8f94bb",
+  "sponsor": "Recrewty"
+}

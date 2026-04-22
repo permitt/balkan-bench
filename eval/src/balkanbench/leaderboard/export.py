@@ -119,11 +119,12 @@ def _build_row(
     task_primary_metrics: dict[str, str],
 ) -> dict[str, Any] | None:
     """Build one leaderboard row from a model's per-task result artifacts."""
-    model = model_dir.name
+    model_slug = model_dir.name
     results: dict[str, dict[str, float] | None] = {t: None for t in ranked_tasks}
     model_id: str | None = None
     model_revision: str | None = None
     params: int | None = None
+    display_name: str | None = None
     any_non_rankable = False
     tasks_present = 0
 
@@ -142,6 +143,9 @@ def _build_row(
         model_id = artifact["model_id"]
         model_revision = artifact.get("model_revision")
         params = artifact.get("params") or params
+        # Prefer a display name on the artifact (so a pretty row label like
+        # "BERTić" survives round-trips through the slug-based directory layout).
+        display_name = artifact.get("model_display_name") or display_name
 
     if tasks_present == 0:
         # No result file found for any ranked task; skip this model entirely.
@@ -153,8 +157,8 @@ def _build_row(
 
     row: dict[str, Any] = {
         "rank": None,  # assigned by _assign_ranks
-        "model": model,
-        "model_id": model_id or f"unknown/{model}",
+        "model": display_name or model_slug,
+        "model_id": model_id or f"unknown/{model_slug}",
         "params": int(params or 0),
         "params_display": _fmt_params(params or 0),
         "results": results,

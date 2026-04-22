@@ -1,0 +1,81 @@
+{
+  "benchmark_name": "balkanbench",
+  "benchmark_version": "0.1.0",
+  "run_type": "official",
+  "task_id": "superglue.copa.sr",
+  "language": "sr",
+  "model": "tesla_xlm",
+  "model_display_name": "TeSLa-XLM",
+  "model_id": "te-sla/teslaXLM",
+  "params": 560000000,
+  "model_revision": "launch-seed-v0.1.0",
+  "code_revision": "feature-code-for-eval-launch-seed",
+  "dataset_revision": "v0.1.0-data",
+  "image_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "config_hash": "sha256:c1d89dfd0bd59515fd1f1dde68ede38791c982455c82f5b86585aaf1ce9dc740",
+  "selection_metric": "accuracy",
+  "hp_search": {
+    "tool": "optuna",
+    "sampler": "TPESampler",
+    "sampler_seed": 42,
+    "num_trials": 0,
+    "search_space_id": "v0.1-launch-seed",
+    "early_stopping_policy": "reproduced from prior-pipeline aggregates; seeded for v0.1 launch, regenerated in v0.2 when all 9 models re-run through the public harness"
+  },
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "seed_results": [
+    {
+      "seed": 42,
+      "primary": {
+        "accuracy": 48.702273009284355
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 43,
+      "primary": {
+        "accuracy": 49.51950566888946
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 44,
+      "primary": {
+        "accuracy": 47.197415862321485
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 45,
+      "primary": {
+        "accuracy": 50.481585046482586
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 46,
+      "primary": {
+        "accuracy": 51.099220413022124
+      },
+      "secondary": {}
+    }
+  ],
+  "aggregate": {
+    "mean": {
+      "accuracy": 49.400000000000006
+    },
+    "stdev": {
+      "accuracy": 1.5337582654079367
+    }
+  },
+  "task_score": 49.400000000000006,
+  "rankable": true,
+  "test_predictions_hash": "sha256:1f6a2e397d0b91030895be6774db2a09403e5561f815c7fb32a9b5cede3fb217",
+  "sponsor": "Recrewty"
+}

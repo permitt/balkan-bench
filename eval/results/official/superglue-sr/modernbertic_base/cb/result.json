@@ -1,0 +1,81 @@
+{
+  "benchmark_name": "balkanbench",
+  "benchmark_version": "0.1.0",
+  "run_type": "official",
+  "task_id": "superglue.cb.sr",
+  "language": "sr",
+  "model": "modernbertic_base",
+  "model_display_name": "ModernBERTi\u0107 base",
+  "model_id": "permitt/galton-modernbertic-base-bcms-v1",
+  "params": 395000000,
+  "model_revision": "launch-seed-v0.1.0",
+  "code_revision": "feature-code-for-eval-launch-seed",
+  "dataset_revision": "v0.1.0-data",
+  "image_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "config_hash": "sha256:5e132c0f876ea905ccf8b22c153079047f6e1127b57d47d5c048205bc2357241",
+  "selection_metric": "f1_macro",
+  "hp_search": {
+    "tool": "optuna",
+    "sampler": "TPESampler",
+    "sampler_seed": 42,
+    "num_trials": 0,
+    "search_space_id": "v0.1-launch-seed",
+    "early_stopping_policy": "reproduced from prior-pipeline aggregates; seeded for v0.1 launch, regenerated in v0.2 when all 9 models re-run through the public harness"
+  },
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "seed_results": [
+    {
+      "seed": 42,
+      "primary": {
+        "f1_macro": 80.10641862561515
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 43,
+      "primary": {
+        "f1_macro": 76.75862924479266
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 44,
+      "primary": {
+        "f1_macro": 79.10461618152698
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 45,
+      "primary": {
+        "f1_macro": 75.61742975430589
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 46,
+      "primary": {
+        "f1_macro": 81.01290619375925
+      },
+      "secondary": {}
+    }
+  ],
+  "aggregate": {
+    "mean": {
+      "f1_macro": 78.51999999999998
+    },
+    "stdev": {
+      "f1_macro": 2.2693844096347764
+    }
+  },
+  "task_score": 78.51999999999998,
+  "rankable": true,
+  "test_predictions_hash": "sha256:284f87b4c5616a5786b52317a9a2d4c52d8c9d9d5cb9bf3e8524a90b311f7eee",
+  "sponsor": "Recrewty"
+}

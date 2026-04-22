@@ -1,0 +1,81 @@
+{
+  "benchmark_name": "balkanbench",
+  "benchmark_version": "0.1.0",
+  "run_type": "official",
+  "task_id": "superglue.multirc.sr",
+  "language": "sr",
+  "model": "bertic",
+  "model_display_name": "BERTi\u0107",
+  "model_id": "classla/bcms-bertic",
+  "params": 110000000,
+  "model_revision": "launch-seed-v0.1.0",
+  "code_revision": "feature-code-for-eval-launch-seed",
+  "dataset_revision": "v0.1.0-data",
+  "image_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "config_hash": "sha256:ac501c9e533414ddecd68eb1bcb4417d466015b2ab28752cf198ed95e328d0e2",
+  "selection_metric": "f1_a",
+  "hp_search": {
+    "tool": "optuna",
+    "sampler": "TPESampler",
+    "sampler_seed": 42,
+    "num_trials": 0,
+    "search_space_id": "v0.1-launch-seed",
+    "early_stopping_policy": "reproduced from prior-pipeline aggregates; seeded for v0.1 launch, regenerated in v0.2 when all 9 models re-run through the public harness"
+  },
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "seed_results": [
+    {
+      "seed": 42,
+      "primary": {
+        "f1_a": 66.41415710252828
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 43,
+      "primary": {
+        "f1_a": 66.35219683607788
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 44,
+      "primary": {
+        "f1_a": 66.80880658650737
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 45,
+      "primary": {
+        "f1_a": 66.56357935658663
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 46,
+      "primary": {
+        "f1_a": 67.61126011829987
+      },
+      "secondary": {}
+    }
+  ],
+  "aggregate": {
+    "mean": {
+      "f1_a": 66.75
+    },
+    "stdev": {
+      "f1_a": 0.5125957645381631
+    }
+  },
+  "task_score": 66.75,
+  "rankable": true,
+  "test_predictions_hash": "sha256:85e20f9bb2df32eb59f3a061b61d6e600cc75796c38035e49bbe6d84b4000448",
+  "sponsor": "Recrewty"
+}

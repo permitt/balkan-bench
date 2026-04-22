@@ -1,0 +1,81 @@
+{
+  "benchmark_name": "balkanbench",
+  "benchmark_version": "0.1.0",
+  "run_type": "official",
+  "task_id": "superglue.cb.sr",
+  "language": "sr",
+  "model": "tesla_xlm",
+  "model_display_name": "TeSLa-XLM",
+  "model_id": "te-sla/teslaXLM",
+  "params": 560000000,
+  "model_revision": "launch-seed-v0.1.0",
+  "code_revision": "feature-code-for-eval-launch-seed",
+  "dataset_revision": "v0.1.0-data",
+  "image_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "config_hash": "sha256:833eefd3d0b285c6a0fb1f0c04e768700da7ec88c4b8d09f91bafa3f1b4ab968",
+  "selection_metric": "f1_macro",
+  "hp_search": {
+    "tool": "optuna",
+    "sampler": "TPESampler",
+    "sampler_seed": 42,
+    "num_trials": 0,
+    "search_space_id": "v0.1-launch-seed",
+    "early_stopping_policy": "reproduced from prior-pipeline aggregates; seeded for v0.1 launch, regenerated in v0.2 when all 9 models re-run through the public harness"
+  },
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "seed_results": [
+    {
+      "seed": 42,
+      "primary": {
+        "f1_macro": 78.38458750423518
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 43,
+      "primary": {
+        "f1_macro": 65.31539316484454
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 44,
+      "primary": {
+        "f1_macro": 73.74884331129002
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 45,
+      "primary": {
+        "f1_macro": 64.07762744475413
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 46,
+      "primary": {
+        "f1_macro": 82.8235485748762
+      },
+      "secondary": {}
+    }
+  ],
+  "aggregate": {
+    "mean": {
+      "f1_macro": 72.87000000000002
+    },
+    "stdev": {
+      "f1_macro": 8.133788627142097
+    }
+  },
+  "task_score": 72.87000000000002,
+  "rankable": true,
+  "test_predictions_hash": "sha256:b4295720965b5852278e3103d3e8e0379e3a2477c418dbee110598672513a821",
+  "sponsor": "Recrewty"
+}

@@ -1,0 +1,81 @@
+{
+  "benchmark_name": "balkanbench",
+  "benchmark_version": "0.1.0",
+  "run_type": "official",
+  "task_id": "superglue.wsc.sr",
+  "language": "sr",
+  "model": "crosloengual_bert",
+  "model_display_name": "CroSloEngual BERT",
+  "model_id": "EMBEDDIA/crosloengual-bert",
+  "params": 124000000,
+  "model_revision": "launch-seed-v0.1.0",
+  "code_revision": "feature-code-for-eval-launch-seed",
+  "dataset_revision": "v0.1.0-data",
+  "image_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "config_hash": "sha256:01d31764eaba4ccd88384c8da30526b95b57cb2daa5de4a5462103a4e693b074",
+  "selection_metric": "accuracy",
+  "hp_search": {
+    "tool": "optuna",
+    "sampler": "TPESampler",
+    "sampler_seed": 42,
+    "num_trials": 0,
+    "search_space_id": "v0.1-launch-seed",
+    "early_stopping_policy": "reproduced from prior-pipeline aggregates; seeded for v0.1 launch, regenerated in v0.2 when all 9 models re-run through the public harness"
+  },
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "seed_results": [
+    {
+      "seed": 42,
+      "primary": {
+        "accuracy": 61.85819163070723
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 43,
+      "primary": {
+        "accuracy": 63.15809229901448
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 44,
+      "primary": {
+        "accuracy": 64.61253755138532
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 45,
+      "primary": {
+        "accuracy": 64.67553693294798
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 46,
+      "primary": {
+        "accuracy": 61.89564158594498
+      },
+      "secondary": {}
+    }
+  ],
+  "aggregate": {
+    "mean": {
+      "accuracy": 63.239999999999995
+    },
+    "stdev": {
+      "accuracy": 1.3845602552967213
+    }
+  },
+  "task_score": 63.239999999999995,
+  "rankable": true,
+  "test_predictions_hash": "sha256:bf9034ad69b038914e238071cf4970f48d27b7d0b2a38bcd2e58755eca532e8c",
+  "sponsor": "Recrewty"
+}

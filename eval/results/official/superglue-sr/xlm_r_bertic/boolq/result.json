@@ -1,0 +1,81 @@
+{
+  "benchmark_name": "balkanbench",
+  "benchmark_version": "0.1.0",
+  "run_type": "official",
+  "task_id": "superglue.boolq.sr",
+  "language": "sr",
+  "model": "xlm_r_bertic",
+  "model_display_name": "XLM-R BERTi\u0107",
+  "model_id": "classla/xlm-r-bertic",
+  "params": 560000000,
+  "model_revision": "launch-seed-v0.1.0",
+  "code_revision": "feature-code-for-eval-launch-seed",
+  "dataset_revision": "v0.1.0-data",
+  "image_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "config_hash": "sha256:e32f6595e7ddc75bb548ea09df1325bd912f0bd3a4810eadd346cb771951ac95",
+  "selection_metric": "accuracy",
+  "hp_search": {
+    "tool": "optuna",
+    "sampler": "TPESampler",
+    "sampler_seed": 42,
+    "num_trials": 0,
+    "search_space_id": "v0.1-launch-seed",
+    "early_stopping_policy": "reproduced from prior-pipeline aggregates; seeded for v0.1 launch, regenerated in v0.2 when all 9 models re-run through the public harness"
+  },
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "seed_results": [
+    {
+      "seed": 42,
+      "primary": {
+        "accuracy": 88.85166006634519
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 43,
+      "primary": {
+        "accuracy": 74.69954371243946
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 44,
+      "primary": {
+        "accuracy": 71.29241798087284
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 45,
+      "primary": {
+        "accuracy": 74.98445616266117
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 46,
+      "primary": {
+        "accuracy": 60.071922077681364
+      },
+      "secondary": {}
+    }
+  ],
+  "aggregate": {
+    "mean": {
+      "accuracy": 73.98000000000002
+    },
+    "stdev": {
+      "accuracy": 10.287743643148483
+    }
+  },
+  "task_score": 73.98000000000002,
+  "rankable": true,
+  "test_predictions_hash": "sha256:0ef844beae835f4fd57ba17a8207fd05fd006c215361a74fa4c8492c3d7266af",
+  "sponsor": "Recrewty"
+}

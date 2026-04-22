@@ -34,6 +34,7 @@
     "task_id":           { "type": "string", "minLength": 1 },
     "language":          { "type": "string", "minLength": 1 },
     "model":             { "type": "string", "minLength": 1 },
+    "model_display_name": { "type": "string", "minLength": 1 },
     "model_id":          { "type": "string", "minLength": 1 },
     "model_revision":    { "type": "string", "minLength": 1 },
     "code_revision":     { "type": "string", "minLength": 1 },
@@ -92,6 +93,7 @@
     "task_score":            { "type": "number" },
     "rankable":              { "type": "boolean" },
     "test_predictions_hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "params":                { "type": "integer", "minimum": 0 },
     "throughput": {
       "type": "object",
       "additionalProperties": true,

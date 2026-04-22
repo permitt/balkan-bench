@@ -1,0 +1,81 @@
+{
+  "benchmark_name": "balkanbench",
+  "benchmark_version": "0.1.0",
+  "run_type": "official",
+  "task_id": "superglue.cb.sr",
+  "language": "sr",
+  "model": "modernbertic_small",
+  "model_display_name": "ModernBERTi\u0107 small",
+  "model_id": "permitt/galton-modernbertic-small-bcms-v1",
+  "params": 149000000,
+  "model_revision": "launch-seed-v0.1.0",
+  "code_revision": "feature-code-for-eval-launch-seed",
+  "dataset_revision": "v0.1.0-data",
+  "image_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "config_hash": "sha256:80719eeaccafe83f830ab55e4263df5d4b1450950d118a94348acf96de3af60d",
+  "selection_metric": "f1_macro",
+  "hp_search": {
+    "tool": "optuna",
+    "sampler": "TPESampler",
+    "sampler_seed": 42,
+    "num_trials": 0,
+    "search_space_id": "v0.1-launch-seed",
+    "early_stopping_policy": "reproduced from prior-pipeline aggregates; seeded for v0.1 launch, regenerated in v0.2 when all 9 models re-run through the public harness"
+  },
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "seed_results": [
+    {
+      "seed": 42,
+      "primary": {
+        "f1_macro": 72.46099969284613
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 43,
+      "primary": {
+        "f1_macro": 77.84454643355248
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 44,
+      "primary": {
+        "f1_macro": 78.71720407231328
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 45,
+      "primary": {
+        "f1_macro": 75.3797236704797
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 46,
+      "primary": {
+        "f1_macro": 80.39752613080836
+      },
+      "secondary": {}
+    }
+  ],
+  "aggregate": {
+    "mean": {
+      "f1_macro": 76.96
+    },
+    "stdev": {
+      "f1_macro": 3.099397178737658
+    }
+  },
+  "task_score": 76.96,
+  "rankable": true,
+  "test_predictions_hash": "sha256:910a229e13e27c55c9f2aab43f0b1c7e0915183689a08f6f9e293a2794a7f2fb",
+  "sponsor": "Recrewty"
+}

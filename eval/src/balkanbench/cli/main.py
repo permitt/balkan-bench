@@ -11,6 +11,7 @@ from balkanbench.cli.leaderboard import leaderboard_app
 from balkanbench.cli.listcmd import list_app
 from balkanbench.cli.predict import predict_cmd
 from balkanbench.cli.publish import publish_dataset_cmd
+from balkanbench.cli.score import score_cmd
 
 app = typer.Typer(
     name="balkanbench",
@@ -36,6 +37,10 @@ app.command(
     "predict",
     help="Predict on the public test split; emit predictions.jsonl + run_metadata.json.",
 )(predict_cmd)
+app.command(
+    "score",
+    help="Score predictions.jsonl against private test labels (requires HF_OFFICIAL_TOKEN).",
+)(score_cmd)
 
 
 def _version_callback(value: bool) -> None:

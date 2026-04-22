@@ -1,0 +1,80 @@
+name: Propose a benchmark
+description: Add a new benchmark suite (new dataset + tasks) to BalkanBench.
+title: "[propose-benchmark] <name>"
+labels: ["proposal-benchmark"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for proposing a new benchmark. Please read
+        [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md) and
+        [docs/governance/contributions.md](../blob/main/docs/governance/contributions.md)
+        first. Benchmarks are accepted only with a public identity + license.
+  - type: input
+    id: name
+    attributes:
+      label: Benchmark name (short identifier)
+      description: Must match the directory name under `eval/configs/benchmarks/`. Lowercase, `a-z0-9_`.
+      placeholder: croatian_sentiment
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: One paragraph. What is the task set, why is it useful for BCMS LLM evaluation?
+    validations:
+      required: true
+  - type: input
+    id: languages
+    attributes:
+      label: Languages
+      description: Comma-separated BCMS codes (sr, hr, cnr, bs). List roadmap separately.
+      placeholder: "available: [hr]; roadmap: [sr, bs, cnr]"
+    validations:
+      required: true
+  - type: textarea
+    id: tasks
+    attributes:
+      label: Task list
+      description: Names + one-line descriptions for every task.
+    validations:
+      required: true
+  - type: input
+    id: data_source
+    attributes:
+      label: Data source
+      description: Hugging Face repo, paper, or project URL.
+    validations:
+      required: true
+  - type: input
+    id: license
+    attributes:
+      label: License
+      description: SPDX identifier (e.g. CC-BY-4.0, Apache-2.0).
+    validations:
+      required: true
+  - type: dropdown
+    id: hidden_labels
+    attributes:
+      label: Hidden test-label policy
+      options:
+        - hidden (private HF repo for test labels)
+        - public (all splits labeled)
+    validations:
+      required: true
+  - type: input
+    id: identity_handle
+    attributes:
+      label: Your GitHub or Hugging Face handle
+      description: Required. Anonymous proposals are not accepted.
+      placeholder: "@your-github-handle or hf:your-huggingface-handle"
+    validations:
+      required: true
+  - type: textarea
+    id: maintainer_commitment
+    attributes:
+      label: Maintainer commitment
+      description: Will you be listed as the benchmark maintainer? What is your expected response time for review questions?
+    validations:
+      required: true

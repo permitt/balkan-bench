@@ -1,0 +1,198 @@
+{
+  "benchmark": "superglue",
+  "language": "sr",
+  "benchmark_version": "0.1.0",
+  "generated_at": "2026-04-27T09:00:00Z",
+  "sponsor": "Recrewty",
+  "seeds": 5,
+  "ranked_tasks": ["boolq", "cb", "copa", "rte", "multirc", "wsc"],
+  "task_primary_metrics": {
+    "boolq": "accuracy",
+    "cb": "f1_macro",
+    "copa": "accuracy",
+    "rte": "accuracy",
+    "multirc": "f1_a",
+    "wsc": "accuracy"
+  },
+  "throughput": {
+    "hardware": "NVIDIA L4 24GB",
+    "precision": "fp16",
+    "batch_size_policy": "from_task_config",
+    "warmup_batches": 2,
+    "measurement_batches": 50
+  },
+  "rows": [
+    {
+      "rank": 1,
+      "model": "ModernBERTić base",
+      "model_id": "permitt/galton-modernbertic-base-bcms-v1",
+      "params": 395000000,
+      "params_display": "395M",
+      "results": {
+        "cb":      { "mean": 78.52, "stdev": 3.82 },
+        "copa":    { "mean": 76.84, "stdev": 1.29 },
+        "rte":     { "mean": 73.13, "stdev": 0.84 },
+        "wsc":     { "mean": 63.56, "stdev": 2.39 },
+        "boolq":   { "mean": 80.70, "stdev": 0.44 },
+        "multirc": { "mean": 67.90, "stdev": 0.47 }
+      },
+      "avg": 73.44,
+      "complete": true,
+      "tasks_completed": 6,
+      "tasks_total": 6
+    },
+    {
+      "rank": 2,
+      "model": "BERTić",
+      "model_id": "classla/bcms-bertic",
+      "params": 110000000,
+      "params_display": "110M",
+      "results": {
+        "cb":      { "mean": 78.61, "stdev": 2.90 },
+        "copa":    { "mean": 68.87, "stdev": 0.52 },
+        "rte":     { "mean": 71.70, "stdev": 0.87 },
+        "wsc":     { "mean": 65.07, "stdev": 0.00 },
+        "boolq":   { "mean": 77.79, "stdev": 0.18 },
+        "multirc": { "mean": 66.75, "stdev": 0.87 }
+      },
+      "avg": 71.46,
+      "complete": true,
+      "tasks_completed": 6,
+      "tasks_total": 6
+    },
+    {
+      "rank": null,
+      "model": "ModernBERTić small",
+      "model_id": "permitt/galton-modernbertic-small-bcms-v1",
+      "params": 149000000,
+      "params_display": "149M",
+      "results": {
+        "cb":      { "mean": 76.96, "stdev": 3.19 },
+        "copa":    { "mean": 65.76, "stdev": 2.42 },
+        "rte":     { "mean": 65.82, "stdev": 1.14 },
+        "wsc":     { "mean": 64.11, "stdev": 1.11 },
+        "boolq":   { "mean": 76.02, "stdev": 0.63 },
+        "multirc": null
+      },
+      "avg": 69.73,
+      "complete": false,
+      "tasks_completed": 5,
+      "tasks_total": 6,
+      "partial_flag": "(5/6) partial"
+    },
+    {
+      "rank": 3,
+      "model": "mmBERT",
+      "model_id": "jhu-clsp/mmBERT-base",
+      "params": 307000000,
+      "params_display": "307M",
+      "results": {
+        "cb":      { "mean": 78.93, "stdev": 0.88 },
+        "copa":    { "mean": 56.00, "stdev": 3.64 },
+        "rte":     { "mean": 73.10, "stdev": 0.50 },
+        "wsc":     { "mean": 62.33, "stdev": 2.56 },
+        "boolq":   { "mean": 78.17, "stdev": 0.31 },
+        "multirc": { "mean": 63.79, "stdev": 1.42 }
+      },
+      "avg": 68.72,
+      "complete": true,
+      "tasks_completed": 6,
+      "tasks_total": 6
+    },
+    {
+      "rank": 4,
+      "model": "XLM-R BERTić",
+      "model_id": "classla/xlm-r-bertic",
+      "params": 560000000,
+      "params_display": "560M",
+      "results": {
+        "cb":      { "mean": 83.90, "stdev": 2.76 },
+        "copa":    { "mean": 58.60, "stdev": 4.91 },
+        "rte":     { "mean": 73.78, "stdev": 1.37 },
+        "wsc":     { "mean": 64.16, "stdev": 1.29 },
+        "boolq":   { "mean": 73.98, "stdev": 8.25 },
+        "multirc": { "mean": 47.43, "stdev": 27.39 }
+      },
+      "avg": 66.97,
+      "complete": true,
+      "tasks_completed": 6,
+      "tasks_total": 6
+    },
+    {
+      "rank": 5,
+      "model": "CroSloEngual BERT",
+      "model_id": "EMBEDDIA/crosloengual-bert",
+      "params": 124000000,
+      "params_display": "124M",
+      "results": {
+        "cb":      { "mean": 79.77, "stdev": 1.73 },
+        "copa":    { "mean": 59.47, "stdev": 1.89 },
+        "rte":     { "mean": 65.30, "stdev": 1.52 },
+        "wsc":     { "mean": 63.24, "stdev": 0.85 },
+        "boolq":   { "mean": 72.30, "stdev": 0.09 },
+        "multirc": { "mean": 59.82, "stdev": 0.82 }
+      },
+      "avg": 66.65,
+      "complete": true,
+      "tasks_completed": 6,
+      "tasks_total": 6
+    },
+    {
+      "rank": 6,
+      "model": "TeSLa-XLM",
+      "model_id": "te-sla/teslaXLM",
+      "params": 560000000,
+      "params_display": "560M",
+      "results": {
+        "cb":      { "mean": 72.87, "stdev": 9.62 },
+        "copa":    { "mean": 49.40, "stdev": 1.50 },
+        "rte":     { "mean": 58.49, "stdev": 11.53 },
+        "wsc":     { "mean": 63.93, "stdev": 1.16 },
+        "boolq":   { "mean": 80.63, "stdev": 0.40 },
+        "multirc": { "mean": 65.00, "stdev": 3.98 }
+      },
+      "avg": 65.05,
+      "complete": true,
+      "tasks_completed": 6,
+      "tasks_total": 6
+    },
+    {
+      "rank": 7,
+      "model": "Jerteh-355",
+      "model_id": "jerteh/Jerteh-355",
+      "params": 354000000,
+      "params_display": "354M",
+      "results": {
+        "cb":      { "mean": 75.00, "stdev": 2.61 },
+        "copa":    { "mean": 57.93, "stdev": 0.09 },
+        "rte":     { "mean": 59.60, "stdev": 0.73 },
+        "wsc":     { "mean": 64.61, "stdev": 0.65 },
+        "boolq":   { "mean": 71.68, "stdev": 1.40 },
+        "multirc": { "mean": 60.68, "stdev": 0.67 }
+      },
+      "avg": 64.92,
+      "complete": true,
+      "tasks_completed": 6,
+      "tasks_total": 6
+    },
+    {
+      "rank": 8,
+      "model": "mmBERT-small",
+      "model_id": "jhu-clsp/mmBERT-small",
+      "params": 140000000,
+      "params_display": "140M",
+      "results": {
+        "cb":      { "mean": 72.65, "stdev": 2.24 },
+        "copa":    { "mean": 53.20, "stdev": 1.70 },
+        "rte":     { "mean": 64.56, "stdev": 1.56 },
+        "wsc":     { "mean": 64.38, "stdev": 0.97 },
+        "boolq":   { "mean": 73.62, "stdev": 0.31 },
+        "multirc": { "mean": 59.69, "stdev": 2.84 }
+      },
+      "avg": 64.68,
+      "complete": true,
+      "tasks_completed": 6,
+      "tasks_total": 6
+    }
+  ]
+}

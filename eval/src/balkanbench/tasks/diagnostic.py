@@ -107,6 +107,6 @@ def _assert_above_random(bundle: dict[str, float], *, n: int) -> None:
             raise DiagnosticBelowRandomError(
                 f"matthews_correlation={bundle['matthews_correlation']:.3f} is more than "
                 f"{_SIGMA_TOLERANCE}sigma below the 0.0 random baseline "
-                f"(n={n}, sigma={mcc_std:.3f}); "
-                "refusing to emit a diagnostic result, this almost always signals a label-mapping bug"
+                f"(n={n}, sigma={mcc_std:.3f}); refusing to emit a diagnostic result, "
+                "this almost always signals a label-mapping bug"
             )

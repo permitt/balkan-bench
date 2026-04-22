@@ -12,7 +12,6 @@ from balkanbench.metrics.f1 import f1_a, f1_macro
 from balkanbench.metrics.gender_parity import gender_parity
 from balkanbench.metrics.matthews import matthews_correlation
 
-
 # ---------- registry ----------
 
 

@@ -81,6 +81,11 @@
           "type": "array",
           "items": { "type": "string" },
           "description": "Columns that identify a group for grouped-metric tasks (e.g. MultiRC paragraph_id + question_id)."
+        },
+        "metric_columns": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Extra dataset columns to forward to task.score() as kwargs (e.g. AXg's is_pro_stereotype for gender_parity)."
         }
       }
     },

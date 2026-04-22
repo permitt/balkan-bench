@@ -18,9 +18,13 @@ dataset:
 inputs:
   fields: [premise, hypothesis]
   id_field: example_id
+  # metric_columns: [is_pro_stereotype]
+  # ^ re-enable once the published permitt/superglue-serbian AXg split
+  #   carries an `is_pro_stereotype` column. Until then gender_parity is
+  #   dropped from the reported metric list.
 metrics:
   primary: [accuracy]
-  report: [accuracy, gender_parity]
+  report: [accuracy]
   task_score: accuracy
 prompts:
   sr:

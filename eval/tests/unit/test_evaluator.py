@@ -250,6 +250,8 @@ def test_run_multiseed_calls_single_seed_per_seed(monkeypatch) -> None:
         seed: int,
         output_dir: Any,
         eval_split: str = "validation",
+        train: bool = True,
+        compute_metrics: bool = True,
     ) -> SeedResult:
         seeds_called.append(seed)
         return SeedResult(

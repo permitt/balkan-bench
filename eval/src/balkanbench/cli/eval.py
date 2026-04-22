@@ -54,6 +54,18 @@ def eval_cmd(
         "--run-type",
         help="'official' (rankable) or 'experimental' (not rankable).",
     ),
+    eval_split: str | None = typer.Option(
+        None,
+        "--eval-split",
+        help="Dataset split to evaluate on. Defaults to 'validation' for ranked "
+        "tasks and 'test' for diagnostic tasks.",
+    ),
+    no_train: bool = typer.Option(
+        False,
+        "--no-train",
+        help="Skip Trainer.train() and evaluate the loaded checkpoint as-is. "
+        "Automatic for tasks with status='diagnostic' (no train split).",
+    ),
 ) -> None:
     """Train on train, evaluate on validation, write a result artifact."""
     try:
@@ -74,6 +86,23 @@ def eval_cmd(
     if not chosen_seeds:
         typer.echo(_red("no seeds provided on CLI and the model config does not declare any"))
         raise typer.Exit(code=1)
+
+    # Diagnostics (AXb / AXg) have only a test split and are evaluated
+    # without training. Real use would load a fine-tuned RTE checkpoint
+    # first; v0.1 runs the base model and relies on the below-random
+    # sanity gate in DiagnosticTask to catch wiring bugs.
+    is_diagnostic = task_cfg.get("status") == "diagnostic"
+    effective_eval_split = eval_split or ("test" if is_diagnostic else "validation")
+    effective_no_train = no_train or is_diagnostic
+    if is_diagnostic and not no_train:
+        typer.echo(
+            typer.style(
+                "diagnostic task detected: auto-enabling --no-train and "
+                "--eval-split=test. For rigorous AXb/AXg scoring, run with a "
+                "fine-tuned RTE checkpoint (v0.2 feature).",
+                fg=typer.colors.YELLOW,
+            )
+        )
 
     typer.echo(
         _green(
@@ -96,6 +125,8 @@ def eval_cmd(
         datasets=datasets,
         seeds=chosen_seeds,
         output_dir=out / "work" / f"{benchmark}-{language}" / model,
+        eval_split=effective_eval_split,
+        train=not effective_no_train,
     )
 
     aggregate = aggregate_seed_results(seed_results)

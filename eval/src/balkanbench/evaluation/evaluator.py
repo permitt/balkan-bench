@@ -96,8 +96,19 @@ def run_single_seed(
     seed: int,
     output_dir: str | Path,
     eval_split: str = "validation",
+    train: bool = True,
+    compute_metrics: bool = True,
 ) -> SeedResult:
-    """Train one model on the train split, evaluate on ``eval_split``."""
+    """Train (optional) then evaluate on ``eval_split``.
+
+    Flags:
+    - ``train=False`` skips ``Trainer.train()`` - used by diagnostic-only tasks
+      (AXb/AXg) which have no train split, and by any CLI that already loaded
+      a trained checkpoint.
+    - ``compute_metrics=False`` skips reference loading and scoring - used by
+      ``balkanbench predict`` against the public test split, which has no
+      label column.
+    """
     set_seed(seed)
 
     encoder = HFEncoder.build(model_cfg=model_cfg, task_cfg=task_cfg)
@@ -118,13 +129,25 @@ def run_single_seed(
         train_dataset=tokenized.get("train"),
         eval_dataset=tokenized.get(eval_split),
     )
-    trainer.train()
+    if train:
+        trainer.train()
 
     eval_ds = tokenized[eval_split]
     prediction_output = trainer.predict(eval_ds)
     logits = np.asarray(prediction_output.predictions)
     decoded = task.decode(logits)
     predictions = decoded.tolist() if hasattr(decoded, "tolist") else list(decoded)
+
+    if not compute_metrics:
+        return SeedResult(
+            seed=seed,
+            primary={},
+            secondary={},
+            task_score=0.0,
+            predictions=predictions,
+            references=[],
+            group_ids=None,
+        )
 
     # References come from the original (pre-tokenised) split so our fake
     # tokeniser-free tests still work.
@@ -136,6 +159,19 @@ def run_single_seed(
     if group_fields:
         group_ids = list(zip(*[datasets[eval_split][g] for g in group_fields], strict=True))
         score_kwargs["group_ids"] = group_ids
+
+    # Generic side-channel: let a task declare extra columns the evaluator
+    # forwards to ``score()`` as kwargs. AXg's ``gender_parity`` uses this to
+    # carry ``is_pro_stereotype``; future metrics that need per-example
+    # metadata plug in here without the evaluator having to know about them.
+    for column in task_cfg["inputs"].get("metric_columns") or []:
+        if column not in datasets[eval_split].column_names:
+            raise KeyError(
+                f"task_cfg.inputs.metric_columns references {column!r} but the "
+                f"{eval_split!r} split does not have it; columns present: "
+                f"{datasets[eval_split].column_names}"
+            )
+        score_kwargs[column] = list(datasets[eval_split][column])
 
     bundle = task.score(predictions=predictions, references=references, **score_kwargs)
     primary = {name: value for name, value in bundle.items() if name in task.primary_metric_names()}
@@ -162,6 +198,8 @@ def run_multiseed(
     seeds: list[int],
     output_dir: str | Path,
     eval_split: str = "validation",
+    train: bool = True,
+    compute_metrics: bool = True,
 ) -> list[SeedResult]:
     """Run ``run_single_seed`` for every seed; return the list in order."""
     results: list[SeedResult] = []
@@ -175,6 +213,8 @@ def run_multiseed(
                 seed=seed,
                 output_dir=Path(output_dir) / f"seed-{seed}",
                 eval_split=eval_split,
+                train=train,
+                compute_metrics=compute_metrics,
             )
         )
     return results

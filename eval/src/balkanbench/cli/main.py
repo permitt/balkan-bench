@@ -7,6 +7,7 @@ import typer
 from balkanbench import __version__
 from balkanbench.cli import validate as validate_cmds
 from balkanbench.cli.eval import eval_cmd
+from balkanbench.cli.leaderboard import leaderboard_app
 from balkanbench.cli.listcmd import list_app
 from balkanbench.cli.predict import predict_cmd
 from balkanbench.cli.publish import publish_dataset_cmd
@@ -19,6 +20,7 @@ app = typer.Typer(
 )
 
 app.add_typer(list_app, name="list")
+app.add_typer(leaderboard_app, name="leaderboard")
 
 app.command("validate-env", help="Check Python + deps + env vars.")(validate_cmds.validate_env)
 app.command("validate-config", help="Validate a YAML config against a JSON Schema.")(

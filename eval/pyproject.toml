@@ -37,6 +37,7 @@ dev = [
     "transformers>=4.40",
     "scikit-learn>=1.4",
     "numpy>=1.26",
+    "optuna>=3.6",
 ]
 publish = [
     "datasets>=2.20",
@@ -48,6 +49,7 @@ ml = [
     "transformers>=4.40",
     "scikit-learn>=1.4",
     "numpy>=1.26",
+    "optuna>=3.6",
 ]
 
 [project.scripts]

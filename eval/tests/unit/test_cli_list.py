@@ -28,8 +28,8 @@ def test_list_tasks_runs(tmp_path, monkeypatch) -> None:
     assert result.exit_code == 0
 
 
-def test_list_languages_returns_sr_for_v01(tmp_path, monkeypatch) -> None:
+def test_list_languages_empty_with_no_configs(tmp_path, monkeypatch) -> None:
     monkeypatch.setenv("BALKANBENCH_CONFIGS_DIR", str(tmp_path))
     result = runner.invoke(app, ["list", "languages"])
     assert result.exit_code == 0
-    assert "sr" in result.stdout
+    assert "no languages discovered" in result.stdout.lower()

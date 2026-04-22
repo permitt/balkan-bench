@@ -32,3 +32,12 @@ def test_missing_hf_repo_fails() -> None:
     )
     assert errors
     assert any("hf_repo" in (e.message + str(e.path)) for e in errors)
+
+
+def test_bare_task_override_keys_rejected() -> None:
+    errors = list(
+        Draft202012Validator(_load_schema()).iter_errors(
+            _load_yaml("bertic_invalid_bare_override_keys.yaml")
+        )
+    )
+    assert errors, "task_overrides must use {benchmark}.{task} namespaced keys"

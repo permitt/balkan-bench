@@ -65,3 +65,29 @@ def test_configs_root_defaults_when_env_unset(monkeypatch) -> None:
     monkeypatch.delenv("BALKANBENCH_CONFIGS_DIR", raising=False)
     root = _configs_root()
     assert root.name == "configs"
+
+
+def test_list_languages_discovers_from_task_yamls(tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("BALKANBENCH_CONFIGS_DIR", str(tmp_path))
+    task_yaml = tmp_path / "benchmarks" / "superglue" / "tasks" / "boolq.yaml"
+    task_yaml.parent.mkdir(parents=True)
+    task_yaml.write_text("languages:\n  available: [sr]\n  ranked: [sr]\n  roadmap: [hr, cnr]\n")
+    result = runner.invoke(app, ["list", "languages"])
+    assert result.exit_code == 0, result.output
+    assert "sr\tavailable" in result.stdout
+    assert "hr\troadmap" in result.stdout
+    assert "cnr\troadmap" in result.stdout
+
+
+def test_list_languages_merges_across_benchmarks(tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("BALKANBENCH_CONFIGS_DIR", str(tmp_path))
+    sg = tmp_path / "benchmarks" / "superglue" / "tasks" / "boolq.yaml"
+    sg.parent.mkdir(parents=True)
+    sg.write_text("languages:\n  available: [sr]\n  ranked: [sr]\n")
+    sle = tmp_path / "benchmarks" / "sle" / "tasks" / "arc_challenge.yaml"
+    sle.parent.mkdir(parents=True)
+    sle.write_text("languages:\n  available: [sr, hr]\n  ranked: [sr]\n")
+    result = runner.invoke(app, ["list", "languages"])
+    assert result.exit_code == 0, result.output
+    assert "sr\tavailable" in result.stdout
+    assert "hr\tavailable" in result.stdout

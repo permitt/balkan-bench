@@ -47,6 +47,12 @@
       "required": ["public_repo", "config", "splits"],
       "additionalProperties": false,
       "properties": {
+        "source_type": {
+          "type": "string",
+          "enum": ["huggingface", "https", "gcs", "local"],
+          "default": "huggingface",
+          "description": "Where the data lives. Non-huggingface source_types require different fields (added to the schema as those benchmarks land)."
+        },
         "public_repo":  { "type": "string", "minLength": 1 },
         "private_repo": { "type": "string" },
         "config":       { "type": "string", "minLength": 1 },

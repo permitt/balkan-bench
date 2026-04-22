@@ -29,10 +29,14 @@
     },
     "task_overrides": {
       "type": "object",
-      "additionalProperties": {
-        "type": "object",
-        "additionalProperties": true
-      }
+      "description": "Per-task training overrides. Keys must be namespaced {benchmark}.{task} to avoid collisions across benchmarks.",
+      "patternProperties": {
+        "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*$": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
     },
     "seeds": {
       "type": "array",

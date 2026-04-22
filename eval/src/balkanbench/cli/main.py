@@ -5,6 +5,7 @@ import typer
 
 from balkanbench import __version__
 from balkanbench.cli import validate as validate_cmds
+from balkanbench.cli.listcmd import list_app
 
 app = typer.Typer(
     name="balkanbench",
@@ -12,6 +13,8 @@ app = typer.Typer(
     add_completion=False,
     no_args_is_help=True,
 )
+
+app.add_typer(list_app, name="list")
 
 app.command("validate-env", help="Check Python + deps + env vars.")(validate_cmds.validate_env)
 app.command("validate-config", help="Validate a YAML config against a JSON Schema.")(

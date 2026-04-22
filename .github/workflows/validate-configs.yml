@@ -1,0 +1,62 @@
+name: validate-configs
+
+on:
+  push:
+    paths:
+      - "eval/configs/**"
+      - "eval/schemas/**"
+      - "eval/src/balkanbench/cli/validate.py"
+      - ".github/workflows/validate-configs.yml"
+  pull_request:
+    paths:
+      - "eval/configs/**"
+      - "eval/schemas/**"
+
+jobs:
+  validate:
+    name: validate every YAML config against its JSON Schema
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: eval
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install package
+        run: uv pip install --system -e ".[dev]"
+
+      - name: Validate benchmark manifests
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          for yaml in configs/benchmarks/*/benchmark.yaml; do
+            echo "validating $yaml"
+            balkanbench validate-config "$yaml" --schema benchmark_spec
+          done
+
+      - name: Validate task YAMLs
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          for yaml in configs/benchmarks/*/tasks/*.yaml; do
+            echo "validating $yaml"
+            balkanbench validate-config "$yaml" --schema task_spec
+          done
+
+      - name: Validate model YAMLs
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          for yaml in configs/models/official/*.yaml configs/models/experimental/*.yaml; do
+            echo "validating $yaml"
+            balkanbench validate-config "$yaml" --schema model_spec
+          done

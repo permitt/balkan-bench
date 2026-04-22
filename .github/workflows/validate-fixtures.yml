@@ -1,0 +1,37 @@
+name: validate-fixtures
+
+on:
+  push:
+    paths:
+      - "eval/tests/fixtures/**"
+      - "eval/schemas/**"
+      - ".github/workflows/validate-fixtures.yml"
+  pull_request:
+    paths:
+      - "eval/tests/fixtures/**"
+      - "eval/schemas/**"
+
+jobs:
+  validate:
+    name: validate test fixtures against the JSON Schemas
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: eval
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install package
+        run: uv pip install --system -e ".[dev]"
+
+      - name: Run schema tests only
+        run: pytest tests/unit/test_schema_*.py --no-cov -q

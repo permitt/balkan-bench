@@ -73,7 +73,7 @@ packages = ["balkanbench"]
 mypy_path = "src"
 
 [[tool.mypy.overrides]]
-module = ["jsonschema.*"]
+module = ["jsonschema.*", "datasets", "datasets.*", "huggingface_hub", "huggingface_hub.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

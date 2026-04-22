@@ -7,6 +7,7 @@ import typer
 from balkanbench import __version__
 from balkanbench.cli import validate as validate_cmds
 from balkanbench.cli.listcmd import list_app
+from balkanbench.cli.publish import publish_dataset_cmd
 
 app = typer.Typer(
     name="balkanbench",
@@ -22,6 +23,10 @@ app.command("validate-config", help="Validate a YAML config against a JSON Schem
     validate_cmds.validate_config
 )
 app.command("validate-data", help="Validate a dataset manifest JSON.")(validate_cmds.validate_data)
+app.command(
+    "publish-dataset",
+    help="Normalise a source HF dataset and publish the public BalkanBench variant.",
+)(publish_dataset_cmd)
 
 
 def _version_callback(value: bool) -> None:

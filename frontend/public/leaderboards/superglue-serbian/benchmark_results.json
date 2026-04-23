@@ -24,7 +24,7 @@
   "rows": [
     {
       "rank": 1,
-      "model": "ModernBERTić base",
+      "model": "ModernBERTić large",
       "model_id": "permitt/galton-modernbertic-base-bcms-v1",
       "params": 395000000,
       "params_display": "395M",
@@ -72,13 +72,13 @@
         "rte":     { "mean": 65.82, "stdev": 1.14 },
         "wsc":     { "mean": 64.11, "stdev": 1.11 },
         "boolq":   { "mean": 76.02, "stdev": 0.63 },
-        "multirc": null
+        "multirc": { "mean": 66.90, "stdev": 0.69 }
       },
       "avg": 69.73,
-      "complete": false,
+      "complete": true,
       "tasks_completed": 5,
       "tasks_total": 6,
-      "partial_flag": "(5/6) partial"
+      "partial_flag": ""
     },
     {
       "rank": 3,

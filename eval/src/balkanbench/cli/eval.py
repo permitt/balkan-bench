@@ -119,7 +119,9 @@ def eval_cmd(
             f"Loading dataset {task_cfg['dataset']['public_repo']}:{task_cfg['dataset']['config']}"
         )
     )
-    datasets = load_dataset(
+    from balkanbench.cli import eval as _self
+
+    datasets = _self.load_dataset(
         task_cfg["dataset"]["public_repo"],
         task_cfg["dataset"]["config"],
         revision=dataset_revision,

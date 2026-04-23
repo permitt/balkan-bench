@@ -117,10 +117,12 @@ def publish_dataset(
     """
     token = _hf_token_or_raise()
 
+    from balkanbench.data import publish as _self
+
     prepared: dict[str, DatasetDict] = {}
     for config in configs_to_publish:
         try:
-            source = load_dataset(source_repo, config)
+            source = _self.load_dataset(source_repo, config)
         except Exception as exc:
             raise PublishError(
                 f"failed to load config {config!r} from {source_repo!r}: {exc}"
@@ -157,7 +159,7 @@ def publish_dataset(
             public_repo=public_repo,
         )
 
-    api = HfApi(token=token)
+    api = _self.HfApi(token=token)
     api.create_repo(
         repo_id=public_repo,
         repo_type="dataset",

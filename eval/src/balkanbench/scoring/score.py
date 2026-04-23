@@ -92,7 +92,9 @@ def score_predictions(
             "private-label scoring requires a private repo"
         )
 
-    private_labels_ds = load_dataset(
+    from balkanbench.scoring import score as _self
+
+    private_labels_ds = _self.load_dataset(
         private_repo,
         task_cfg["dataset"]["config"],
         split="test",

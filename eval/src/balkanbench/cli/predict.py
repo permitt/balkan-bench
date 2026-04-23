@@ -56,7 +56,9 @@ def predict_cmd(
         typer.echo(_red(f"config not found: {exc}"))
         raise typer.Exit(code=1) from exc
 
-    datasets = load_dataset(
+    from balkanbench.cli import predict as _self
+
+    datasets = _self.load_dataset(
         task_cfg["dataset"]["public_repo"],
         task_cfg["dataset"]["config"],
         revision=dataset_revision,

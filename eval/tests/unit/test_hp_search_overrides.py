@@ -92,7 +92,6 @@ def _fake_datasets() -> DatasetDict:
 
 
 def _fake_single_seed(**kwargs: Any) -> SeedResult:
-    lr = kwargs["model_cfg"]["training"].get("learning_rate", 0)
     # Simulate effective training args after HFEncoder merge: task_overrides wins.
     overrides = kwargs["model_cfg"].get("task_overrides", {})
     key = f"{kwargs['task_cfg']['benchmark']}.{kwargs['task_cfg']['task']}"

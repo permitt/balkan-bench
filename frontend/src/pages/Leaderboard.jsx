@@ -14,15 +14,69 @@ const TASK_LABELS = {
   wsc: 'WSC',
 }
 
+const TASK_DESCRIPTIONS = {
+  boolq: 'Boolean questions over a short passage',
+  cb: 'Three-way textual entailment (entailment / contradiction / neutral)',
+  copa: 'Choice of plausible alternatives (cause / effect)',
+  rte: 'Binary textual entailment',
+  multirc: 'Multi-sentence reading comprehension (grouped F1 + exact match)',
+  wsc: 'Winograd Schema coreference reformulated as binary classification',
+}
+
+const LANGUAGES = {
+  sr:  { flag: '🇷🇸', name: 'Serbian',    nativeName: 'Srpski' },
+  hr:  { flag: '🇭🇷', name: 'Croatian',   nativeName: 'Hrvatski' },
+  cnr: { flag: '🇲🇪', name: 'Montenegrin', nativeName: 'Crnogorski' },
+  bs:  { flag: '🇧🇦', name: 'Bosnian',    nativeName: 'Bosanski' },
+}
+
+const BENCHMARKS = {
+  superglue: {
+    label: 'SuperGLUE',
+    tagline: 'Encoder NLU · 6 ranked tasks',
+    description: 'Encoder-fine-tune NLU, 6 ranked tasks + 2 diagnostics.',
+    available: true,
+    availableIn: null,
+  },
+  sle: {
+    label: 'Serbian-LLM-Eval',
+    tagline: 'Generative few-shot',
+    description: 'Generative few-shot eval (Aleksa Gordić) — ARC, HellaSwag, PIQA, BoolQ, Winogrande, etc.',
+    available: false,
+    availableIn: 'v0.2',
+  },
+  mteb_bcms: {
+    label: 'MTEB-BCMS',
+    tagline: 'Embeddings · 4 tasks',
+    description: 'Massive Text Embedding Benchmark, BCMS adaptation.',
+    available: false,
+    availableIn: 'v0.3',
+  },
+  llm_arena: {
+    label: 'LLM Arena',
+    tagline: 'Human-judged Elo',
+    description: 'Head-to-head human preference ratings across BCMS LLMs.',
+    available: false,
+    availableIn: 'v0.3',
+  },
+}
+
 // Discoverable leaderboards. When a new (benchmark, language) pair publishes
 // its benchmark_results.json, flip `available: true`; no other code changes.
 const LEADERBOARDS = [
-  { benchmark: 'superglue', language: 'sr',  path: 'superglue-serbian',    label: 'SuperGLUE · Serbian',      available: true  },
-  { benchmark: 'superglue', language: 'hr',  path: 'superglue-croatian',   label: 'SuperGLUE · Croatian',     available: false },
-  { benchmark: 'superglue', language: 'cnr', path: 'superglue-montenegrin',label: 'SuperGLUE · Montenegrin',  available: false },
-  { benchmark: 'superglue', language: 'bs',  path: 'superglue-bosnian',    label: 'SuperGLUE · Bosnian',      available: false },
-  { benchmark: 'sle',       language: 'sr',  path: 'sle-serbian',          label: 'Serbian-LLM-Eval · Serbian', available: false },
+  { benchmark: 'superglue', language: 'sr',  path: 'superglue-serbian',    available: true,  availableIn: null   },
+  { benchmark: 'superglue', language: 'hr',  path: 'superglue-croatian',   available: false, availableIn: 'v0.2' },
+  { benchmark: 'superglue', language: 'cnr', path: 'superglue-montenegrin',available: false, availableIn: 'v0.2' },
+  { benchmark: 'superglue', language: 'bs',  path: 'superglue-bosnian',    available: false, availableIn: 'v0.2' },
+  { benchmark: 'sle',       language: 'sr',  path: 'sle-serbian',          available: false, availableIn: 'v0.2' },
 ]
+
+function chipLabel(entry) {
+  const lang = LANGUAGES[entry.language]
+  const bench = BENCHMARKS[entry.benchmark]
+  const tag = `${bench.label} · ${lang.name}`
+  return entry.available ? tag : `${tag} — coming in ${entry.availableIn}`
+}
 
 function formatCell(cell) {
   if (cell === null || cell === undefined) return { main: '—', stdev: null }
@@ -39,11 +93,16 @@ function sortValue(row, rankBy) {
 
 export default function Leaderboard() {
   const [params, setParams] = useSearchParams()
+  const bench = params.get('benchmark') || 'superglue'
   const lang = params.get('lang') || 'sr'
   const rankBy = params.get('task') || 'avg'
 
   const target =
-    LEADERBOARDS.find((l) => l.language === lang && l.available) ?? LEADERBOARDS[0]
+    LEADERBOARDS.find((l) => l.benchmark === bench && l.language === lang && l.available) ??
+    LEADERBOARDS.find((l) => l.available) ??
+    LEADERBOARDS[0]
+
+  const langEntries = LEADERBOARDS.filter((l) => l.benchmark === target.benchmark)
 
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
@@ -80,6 +139,13 @@ export default function Leaderboard() {
     setParams(next, { replace: true })
   }
 
+  const setBench = (nextBench) => {
+    const next = new URLSearchParams(params)
+    if (nextBench === 'superglue') next.delete('benchmark')
+    else next.set('benchmark', nextBench)
+    setParams(next, { replace: true })
+  }
+
   const setRankBy = (nextTask) => {
     const next = new URLSearchParams(params)
     if (nextTask === 'avg') next.delete('task')
@@ -91,11 +157,54 @@ export default function Leaderboard() {
     <>
       <Topbar />
       <Nav />
-      <section className="lb-wrap">
+      <section className="lb-page">
+        <aside className="lb-sidebar">
+          <div className="lb-side-k">Benchmarks</div>
+          <nav className="lb-side-nav">
+            {Object.entries(BENCHMARKS).map(([key, meta]) => {
+              const isActive = target.benchmark === key
+              const title = meta.available
+                ? `${meta.label} — ${meta.description}`
+                : `${meta.label} — coming in ${meta.availableIn}. ${meta.description}`
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  className={`lb-side-item ${isActive ? 'active' : ''} ${!meta.available ? 'disabled' : ''}`}
+                  title={title}
+                  aria-label={title}
+                  disabled={!meta.available}
+                  onClick={() => meta.available && setBench(key)}
+                >
+                  <div className="lb-side-label">
+                    {meta.label}
+                    {!meta.available && <span className="lb-side-soon">{meta.availableIn}</span>}
+                  </div>
+                  <div className="lb-side-tag">{meta.tagline}</div>
+                </button>
+              )
+            })}
+          </nav>
+          <div className="lb-side-footnote">
+            New benchmark?{' '}
+            <a href="https://github.com/permitt/balkan-bench/issues/new/choose" target="_blank" rel="noopener noreferrer">
+              Propose one
+            </a>
+            . See{' '}
+            <a href="https://github.com/permitt/balkan-bench/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer">
+              CONTRIBUTING
+            </a>.
+          </div>
+        </aside>
+
+        <div className="lb-main">
         <div className="lb-head">
           <div className="lb-eyebrow">
             <span className="chip">LEADERBOARD</span>
-            <span>{target.label.toUpperCase()} · V0.1</span>
+            <span>
+              {BENCHMARKS[target.benchmark].label.toUpperCase()} ·{' '}
+              {LANGUAGES[target.language].flag} {LANGUAGES[target.language].name.toUpperCase()} · V0.1
+            </span>
           </div>
           <h1 className="lb-title">
             Every model, <span className="stroke">measured</span><span className="slash">.</span>
@@ -110,18 +219,24 @@ export default function Leaderboard() {
           <div className="lb-ctl">
             <span className="lb-ctl-k">Language</span>
             <div className="lb-seg">
-              {LEADERBOARDS.map((l) => (
-                <button
-                  key={`${l.benchmark}-${l.language}`}
-                  type="button"
-                  disabled={!l.available}
-                  className={lang === l.language ? 'active' : ''}
-                  title={l.available ? l.label : `${l.label} — coming in v0.2`}
-                  onClick={() => l.available && setLang(l.language)}
-                >
-                  {l.language.toUpperCase()}
-                </button>
-              ))}
+              {langEntries.map((l) => {
+                const langMeta = LANGUAGES[l.language]
+                return (
+                  <button
+                    key={`${l.benchmark}-${l.language}`}
+                    type="button"
+                    disabled={!l.available}
+                    className={lang === l.language ? 'active' : ''}
+                    title={chipLabel(l)}
+                    aria-label={chipLabel(l)}
+                    onClick={() => l.available && setLang(l.language)}
+                  >
+                    <span className="lb-flag" aria-hidden="true">{langMeta.flag}</span>
+                    <span className="lb-lang-code">{l.language.toUpperCase()}</span>
+                    <span className="lb-lang-name">{langMeta.nativeName}</span>
+                  </button>
+                )
+              })}
             </div>
           </div>
 
@@ -132,6 +247,7 @@ export default function Leaderboard() {
                 <button
                   type="button"
                   className={rankBy === 'avg' ? 'active' : ''}
+                  title="Main score — unweighted mean of the 6 primary task scores"
                   onClick={() => setRankBy('avg')}
                 >
                   Avg
@@ -141,6 +257,7 @@ export default function Leaderboard() {
                     key={t}
                     type="button"
                     className={rankBy === t ? 'active' : ''}
+                    title={`${TASK_LABELS[t] || t} (${data.task_primary_metrics[t]}) — ${TASK_DESCRIPTIONS[t] || ''}`}
                     onClick={() => setRankBy(t)}
                   >
                     {TASK_LABELS[t] || t}
@@ -232,6 +349,7 @@ export default function Leaderboard() {
         )}
 
         {!data && !error && <div className="lb-loading">Loading leaderboard…</div>}
+        </div>
       </section>
       <Footer />
     </>

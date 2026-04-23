@@ -4,6 +4,139 @@
   padding: 56px 28px 48px;
 }
 
+.lb-page {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 40px 28px 48px;
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+.lb-sidebar {
+  position: sticky;
+  top: 32px;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  padding: 18px 0 14px;
+}
+
+.lb-side-k {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding: 0 18px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.lb-side-nav {
+  display: flex;
+  flex-direction: column;
+}
+
+.lb-side-item {
+  text-align: left;
+  font-family: var(--sans);
+  padding: 14px 18px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  border-left: 3px solid transparent;
+  cursor: pointer;
+  transition: background 0.12s, border-left-color 0.12s;
+}
+
+.lb-side-item:hover:not(.disabled) {
+  background: var(--paper-2);
+}
+
+.lb-side-item.active {
+  border-left-color: var(--signal);
+  background: var(--paper-2);
+}
+
+.lb-side-item.disabled {
+  cursor: not-allowed;
+}
+.lb-side-item.disabled .lb-side-label,
+.lb-side-item.disabled .lb-side-tag {
+  color: var(--ink-4);
+}
+
+.lb-side-label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.lb-side-soon {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+  padding: 2px 6px;
+  border: 1px solid var(--line);
+}
+
+.lb-side-tag {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+  margin-top: 4px;
+}
+
+.lb-side-footnote {
+  padding: 14px 18px 0;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+  line-height: 1.5;
+}
+.lb-side-footnote a {
+  color: var(--signal);
+  border-bottom: 1px dashed var(--signal);
+}
+
+.lb-flag {
+  font-size: 14px;
+  margin-right: 4px;
+}
+.lb-lang-code {
+  font-weight: 600;
+  margin-right: 4px;
+}
+.lb-lang-name {
+  color: var(--ink-4);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.lb-seg button.active .lb-lang-name {
+  color: var(--paper);
+  opacity: 0.75;
+}
+
+@media (max-width: 880px) {
+  .lb-page {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .lb-sidebar {
+    position: static;
+    top: auto;
+  }
+}
+
 .lb-head { margin-bottom: 24px; }
 
 .lb-controls {

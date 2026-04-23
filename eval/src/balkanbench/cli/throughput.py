@@ -28,30 +28,83 @@ def _green(t: str) -> str:
     return typer.style(t, fg=typer.colors.GREEN, bold=True)
 
 
+_CLASSIFICATION_LIKE = {
+    "binary_classification",
+    "multiclass_classification",
+    "grouped_binary_classification",
+    "wsc",
+    "diagnostic",
+}
+
+
+def _task_scoped_predict_fn(task_type: str, num_choices: int) -> Any:
+    """Return a predict_fn with ``task_type`` and ``num_choices`` pinned.
+
+    Kept out of ``throughput_cmd`` so the bound values don't drift as the
+    per-task loop iterates (ruff B023).
+    """
+
+    def _predict(model: Any, batch: Any, *, batch_size: int, max_seq_len: int) -> Any:
+        return default_predict_fn(
+            model,
+            batch,
+            batch_size=batch_size,
+            max_seq_len=max_seq_len,
+            task_type=task_type,
+            num_choices=num_choices,
+        )
+
+    return _predict
+
+
 def default_predict_fn(
-    model: Any, batch: Any, *, batch_size: int, max_seq_len: int
+    model: Any,
+    batch: Any,
+    *,
+    batch_size: int,
+    max_seq_len: int,
+    task_type: str = "binary_classification",
+    num_choices: int = 2,
 ) -> tuple[Any, float]:
     """Baseline predict_fn used by the CLI: runs ``model(**inputs)`` and times it.
 
-    Tests monkeypatch this symbol to supply a deterministic fake.
+    Input shape is chosen from ``task_type`` so the forward pass matches the
+    model's actual contract:
+
+    - classification-like (``binary_classification``, ``multiclass_classification``,
+      ``grouped_binary_classification``, ``wsc``, ``diagnostic``): 2D tensor of
+      shape ``(batch_size, max_seq_len)``.
+    - ``multiple_choice`` (COPA / ``AutoModelForMultipleChoice``): 3D tensor of
+      shape ``(batch_size, num_choices, max_seq_len)``.
+
+    Forward-pass failures propagate. An earlier version caught every
+    exception and fell back to ``input_ids.sum()``, which silently produced a
+    'throughput' number that wasn't measuring a real forward pass; the
+    fallback is deliberately removed.
+
+    Tests monkeypatch this symbol directly to supply a deterministic fake.
     """
+    del batch  # the real flow would index the dataset; shape-only timing here
+
     import numpy as np
     import torch
 
-    # ``batch`` is a list of row indices; for the real flow a collator would
-    # tokenise and pad. Here we emit dummy tensors matching the declared shape
-    # so the wall-clock reflects a forward pass of the right size.
-    input_ids = torch.randint(0, 1000, (batch_size, max_seq_len))
+    if task_type == "multiple_choice":
+        shape: tuple[int, ...] = (batch_size, num_choices, max_seq_len)
+    elif task_type in _CLASSIFICATION_LIKE:
+        shape = (batch_size, max_seq_len)
+    else:
+        raise ValueError(
+            f"default_predict_fn has no input shape for task_type={task_type!r}; "
+            f"known: {sorted(_CLASSIFICATION_LIKE | {'multiple_choice'})}"
+        )
+
+    input_ids = torch.randint(0, 1000, shape)
     attn = torch.ones_like(input_ids)
     model.eval()
     with torch.no_grad():
         start = time.perf_counter()
-        try:
-            _ = model(input_ids=input_ids, attention_mask=attn)
-        except Exception:
-            # Fall back to a tolerant call for models whose forward expects
-            # other kwargs (multiple-choice needs a 3D tensor, etc.).
-            _ = input_ids.sum()
+        _ = model(input_ids=input_ids, attention_mask=attn)
         elapsed = time.perf_counter() - start
     return np.zeros(batch_size, dtype=np.int64), elapsed
 
@@ -123,6 +176,17 @@ def throughput_cmd(
         encoder = HFEncoder.build(model_cfg=model_cfg, task_cfg=task_cfg)
 
         eval_split_name = "validation" if "validation" in datasets else "test"
+
+        # Build the predict_fn with task_type + num_choices already pinned so
+        # the default_predict_fn picks the right input shape (2D for
+        # classification, 3D for multiple_choice). Tests that monkeypatch
+        # default_predict_fn still win because the helper resolves it at
+        # call time.
+        predict_fn = _task_scoped_predict_fn(
+            task_type=task_cfg["task_type"],
+            num_choices=int(task_cfg.get("num_choices", 2)),
+        )
+
         sample = measure_task_throughput(
             model=encoder.model,
             tokenizer=encoder.tokenizer,
@@ -133,7 +197,7 @@ def throughput_cmd(
             precision=precision,
             warmup_batches=warmup_batches,
             measurement_batches=measurement_batches,
-            predict_fn=default_predict_fn,
+            predict_fn=predict_fn,
         )
         write_task_throughput(
             sample=sample,

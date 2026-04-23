@@ -110,16 +110,19 @@ def measure_task_throughput(
             "No measurement batches available; increase dataset size or decrease warmup."
         )
 
-    per_batch_seconds: list[float] = []
+    # Per-batch throughput uses the actual batch length, not the configured
+    # batch_size, so a tail batch shorter than batch_size does not inflate the
+    # reported ex/s. Take the median across per-batch throughputs.
+    per_batch_ex_per_sec: list[float] = []
     for batch in measurement_slice:
         _preds, seconds = predict_fn(model, batch, batch_size=batch_size, max_seq_len=max_seq_len)
-        per_batch_seconds.append(float(seconds))
+        seconds = float(seconds)
+        if seconds <= 0:
+            raise ValueError(f"predict_fn reported non-positive latency: {seconds}")
+        actual_size = len(batch)
+        per_batch_ex_per_sec.append(actual_size / seconds)
 
-    median_seconds = statistics.median(per_batch_seconds)
-    if median_seconds <= 0:
-        raise ValueError(f"predict_fn reported non-positive median latency: {median_seconds}")
-
-    ex_per_sec = batch_size / median_seconds
+    ex_per_sec = statistics.median(per_batch_ex_per_sec)
     tok_per_sec = ex_per_sec * max_seq_len
 
     return ThroughputSample(
@@ -131,7 +134,7 @@ def measure_task_throughput(
         hardware=hardware,
         precision=precision,
         warmup_batches=warmup_batches,
-        measurement_batches=len(per_batch_seconds),
+        measurement_batches=len(per_batch_ex_per_sec),
         torch_version=_torch_version(),
         driver_version=driver_version,
     )

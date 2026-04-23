@@ -54,8 +54,10 @@ def test_throughput_cli_writes_per_task_and_aggregate(tmp_path, monkeypatch) -> 
         lambda model_cfg, task_cfg: _FakeEncoder(),
     )
 
-    # Deterministic per-batch latency: 0.01s for every batch -> 1600 ex/sec @ bs=16
-    def fake_predict(model, batch, *, batch_size: int, max_seq_len: int):
+    # Deterministic per-batch latency: 0.01s for every batch -> 1600 ex/sec @ bs=16.
+    # The closure in throughput_cmd passes task_type + num_choices through to the
+    # default_predict_fn, so fakes must accept (or ignore) them.
+    def fake_predict(model, batch, *, batch_size: int, max_seq_len: int, **_):
         return [0] * batch_size, 0.01
 
     monkeypatch.setattr("balkanbench.cli.throughput.default_predict_fn", fake_predict)
@@ -112,7 +114,7 @@ def test_throughput_cli_sweeps_every_ranked_task_by_default(tmp_path, monkeypatc
         lambda model_cfg, task_cfg: _FakeEncoder(),
     )
 
-    def fake_predict(model, batch, *, batch_size: int, max_seq_len: int):
+    def fake_predict(model, batch, *, batch_size: int, max_seq_len: int, **_):
         return [0] * batch_size, 0.02
 
     monkeypatch.setattr("balkanbench.cli.throughput.default_predict_fn", fake_predict)

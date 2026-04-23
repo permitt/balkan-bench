@@ -156,6 +156,34 @@ def test_measure_respects_full_pass_cap() -> None:
     assert sample.measurement_batches == 1
 
 
+def test_measure_partial_final_batch_does_not_inflate_throughput() -> None:
+    """A tail batch shorter than batch_size must be counted by its actual size.
+
+    24 rows at batch_size=16 yields one full batch of 16 and one partial batch
+    of 8 examples. If both see the same per-batch latency (0.010s), the full
+    batch runs at 1600 ex/s and the partial runs at 800 ex/s; the median
+    across per-batch throughputs is 1200 ex/s, not the 1600 ex/s we would
+    report if we naively divided the configured batch_size by the median
+    latency.
+    """
+    cfg = _boolq_cfg()
+    predict_fn = _fake_predict_fn_constant(0.010)
+    sample = measure_task_throughput(
+        model=object(),
+        tokenizer=_FakeTokenizer(),
+        task_cfg=cfg,
+        dataset=_val_dataset(24),
+        language="sr",
+        hardware="NVIDIA L4 24GB",
+        precision="fp16",
+        warmup_batches=0,
+        measurement_batches=50,
+        predict_fn=predict_fn,
+    )
+    assert sample.measurement_batches == 2
+    assert sample.throughput_ex_per_sec == pytest.approx(1200.0, rel=1e-3)
+
+
 def test_write_task_throughput_matches_schema(tmp_path) -> None:
     sample = ThroughputSample(
         batch_size=16,

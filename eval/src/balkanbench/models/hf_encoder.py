@@ -14,11 +14,26 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from transformers import (
-    AutoModelForMultipleChoice,
-    AutoModelForSequenceClassification,
-    AutoTokenizer,
-)
+# transformers is lazy-loaded via __getattr__ so `balkanbench --version`,
+# --help, and the non-ML subcommands avoid its multi-second import cost.
+# Tests that monkeypatch ``balkanbench.models.hf_encoder.AutoModelFor*`` still
+# work because monkeypatching sets the name in the module dict, which is
+# consulted before __getattr__.
+_LAZY = {
+    "AutoModelForMultipleChoice": "transformers",
+    "AutoModelForSequenceClassification": "transformers",
+    "AutoTokenizer": "transformers",
+}
+
+
+def __getattr__(name: str) -> Any:
+    module_name = _LAZY.get(name)
+    if module_name is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    import importlib
+
+    return getattr(importlib.import_module(module_name), name)
+
 
 _CLASSIFICATION_TASK_TYPES: set[str] = {
     "binary_classification",
@@ -46,21 +61,28 @@ class HFEncoder:
         model_cfg: dict[str, Any],
         task_cfg: dict[str, Any],
     ) -> HFEncoder:
+        # Resolve lazy names via the module's __getattr__ so tests that
+        # monkeypatch ``balkanbench.models.hf_encoder.AutoModelFor*.from_pretrained``
+        # still win. The import inside the function body keeps
+        # `balkanbench --version` fast by never pulling transformers at
+        # package import time.
+        from balkanbench.models import hf_encoder as _self
+
         task_type = task_cfg["task_type"]
         repo = model_cfg["hf_repo"]
         revision = model_cfg.get("hf_revision")
 
-        tokenizer = AutoTokenizer.from_pretrained(repo, revision=revision, use_fast=True)
+        tokenizer = _self.AutoTokenizer.from_pretrained(repo, revision=revision, use_fast=True)
 
         if task_type in _CLASSIFICATION_TASK_TYPES:
             num_labels = int(task_cfg.get("num_labels", 2))
-            model = AutoModelForSequenceClassification.from_pretrained(
+            model = _self.AutoModelForSequenceClassification.from_pretrained(
                 repo,
                 revision=revision,
                 num_labels=num_labels,
             )
         elif task_type == "multiple_choice":
-            model = AutoModelForMultipleChoice.from_pretrained(
+            model = _self.AutoModelForMultipleChoice.from_pretrained(
                 repo,
                 revision=revision,
             )

@@ -33,13 +33,28 @@ import yaml
 from balkanbench.evaluation import run_single_seed
 from balkanbench.provenance import collect_provenance
 
-try:  # pragma: no cover - import-level only
-    import optuna
-    from optuna.samplers import TPESampler
-except ImportError as exc:  # pragma: no cover - runtime guard
-    raise ImportError(
-        "balkanbench.hp_search requires optuna. Install with: pip install 'balkanbench[ml]'"
-    ) from exc
+
+# Lazy-load optuna so `balkanbench --version` does not pay its startup cost.
+# A missing optuna install raises ImportError the first time run_hp_search
+# actually touches it, with a helpful hint pointing at the extras group.
+def __getattr__(name: str) -> Any:
+    if name == "optuna":
+        try:
+            import optuna as _optuna
+        except ImportError as exc:  # pragma: no cover - missing dep
+            raise ImportError(
+                "balkanbench.hp_search requires optuna. Install with: pip install 'balkanbench[ml]'"
+            ) from exc
+        return _optuna
+    if name == "TPESampler":
+        try:
+            from optuna.samplers import TPESampler as _TPE
+        except ImportError as exc:  # pragma: no cover - missing dep
+            raise ImportError(
+                "balkanbench.hp_search requires optuna. Install with: pip install 'balkanbench[ml]'"
+            ) from exc
+        return _TPE
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 class HPSearchError(RuntimeError):
@@ -131,6 +146,9 @@ def run_hp_search(
     if n_trials < 1:
         raise HPSearchError(f"n_trials must be >= 1; got {n_trials}")
 
+    # Resolve the lazy optuna + TPESampler via this module's __getattr__.
+    from balkanbench import hp_search as _self
+
     space = search_space or default_search_space_for(task_cfg["task_type"])
     task_score_metric = task_cfg["metrics"]["task_score"]
 
@@ -139,15 +157,15 @@ def run_hp_search(
     sweep_dir.mkdir(parents=True, exist_ok=True)
     storage = f"sqlite:///{sweep_dir / 'study.db'}"
 
-    study = optuna.create_study(
+    study = _self.optuna.create_study(
         study_name=sweep_id,
         storage=storage,
         direction="maximize",
-        sampler=TPESampler(seed=sampler_seed),
+        sampler=_self.TPESampler(seed=sampler_seed),
         load_if_exists=False,
     )
 
-    def objective(trial: optuna.Trial) -> float:  # pragma: no cover - hit via study.optimize
+    def objective(trial: Any) -> float:  # pragma: no cover - hit via study.optimize
         overrides = {name: _suggest(trial, name, spec) for name, spec in space.items()}
         trial_model_cfg = _apply_training_overrides(model_cfg, overrides)
         seed_result = run_single_seed(

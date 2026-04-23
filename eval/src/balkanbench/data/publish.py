@@ -14,10 +14,7 @@ import io
 import json
 import os
 from dataclasses import dataclass, field
-from typing import Any
-
-from datasets import DatasetDict, load_dataset
-from huggingface_hub import HfApi
+from typing import TYPE_CHECKING, Any
 
 from balkanbench.data.card import render_dataset_card
 from balkanbench.data.manifest import LABEL_FIELDS, ManifestError, build_manifest
@@ -26,6 +23,31 @@ from balkanbench.data.normalize import (
     rename_splits,
     strip_label_columns,
 )
+
+if TYPE_CHECKING:
+    from datasets import DatasetDict  # noqa: F401
+
+
+# Lazy seams: datasets.load_dataset and huggingface_hub.HfApi stay out of
+# the module's import path until someone actually runs `publish-dataset`.
+# Tests that monkeypatch ``balkanbench.data.publish.load_dataset`` / ``HfApi``
+# still win because monkeypatch sets the name in the module dict, which is
+# consulted before __getattr__.
+_LAZY = {
+    "load_dataset": ("datasets", "load_dataset"),
+    "HfApi": ("huggingface_hub", "HfApi"),
+    "DatasetDict": ("datasets", "DatasetDict"),
+}
+
+
+def __getattr__(name: str) -> Any:
+    target = _LAZY.get(name)
+    if target is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    import importlib
+
+    return getattr(importlib.import_module(target[0]), target[1])
+
 
 SPLIT_RENAMES_PER_CONFIG: dict[str, dict[str, str]] = {
     "copa": {"dev": "validation"},

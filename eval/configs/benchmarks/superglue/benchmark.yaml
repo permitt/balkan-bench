@@ -3,7 +3,7 @@ version: 0.1.0
 description: "SuperGLUE benchmark adapted for BCMS languages (Serbian for v0.1)."
 license: CC-BY-4.0
 maintainers:
-  - name: Mitar Perović
+  - name: Mitar Perović, Teodora Mihajlov
     github: permitt
     email: perovicmitar@gmail.com
 citation: "Wang et al. 2019 (SuperGLUE); BalkanBench adaptation 2026."
@@ -13,8 +13,8 @@ tasks:
   ranked: [boolq, cb, copa, rte, multirc, wsc]
   diagnostic: [ax_b, ax_g]
 languages:
-  available: [sr]
-  roadmap: [hr, cnr, bs]
+  available: [sr, hr, cnr]
+  roadmap: [bs]
 aggregation:
   formula: unweighted_mean
   over: primary_task_scores

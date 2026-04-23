@@ -6,13 +6,23 @@ from pathlib import Path
 from typing import Any
 
 import typer
-from datasets import load_dataset
 
 from balkanbench.cli._paths import resolve_model_config, resolve_task_config, schemas_root
 from balkanbench.config import load_yaml_with_schema
 from balkanbench.evaluation import aggregate_seed_results, run_multiseed
 from balkanbench.provenance import collect_provenance
 from balkanbench.scoring.artifact import write_result_artifact
+
+
+# datasets.load_dataset is lazy to keep `balkanbench --version` fast. Tests
+# that monkeypatch ``balkanbench.cli.eval.load_dataset`` still win because the
+# monkeypatched attribute is consulted before __getattr__.
+def __getattr__(name: str) -> Any:
+    if name == "load_dataset":
+        import datasets
+
+        return datasets.load_dataset
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 def _red(text: str) -> str:

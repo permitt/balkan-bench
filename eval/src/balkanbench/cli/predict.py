@@ -5,15 +5,24 @@ from __future__ import annotations
 import json
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 import typer
-from datasets import load_dataset
 
 from balkanbench.cli._paths import resolve_model_config, resolve_task_config, schemas_root
 from balkanbench.config import load_yaml_with_schema
 from balkanbench.evaluation import run_single_seed
 from balkanbench.provenance import collect_provenance
 from balkanbench.scoring.artifact import compute_predictions_hash
+
+
+def __getattr__(name: str) -> Any:
+    # Lazy import of datasets.load_dataset to keep `balkanbench --version` fast.
+    if name == "load_dataset":
+        import datasets
+
+        return datasets.load_dataset
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 def _red(text: str) -> str:

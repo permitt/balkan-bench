@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Any
 
 import typer
-from datasets import load_dataset
 
 from balkanbench.cli._paths import resolve_model_config, resolve_task_config, schemas_root
 from balkanbench.config import load_yaml_with_schema
@@ -18,6 +17,15 @@ from balkanbench.throughput import (
     write_model_throughput_aggregate,
     write_task_throughput,
 )
+
+
+def __getattr__(name: str) -> Any:
+    # Lazy import of datasets.load_dataset to keep `balkanbench --version` fast.
+    if name == "load_dataset":
+        import datasets
+
+        return datasets.load_dataset
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 def _red(t: str) -> str:

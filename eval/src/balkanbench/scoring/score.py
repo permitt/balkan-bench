@@ -14,12 +14,22 @@ import os
 from pathlib import Path
 from typing import Any
 
-from datasets import load_dataset
-
 from balkanbench.evaluation import Aggregate, SeedResult
 from balkanbench.provenance import collect_provenance
 from balkanbench.scoring.artifact import write_result_artifact
 from balkanbench.tasks import get_task_class
+
+
+# datasets.load_dataset is lazy-loaded so the scoring module can be imported
+# without paying the datasets startup cost. Tests that
+# ``monkeypatch.setattr("balkanbench.scoring.score.load_dataset", ...)`` win
+# because monkeypatching sets the name in the module dict.
+def __getattr__(name: str) -> Any:
+    if name == "load_dataset":
+        import datasets
+
+        return datasets.load_dataset
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 class ScoreError(RuntimeError):

@@ -13,8 +13,8 @@ tasks:
   ranked: [boolq, cb, copa, rte, multirc, wsc]
   diagnostic: [ax_b, ax_g]
 languages:
-  available: [sr]
-  roadmap: [hr, cnr, bs]
+  available: [sr, hr, cnr]
+  roadmap: [bs]
 aggregation:
   formula: unweighted_mean
   over: primary_task_scores

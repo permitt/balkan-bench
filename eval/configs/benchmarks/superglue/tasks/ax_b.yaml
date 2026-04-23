@@ -3,9 +3,9 @@ task: ax_b
 status: diagnostic
 task_type: diagnostic
 languages:
-  available: [sr]
+  available: [sr, hr, cnr]
   ranked: []
-  roadmap: [hr, cnr, bs]
+  roadmap: [bs]
 dataset:
   source_type: huggingface
   public_repo: permitt/superglue-serbian

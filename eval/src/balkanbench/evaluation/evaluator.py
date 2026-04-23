@@ -21,15 +21,37 @@ import math
 import statistics
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
-from datasets import DatasetDict
-from transformers import Trainer, TrainingArguments
 
 from balkanbench.models.hf_encoder import HFEncoder
 from balkanbench.seed import set_seed
 from balkanbench.tasks import get_task_class
+
+if TYPE_CHECKING:
+    from datasets import DatasetDict  # noqa: F401
+
+
+# Heavy imports (transformers, datasets) are exposed lazily via __getattr__
+# so that `balkanbench --version` and `--help` do not pay their startup cost.
+# Tests that ``monkeypatch.setattr("balkanbench.evaluation.evaluator.Trainer", ...)``
+# still win because monkeypatching sets the name in the module dict, which is
+# consulted before __getattr__.
+_LAZY = {
+    "Trainer": ("transformers", "Trainer"),
+    "TrainingArguments": ("transformers", "TrainingArguments"),
+    "DatasetDict": ("datasets", "DatasetDict"),
+}
+
+
+def __getattr__(name: str) -> Any:
+    target = _LAZY.get(name)
+    if target is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    import importlib
+
+    return getattr(importlib.import_module(target[0]), target[1])
 
 
 @dataclass
@@ -109,6 +131,11 @@ def run_single_seed(
       ``balkanbench predict`` against the public test split, which has no
       label column.
     """
+    # Resolve the lazy Trainer via the module's __getattr__. Tests that
+    # ``monkeypatch.setattr("...evaluator.Trainer", _FakeTrainer)`` set the
+    # attribute in the module dict, so this lookup returns the fake.
+    from balkanbench.evaluation import evaluator as _self
+
     set_seed(seed)
 
     encoder = HFEncoder.build(model_cfg=model_cfg, task_cfg=task_cfg)
@@ -123,7 +150,7 @@ def run_single_seed(
 
     # Note: in transformers >=5 the `tokenizer` kwarg became `processing_class`.
     # We pre-tokenise the datasets ourselves, so the Trainer does not need it.
-    trainer = Trainer(
+    trainer = _self.Trainer(
         model=encoder.model,
         args=training_args,
         train_dataset=tokenized.get("train"),
@@ -232,10 +259,12 @@ def _tokenize_datasets(
     tokenizer: Any,
 ) -> DatasetDict:
     """Apply ``task.preprocess`` over every split, keeping label column intact."""
+    from datasets import Dataset as _Dataset
+    from datasets import DatasetDict as _DatasetDict
+
     out: dict[str, Any] = {}
     for split_name, split in datasets.items():
         preprocessed = [task.preprocess(row, tokenizer=tokenizer) for row in split]
-        from datasets import Dataset as _Dataset
 
         if not preprocessed:
             out[split_name] = split
@@ -243,7 +272,7 @@ def _tokenize_datasets(
         keys = preprocessed[0].keys()
         columns = {k: [ex[k] for ex in preprocessed] for k in keys}
         out[split_name] = _Dataset.from_dict(columns)
-    return DatasetDict(out)
+    return _DatasetDict(out)
 
 
 def _build_training_arguments(
@@ -253,7 +282,9 @@ def _build_training_arguments(
     seed: int,
 ) -> Any:
     """Assemble ``TrainingArguments`` from the merged task+model training dict."""
-    return TrainingArguments(
+    from balkanbench.evaluation import evaluator as _self
+
+    return _self.TrainingArguments(
         output_dir=str(output_dir),
         learning_rate=float(merged.get("learning_rate", 2e-5)),
         per_device_train_batch_size=int(merged.get("batch_size", 16)),

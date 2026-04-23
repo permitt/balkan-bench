@@ -3,13 +3,22 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import typer
-from datasets import load_dataset
 
 from balkanbench.cli._paths import resolve_model_config, resolve_task_config, schemas_root
 from balkanbench.config import load_yaml_with_schema
 from balkanbench.hp_search import HPSearchError, run_hp_search
+
+
+def __getattr__(name: str) -> Any:
+    # Lazy import of datasets.load_dataset to keep `balkanbench --version` fast.
+    if name == "load_dataset":
+        import datasets
+
+        return datasets.load_dataset
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 def _red(t: str) -> str:
@@ -34,6 +43,11 @@ def hp_search_cmd(
     ),
     out: Path = typer.Option(..., "--out", help="Sweep output directory."),
     dataset_revision: str = typer.Option("v0.1.0-data", "--dataset-revision"),
+    search_space_id: str | None = typer.Option(
+        None,
+        "--search-space-id",
+        help="Identifier for the search space, recorded in the sweep provenance.",
+    ),
 ) -> None:
     """Run Optuna HP search on train -> validation; write the winning config."""
     try:
@@ -47,7 +61,9 @@ def hp_search_cmd(
         typer.echo(_red(f"config not found: {exc}"))
         raise typer.Exit(code=1) from exc
 
-    datasets = load_dataset(
+    from balkanbench.cli import hp_search as _self
+
+    datasets = _self.load_dataset(
         task_cfg["dataset"]["public_repo"],
         task_cfg["dataset"]["config"],
         revision=dataset_revision,
@@ -63,6 +79,8 @@ def hp_search_cmd(
             sampler_seed=sampler_seed,
             out_dir=out,
             seed_for_trials=seed_for_trials,
+            dataset_revision=dataset_revision,
+            search_space_id=search_space_id,
         )
     except HPSearchError as exc:
         typer.echo(_red(str(exc)))

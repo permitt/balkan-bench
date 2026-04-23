@@ -99,11 +99,20 @@ def test_default_search_space_unknown_family_raises() -> None:
         default_search_space_for("weird_new_type")
 
 
+def _effective_lr(kwargs: Any) -> float:
+    """Read learning_rate as it would be after HFEncoder._merge_training_args."""
+    training = dict(kwargs["model_cfg"]["training"])
+    key = f"{kwargs['task_cfg']['benchmark']}.{kwargs['task_cfg']['task']}"
+    training.update(kwargs["model_cfg"].get("task_overrides", {}).get(key, {}))
+    return training["learning_rate"]
+
+
 def test_run_hp_search_returns_best_trial(monkeypatch, tmp_path) -> None:
-    # Each trial picks a deterministic accuracy from the suggested learning_rate
+    # Each trial picks a deterministic accuracy from the suggested learning_rate.
+    # Read the effective LR through task_overrides (that is where run_hp_search
+    # writes its per-trial params now).
     def fake_run_single_seed(**kwargs: Any) -> SeedResult:
-        lr = kwargs["model_cfg"]["training"]["learning_rate"]
-        # accuracy increases with lr so larger-lr trials win
+        lr = _effective_lr(kwargs)
         acc = 0.5 + min(0.49, lr * 1000.0)
         return SeedResult(
             seed=kwargs["seed"],
@@ -125,18 +134,20 @@ def test_run_hp_search_returns_best_trial(monkeypatch, tmp_path) -> None:
         n_trials=4,
         sampler_seed=42,
         out_dir=tmp_path,
+        dataset_revision="v0.1.0-data",
     )
 
     assert result.best_trial_number >= 0
     assert 0.5 <= result.best_value <= 1.0
-    # The winning config is a full model YAML dict with training overrides applied
-    assert result.best_model_cfg["training"]["learning_rate"] > 0
-    # The written config file exists and round-trips through YAML
+    # The winning config stores search results under task_overrides[superglue.boolq].
+    overrides = result.best_model_cfg["task_overrides"]["superglue.boolq"]
+    assert overrides["learning_rate"] > 0
+    # The written config file exists and round-trips through YAML.
     written = yaml.safe_load(result.best_config_path.read_text())
-    assert written["training"]["learning_rate"] == pytest.approx(
-        result.best_model_cfg["training"]["learning_rate"]
+    assert written["task_overrides"]["superglue.boolq"]["learning_rate"] == pytest.approx(
+        overrides["learning_rate"]
     )
-    # Provenance header on the file
+    # Provenance header on the file.
     header = result.best_config_path.read_text().splitlines()[0]
     assert header.startswith("#")
     assert "sweep_id" in result.best_config_path.read_text()
@@ -146,7 +157,7 @@ def test_run_hp_search_uses_task_score_as_objective(monkeypatch, tmp_path) -> No
     objectives: list[float] = []
 
     def fake_run_single_seed(**kwargs: Any) -> SeedResult:
-        lr = kwargs["model_cfg"]["training"]["learning_rate"]
+        lr = _effective_lr(kwargs)
         acc = 0.5 + min(0.49, lr * 1000.0)
         objectives.append(acc)
         return SeedResult(
@@ -169,5 +180,6 @@ def test_run_hp_search_uses_task_score_as_objective(monkeypatch, tmp_path) -> No
         n_trials=3,
         sampler_seed=7,
         out_dir=tmp_path,
+        dataset_revision="v0.1.0-data",
     )
     assert result.best_value == max(objectives)

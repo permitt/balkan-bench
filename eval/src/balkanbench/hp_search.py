@@ -139,10 +139,20 @@ def run_hp_search(
     n_trials: int,
     sampler_seed: int,
     out_dir: Path,
+    dataset_revision: str,
     search_space: dict[str, Any] | None = None,
+    search_space_id: str | None = None,
     seed_for_trials: int = 42,
 ) -> HPSearchResult:
-    """Run an Optuna TPE sweep; return the best trial + write its config."""
+    """Run an Optuna TPE sweep; return the best trial + write its config.
+
+    Winning params are written into
+    ``model_cfg.task_overrides["{benchmark}.{task}"]``, which the runtime
+    merges last in ``HFEncoder._merge_training_args``. Writing to the
+    top-level ``model_cfg.training`` block would be silently no-op'd for
+    any task that already carries a task-scoped override (BERTic's real
+    cb / wsc / copa overrides, for instance).
+    """
     if n_trials < 1:
         raise HPSearchError(f"n_trials must be >= 1; got {n_trials}")
 
@@ -151,6 +161,10 @@ def run_hp_search(
 
     space = search_space or default_search_space_for(task_cfg["task_type"])
     task_score_metric = task_cfg["metrics"]["task_score"]
+    benchmark = task_cfg["benchmark"]
+    task = task_cfg["task"]
+    effective_space_id = search_space_id or f"default-{task_cfg['task_type']}-v1"
+    early_stopping_policy = _describe_early_stopping(task_cfg)
 
     sweep_id = datetime.now(UTC).strftime("sweep-%Y%m%d-%H%M%S")
     sweep_dir = Path(out_dir) / sweep_id
@@ -167,7 +181,7 @@ def run_hp_search(
 
     def objective(trial: Any) -> float:  # pragma: no cover - hit via study.optimize
         overrides = {name: _suggest(trial, name, spec) for name, spec in space.items()}
-        trial_model_cfg = _apply_training_overrides(model_cfg, overrides)
+        trial_model_cfg = _apply_task_overrides(model_cfg, benchmark, task, overrides)
         seed_result = run_single_seed(
             model_cfg=trial_model_cfg,
             task_cfg=task_cfg,
@@ -189,7 +203,7 @@ def run_hp_search(
     if best.value is None:
         raise HPSearchError(f"sweep {sweep_id}: best trial has no value (all trials failed?)")
     best_value = float(best.value)
-    best_model_cfg = _apply_training_overrides(model_cfg, best.params)
+    best_model_cfg = _apply_task_overrides(model_cfg, benchmark, task, best.params)
     best_config_path = sweep_dir / f"{model_cfg['name']}_best.yaml"
     _write_best_config(
         path=best_config_path,
@@ -200,6 +214,9 @@ def run_hp_search(
         best_value=best_value,
         best_trial_number=int(best.number),
         task_cfg=task_cfg,
+        dataset_revision=dataset_revision,
+        search_space_id=effective_space_id,
+        early_stopping_policy=early_stopping_policy,
     )
 
     return HPSearchResult(
@@ -211,15 +228,35 @@ def run_hp_search(
     )
 
 
-def _apply_training_overrides(
-    base_model_cfg: dict[str, Any], overrides: dict[str, Any]
+def _apply_task_overrides(
+    base_model_cfg: dict[str, Any],
+    benchmark: str,
+    task: str,
+    overrides: dict[str, Any],
 ) -> dict[str, Any]:
-    """Return a copy of ``base_model_cfg`` with ``overrides`` merged into training."""
+    """Return a copy of ``base_model_cfg`` with ``overrides`` merged into
+    ``task_overrides["{benchmark}.{task}"]``.
+
+    Top-level ``model_cfg["training"]`` is intentionally left unchanged: the
+    runtime merge in ``HFEncoder._merge_training_args`` applies task_overrides
+    last, so writing to ``training`` would be silently no-op'd for tasks that
+    already carry task-scoped overrides.
+    """
     new_cfg = {k: v for k, v in base_model_cfg.items()}
-    new_training = dict(base_model_cfg.get("training") or {})
-    new_training.update(overrides)
-    new_cfg["training"] = new_training
+    task_overrides = dict(base_model_cfg.get("task_overrides") or {})
+    key = f"{benchmark}.{task}"
+    block = dict(task_overrides.get(key) or {})
+    block.update(overrides)
+    task_overrides[key] = block
+    new_cfg["task_overrides"] = task_overrides
     return new_cfg
+
+
+def _describe_early_stopping(task_cfg: dict[str, Any]) -> str:
+    training = task_cfg.get("training") or {}
+    patience = training.get("early_stopping_patience", 0)
+    metric = training.get("metric_for_best_model", task_cfg["metrics"]["task_score"])
+    return f"patience={patience} on {metric}"
 
 
 def _write_best_config(
@@ -232,6 +269,9 @@ def _write_best_config(
     best_value: float,
     best_trial_number: int,
     task_cfg: dict[str, Any],
+    dataset_revision: str,
+    search_space_id: str,
+    early_stopping_policy: str,
 ) -> None:
     """Write the winning model YAML with a provenance comment block."""
     provenance = collect_provenance()
@@ -245,6 +285,9 @@ def _write_best_config(
         f"# benchmark: {task_cfg['benchmark']}",
         f"# task: {task_cfg['task']}",
         f"# task_score_metric: {task_cfg['metrics']['task_score']}",
+        f"# dataset_revision: {dataset_revision}",
+        f"# search_space_id: {search_space_id}",
+        f"# early_stopping_policy: {early_stopping_policy}",
         f"# package_version: {provenance['package_version']}",
         f"# code_revision: {provenance['code_revision']}",
         f"# torch_version: {provenance['torch_version']}",
@@ -257,6 +300,9 @@ def _write_best_config(
     # Also write a json study summary for quick inspection.
     summary = {
         "sweep_id": sweep_id,
+        "dataset_revision": dataset_revision,
+        "search_space_id": search_space_id,
+        "early_stopping_policy": early_stopping_policy,
         "best_trial_number": best_trial_number,
         "best_value": best_value,
         "sampler_seed": sampler_seed,

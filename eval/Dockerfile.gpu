@@ -1,0 +1,50 @@
+# syntax=docker/dockerfile:1.7
+#
+# GPU image for `balkanbench run` on Vertex AI custom jobs.
+#
+# Built remotely via `gcloud builds submit` (see scripts/gcp/cloudbuild.yaml)
+# and pushed to Artifact Registry. The Vertex AI worker pool spec points its
+# container_image_uri at the resulting tag.
+#
+# Base: NVIDIA's CUDA 12.4 runtime + cuDNN on Ubuntu 22.04 - matches the
+# wheels published by torch>=2.4 with the cu124 build, so no .whl swapping
+# is needed at install time.
+
+FROM nvidia/cuda:12.4.1-cudnn-runtime-ubuntu22.04 AS base
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    UV_LINK_MODE=copy
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        python3.11 python3.11-venv python3.11-dev python3-pip \
+        build-essential git ca-certificates curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && ln -sf /usr/bin/python3.11 /usr/local/bin/python \
+    && ln -sf /usr/bin/python3.11 /usr/local/bin/python3
+
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
+    && ln -s /root/.local/bin/uv /usr/local/bin/uv
+
+WORKDIR /workspace
+
+# Install dependencies first (layer caches across code edits).
+COPY pyproject.toml /workspace/pyproject.toml
+COPY README.md /workspace/README.md
+COPY src /workspace/src
+
+# Install with the [ml] extra (torch + transformers + datasets + optuna)
+# and the [publish] extra (huggingface_hub) since `balkanbench run` loads
+# datasets from HF and writes leaderboard artifacts.
+RUN uv pip install --system --no-cache -e ".[ml,publish]"
+
+# Vertex AI mounts the run's GCS output directory at $AIP_MODEL_DIR.
+# `balkanbench run --out $AIP_MODEL_DIR` is the canonical invocation.
+ENV AIP_MODEL_DIR=/gcs/output
+
+ENTRYPOINT ["balkanbench"]
+CMD ["--help"]

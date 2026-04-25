@@ -41,6 +41,7 @@ if TYPE_CHECKING:
 _LAZY = {
     "Trainer": ("transformers", "Trainer"),
     "TrainingArguments": ("transformers", "TrainingArguments"),
+    "DataCollatorWithPadding": ("transformers", "DataCollatorWithPadding"),
     "DatasetDict": ("datasets", "DatasetDict"),
 }
 
@@ -149,12 +150,16 @@ def run_single_seed(
     )
 
     # Note: in transformers >=5 the `tokenizer` kwarg became `processing_class`.
-    # We pre-tokenise the datasets ourselves, so the Trainer does not need it.
+    # We pre-tokenise the datasets ourselves, but the per-example tokenisation
+    # produces variable-length sequences. The default Trainer collator stacks
+    # them as fixed tensors (and explodes), so we pass DataCollatorWithPadding
+    # which pads each batch to its longest member at iteration time.
     trainer = _self.Trainer(
         model=encoder.model,
         args=training_args,
         train_dataset=tokenized.get("train"),
         eval_dataset=tokenized.get(eval_split),
+        data_collator=_self.DataCollatorWithPadding(tokenizer=encoder.tokenizer),
     )
     if train:
         trainer.train()

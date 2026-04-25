@@ -52,7 +52,10 @@
         "sampler_seed":          { "type": "integer" },
         "num_trials":            { "type": "integer", "minimum": 0 },
         "search_space_id":       { "type": "string" },
-        "early_stopping_policy": { "type": "string" }
+        "early_stopping_policy": { "type": "string" },
+        "best_trial_number":     { "type": "integer", "minimum": 0 },
+        "best_value":            { "type": "number" },
+        "sweep_id":              { "type": "string", "minLength": 1 }
       }
     },
     "seeds": {

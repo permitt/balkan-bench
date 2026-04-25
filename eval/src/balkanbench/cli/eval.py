@@ -48,7 +48,7 @@ def eval_cmd(
         ...,
         "--out",
         help="Output directory for results. Artifact lands at "
-        "{out}/{benchmark}-{language}/{model}/result.json.",
+        "{out}/{benchmark}-{language}/{model}/{task}/result.json.",
     ),
     benchmark_version: str = typer.Option(
         "0.1.0",

@@ -12,6 +12,7 @@ from balkanbench.cli.leaderboard import leaderboard_app
 from balkanbench.cli.listcmd import list_app
 from balkanbench.cli.predict import predict_cmd
 from balkanbench.cli.publish import publish_dataset_cmd
+from balkanbench.cli.run import run_cmd
 from balkanbench.cli.score import score_cmd
 from balkanbench.cli.throughput import throughput_cmd
 
@@ -51,6 +52,10 @@ app.command(
     "throughput",
     help="Measure inference throughput on reference hardware; writes per-task + aggregate JSON.",
 )(throughput_cmd)
+app.command(
+    "run",
+    help="End-to-end pipeline: HP search per ranked task -> multi-seed eval -> leaderboard export.",
+)(run_cmd)
 
 
 def _version_callback(value: bool) -> None:

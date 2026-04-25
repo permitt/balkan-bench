@@ -114,7 +114,11 @@ def write_result_artifact(
 
     _validate_against_schema(artifact)
 
-    target_dir = Path(out_dir) / f"{benchmark}-{language}" / model
+    # Layout: {out_dir}/{benchmark}-{language}/{model}/{task}/result.json
+    # The trailing /{task}/ subdir is what the leaderboard reader walks
+    # (see leaderboard.export._build_row); without it, multi-task runs for
+    # the same (model, language) overwrite each other.
+    target_dir = Path(out_dir) / f"{benchmark}-{language}" / model / task
     target_dir.mkdir(parents=True, exist_ok=True)
     target_path: Path = target_dir / "result.json"
     target_path.write_text(json.dumps(artifact, indent=2))

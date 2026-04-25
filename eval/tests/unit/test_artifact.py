@@ -107,10 +107,13 @@ def test_write_result_artifact_is_schema_valid(tmp_path) -> None:
         out_dir=tmp_path,
     )
 
-    # Path convention: eval/results/official/{benchmark}-{language}/{model}/result.json
-    assert out_path.parent.name == "bertic"
-    assert out_path.parent.parent.name == "superglue-sr"
+    # Path convention: eval/results/official/{benchmark}-{language}/{model}/{task}/result.json
+    # The /{task}/ subdir matches the layout the leaderboard reader walks
+    # (leaderboard.export._build_row), so multi-task runs don't collide.
     assert out_path.name == "result.json"
+    assert out_path.parent.name == "boolq"
+    assert out_path.parent.parent.name == "bertic"
+    assert out_path.parent.parent.parent.name == "superglue-sr"
 
     data = json.loads(out_path.read_text())
     schema = json.loads((SCHEMAS_DIR / "result_artifact.json").read_text())

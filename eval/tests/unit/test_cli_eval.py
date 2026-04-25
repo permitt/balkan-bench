@@ -85,7 +85,7 @@ def test_eval_command_writes_result_artifact(tmp_path, monkeypatch) -> None:
         ],
     )
     assert result.exit_code == 0, result.output
-    artifact_path = tmp_path / "superglue-sr" / "bertic" / "result.json"
+    artifact_path = tmp_path / "superglue-sr" / "bertic" / "boolq" / "result.json"
     assert artifact_path.is_file()
     data = json.loads(artifact_path.read_text())
     assert data["task_id"] == "superglue.boolq.sr"

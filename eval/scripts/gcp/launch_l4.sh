@@ -27,10 +27,11 @@ IMAGE_FAMILY="${IMAGE_FAMILY:-pytorch-latest-gpu}"
 IMAGE_PROJECT="${IMAGE_PROJECT:-deeplearning-platform-release}"
 DISK_SIZE="${DISK_SIZE:-100}"
 
-# For throughput mode we sweep all ranked tasks; TASK is optional.
-if [[ "${MODE}" == "throughput" ]]; then
-  TASK="${TASK:-all}"
-fi
+# For throughput we sweep all ranked tasks; for `run` we use TASKS.
+case "${MODE}" in
+  throughput) TASK="${TASK:-all}" ;;
+  run)        TASK="${TASKS:-all}" ;;
+esac
 require_env TASK
 
 VM_NAME="$(vm_name_for "${MODEL}" "${TASK}" "l4")"

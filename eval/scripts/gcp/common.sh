@@ -96,8 +96,33 @@ pick_balkanbench_cmd() {
       printf 'balkanbench throughput --model %s --benchmark %s --language %s --hardware %s --out %s' \
         "${MODEL}" "${BENCHMARK}" "${LANGUAGE}" "${HARDWARE:-NVIDIA L4 24GB}" "${out}"
       ;;
+    run)
+      # End-to-end: HP search per task -> 5-seed eval on the chosen split ->
+      # leaderboard export (the latter is auto-skipped if TASKS is a strict
+      # subset of the language's ranked tasks). TASKS is space-separated and
+      # repeats --tasks; empty TASKS means "every ranked task for LANGUAGE".
+      local cmd
+      cmd="balkanbench run --model ${MODEL} --benchmark ${BENCHMARK} --language ${LANGUAGE}"
+      cmd+=" --n-trials ${N_TRIALS:-20}"
+      cmd+=" --eval-split ${EVAL_SPLIT:-test}"
+      cmd+=" --dataset-revision ${DATASET_REVISION}"
+      cmd+=" --benchmark-version ${BENCHMARK_VERSION:-0.1.0}"
+      cmd+=" --run-type ${RUN_TYPE:-official}"
+      if [[ -n "${TASKS:-}" ]]; then
+        for t in ${TASKS}; do
+          cmd+=" --tasks ${t}"
+        done
+      fi
+      if [[ -n "${SEEDS:-}" ]]; then
+        for s in ${SEEDS}; do
+          cmd+=" --seeds ${s}"
+        done
+      fi
+      cmd+=" --out ${out}"
+      printf '%s' "${cmd}"
+      ;;
     *)
-      die "unknown MODE=${MODE} (want one of eval, predict, score, hp-search, throughput)"
+      die "unknown MODE=${MODE} (want one of eval, predict, score, hp-search, throughput, run)"
       ;;
   esac
 }

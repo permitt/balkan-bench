@@ -17,7 +17,14 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${HERE}/common.sh"
 
 default_env
-require_env PROJECT_ID GCS_BUCKET MODEL MODE TASK
+# `run` mode uses TASKS (space-separated, may be empty for "all ranked tasks");
+# every other mode still requires a single TASK.
+if [[ "${MODE}" == "run" ]]; then
+  require_env PROJECT_ID GCS_BUCKET MODEL MODE
+  TASK="${TASKS:-all}"
+else
+  require_env PROJECT_ID GCS_BUCKET MODEL MODE TASK
+fi
 
 MACHINE_TYPE="${MACHINE_TYPE:-a2-highgpu-1g}"
 ACCELERATOR="${ACCELERATOR:-type=nvidia-tesla-a100,count=1}"

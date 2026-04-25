@@ -4,14 +4,22 @@ status: ranked
 task_type: multiple_choice
 num_choices: 2
 languages:
-  available: [sr]
-  ranked: [sr]
-  roadmap: [hr, cnr, bs]
+  available: [sr, hr, mne]
+  ranked: [sr, hr, mne]
+  roadmap: [bs]
 dataset:
   source_type: huggingface
-  public_repo: permitt/superglue-serbian
-  private_repo: permitt/superglue-private
   config: copa
+  per_language:
+    sr:
+      public_repo: permitt/superglue-sr
+      private_repo: permitt/superglue-sr-private
+    hr:
+      public_repo: permitt/superglue-hr
+      private_repo: permitt/superglue-hr-private
+    mne:
+      public_repo: permitt/superglue-mne
+      private_repo: permitt/superglue-mne-private
   splits:
     public: [train, validation, test]
     labeled_public: [train, validation]
@@ -28,6 +36,14 @@ prompts:
     template_id: copa_sr_v1
     cause_prompt: "{premise} Šta je bio uzrok?"
     effect_prompt: "{premise} Šta se desilo kao rezultat?"
+  hr:
+    template_id: copa_hr_v1
+    cause_prompt: "{premise} Što je bio uzrok?"
+    effect_prompt: "{premise} Što se dogodilo kao rezultat?"
+  mne:
+    template_id: copa_mne_v1
+    cause_prompt: "{premise} Što je bio uzrok?"
+    effect_prompt: "{premise} Što se desilo kao rezultat?"
 tokenizer:
   max_length: 128
   padding: longest

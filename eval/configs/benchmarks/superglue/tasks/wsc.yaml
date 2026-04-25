@@ -5,12 +5,14 @@ task_type: wsc
 languages:
   available: [sr]
   ranked: [sr]
-  roadmap: [hr, cnr, bs]
+  roadmap: [hr, mne, bs]
 dataset:
   source_type: huggingface
-  public_repo: permitt/superglue-serbian
-  private_repo: permitt/superglue-private
   config: wsc
+  per_language:
+    sr:
+      public_repo: permitt/superglue-sr
+      private_repo: permitt/superglue-sr-private
   splits:
     public: [train, validation, test]
     labeled_public: [train, validation]

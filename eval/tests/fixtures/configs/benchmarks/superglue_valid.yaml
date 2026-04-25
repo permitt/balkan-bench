@@ -11,9 +11,9 @@ paper: https://arxiv.org/abs/1905.00537
 homepage: https://balkanbench.com
 tasks:
   ranked: [boolq, cb, copa, rte, multirc, wsc]
-  diagnostic: [ax_b, ax_g]
+  diagnostic: [axb, axg]
 languages:
-  available: [sr, hr, cnr]
+  available: [sr, hr, mne]
   roadmap: [bs]
 aggregation:
   formula: unweighted_mean

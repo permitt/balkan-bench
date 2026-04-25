@@ -24,9 +24,13 @@ def _boolq_cfg() -> dict:
         "languages": {"available": ["sr"], "ranked": ["sr"]},
         "dataset": {
             "source_type": "huggingface",
-            "public_repo": "permitt/superglue-serbian",
-            "private_repo": "permitt/superglue-private",
             "config": "boolq",
+            "per_language": {
+                "sr": {
+                    "public_repo": "permitt/superglue-sr",
+                    "private_repo": "permitt/superglue-sr-private",
+                }
+            },
             "splits": {
                 "public": ["train", "validation", "test"],
                 "labeled_public": ["train", "validation"],
@@ -115,10 +119,11 @@ def test_score_predictions_writes_schema_valid_artifact(tmp_path, monkeypatch) -
 
 def test_score_predictions_requires_hf_token(monkeypatch, tmp_path) -> None:
     monkeypatch.delenv("HF_OFFICIAL_TOKEN", raising=False)
+    monkeypatch.delenv("HF_TOKEN", raising=False)
     preds = _write_predictions(
         tmp_path / "predictions.jsonl", [{"example_id": "e0", "prediction": 1}]
     )
-    with pytest.raises(ScoreError, match="HF_OFFICIAL_TOKEN"):
+    with pytest.raises(ScoreError, match="HF_TOKEN"):
         score_predictions(
             predictions_path=preds,
             task_cfg=_boolq_cfg(),
@@ -185,21 +190,20 @@ def test_score_predictions_rejects_unknown_example(monkeypatch, tmp_path) -> Non
         )
 
 
-def test_score_predictions_fails_loudly_without_private_repo(monkeypatch, tmp_path) -> None:
+def test_score_predictions_fails_loudly_for_unavailable_language(monkeypatch, tmp_path) -> None:
     cfg = _boolq_cfg()
-    del cfg["dataset"]["private_repo"]
-
+    # Try scoring with a language that has no per_language entry.
     preds = _write_predictions(
         tmp_path / "predictions.jsonl",
         [{"example_id": "e0", "prediction": 1}],
     )
     monkeypatch.setenv("HF_OFFICIAL_TOKEN", "fake-token")
-    with pytest.raises(ScoreError, match="private_repo"):
+    with pytest.raises(ScoreError, match="no dataset for language"):
         score_predictions(
             predictions_path=preds,
             task_cfg=cfg,
             model_cfg=_bertic_cfg(),
-            language="sr",
+            language="bs",
             dataset_revision="v0.1.0-data",
             benchmark_version="0.1.0",
             out_dir=tmp_path / "results",

@@ -31,8 +31,13 @@ def _multirc_cfg() -> dict:
         "task_type": "grouped_binary_classification",
         "languages": {"available": ["sr"], "ranked": ["sr"]},
         "dataset": {
-            "public_repo": "permitt/superglue-serbian",
             "config": "multirc",
+            "per_language": {
+                "sr": {
+                    "public_repo": "permitt/superglue-sr",
+                    "private_repo": "permitt/superglue-sr-private",
+                }
+            },
             "splits": {"public": ["train", "test"], "labeled_public": ["train"]},
         },
         "inputs": {

@@ -10,6 +10,7 @@ import typer
 
 from balkanbench.cli._paths import resolve_model_config, resolve_task_config, schemas_root
 from balkanbench.config import load_yaml_with_schema
+from balkanbench.data.repo import DatasetRepoError, resolve_dataset_repo, resolve_hf_token
 from balkanbench.models.hf_encoder import HFEncoder
 from balkanbench.throughput import (
     ThroughputSample,
@@ -176,12 +177,20 @@ def throughput_cmd(
             typer.echo(_red(str(exc)))
             raise typer.Exit(code=1) from exc
 
+        try:
+            repo_id = resolve_dataset_repo(task_cfg, language, prefer="private")
+        except DatasetRepoError as exc:
+            typer.echo(_red(str(exc)))
+            raise typer.Exit(code=1) from exc
+        token = resolve_hf_token()
+
         from balkanbench.cli import throughput as _self
 
         datasets = _self.load_dataset(
-            task_cfg["dataset"]["public_repo"],
+            repo_id,
             task_cfg["dataset"]["config"],
             revision=dataset_revision,
+            token=token,
         )
         encoder = HFEncoder.build(model_cfg=model_cfg, task_cfg=task_cfg)
 

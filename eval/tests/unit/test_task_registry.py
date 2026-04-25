@@ -27,8 +27,13 @@ def _fake_cfg(task_type: str = "binary_classification") -> dict:
             "metric_for_best_model": "accuracy",
         },
         "dataset": {
-            "public_repo": "permitt/superglue-serbian",
             "config": "mock",
+            "per_language": {
+                "sr": {
+                    "public_repo": "permitt/superglue-sr",
+                    "private_repo": "permitt/superglue-sr-private",
+                }
+            },
             "splits": {"public": ["train"], "labeled_public": ["train"]},
         },
         "inputs": {"fields": ["text"], "id_field": "example_id"},

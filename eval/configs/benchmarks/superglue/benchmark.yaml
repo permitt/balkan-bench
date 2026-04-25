@@ -1,6 +1,6 @@
 benchmark: superglue
 version: 0.1.0
-description: "SuperGLUE benchmark adapted for BCMS languages (Serbian for v0.1)."
+description: "SuperGLUE benchmark adapted for BCMS languages (sr/hr/mne for v0.1)."
 license: CC-BY-4.0
 maintainers:
   - name: Mitar Perović, Teodora Mihajlov
@@ -11,9 +11,9 @@ paper: https://arxiv.org/abs/1905.00537
 homepage: https://balkanbench.com
 tasks:
   ranked: [boolq, cb, copa, rte, multirc, wsc]
-  diagnostic: [ax_b, ax_g]
+  diagnostic: [axb, axg]
 languages:
-  available: [sr, hr, cnr]
+  available: [sr, hr, mne]
   roadmap: [bs]
 aggregation:
   formula: unweighted_mean

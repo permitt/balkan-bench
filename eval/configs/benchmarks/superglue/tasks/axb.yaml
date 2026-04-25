@@ -1,16 +1,18 @@
 benchmark: superglue
-task: ax_b
+task: axb
 status: diagnostic
 task_type: diagnostic
 languages:
-  available: [sr, hr, cnr]
+  available: [sr]
   ranked: []
-  roadmap: [bs]
+  roadmap: [hr, mne, bs]
 dataset:
   source_type: huggingface
-  public_repo: permitt/superglue-serbian
-  private_repo: permitt/superglue-private
-  config: ax_b
+  config: axb
+  per_language:
+    sr:
+      public_repo: permitt/superglue-sr
+      private_repo: permitt/superglue-sr-private
   splits:
     public: [test]
     labeled_public: [test]
@@ -23,8 +25,7 @@ metrics:
   report: [matthews_correlation]
   task_score: matthews_correlation
 prompts:
-  sr:
-    template_id: ax_b_sr_v1
+  sr: { template_id: axb_sr_v1 }
 tokenizer:
   max_length: 256
   padding: longest

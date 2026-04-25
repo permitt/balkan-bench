@@ -4,14 +4,22 @@ status: ranked
 task_type: multiclass_classification
 num_labels: 3
 languages:
-  available: [sr]
-  ranked: [sr]
-  roadmap: [hr, cnr, bs]
+  available: [sr, hr, mne]
+  ranked: [sr, hr, mne]
+  roadmap: [bs]
 dataset:
   source_type: huggingface
-  public_repo: permitt/superglue-serbian
-  private_repo: permitt/superglue-private
   config: cb
+  per_language:
+    sr:
+      public_repo: permitt/superglue-sr
+      private_repo: permitt/superglue-sr-private
+    hr:
+      public_repo: permitt/superglue-hr
+      private_repo: permitt/superglue-hr-private
+    mne:
+      public_repo: permitt/superglue-mne
+      private_repo: permitt/superglue-mne-private
   splits:
     public: [train, validation, test]
     labeled_public: [train, validation]
@@ -24,8 +32,9 @@ metrics:
   report: [accuracy, f1_macro]
   task_score: f1_macro
 prompts:
-  sr:
-    template_id: cb_sr_v1
+  sr:  { template_id: cb_sr_v1 }
+  hr:  { template_id: cb_hr_v1 }
+  mne: { template_id: cb_mne_v1 }
 tokenizer:
   max_length: 256
   padding: longest

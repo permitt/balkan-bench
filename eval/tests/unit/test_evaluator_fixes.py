@@ -44,8 +44,13 @@ def _boolq_cfg(metric_columns: list[str] | None = None) -> dict:
         "task_type": "binary_classification",
         "languages": {"available": ["sr"], "ranked": ["sr"]},
         "dataset": {
-            "public_repo": "permitt/superglue-serbian",
             "config": "boolq",
+            "per_language": {
+                "sr": {
+                    "public_repo": "permitt/superglue-sr",
+                    "private_repo": "permitt/superglue-sr-private",
+                }
+            },
             "splits": {"public": ["train", "test"], "labeled_public": ["train"]},
         },
         "inputs": {"fields": ["question", "passage"], "id_field": "example_id"},
@@ -70,12 +75,17 @@ def _boolq_cfg(metric_columns: list[str] | None = None) -> dict:
 def _axg_cfg() -> dict:
     return {
         "benchmark": "superglue",
-        "task": "ax_g",
+        "task": "axg",
         "task_type": "diagnostic",
         "languages": {"available": ["sr"], "ranked": []},
         "dataset": {
-            "public_repo": "permitt/superglue-serbian",
-            "config": "ax_g",
+            "config": "axg",
+            "per_language": {
+                "sr": {
+                    "public_repo": "permitt/superglue-sr",
+                    "private_repo": "permitt/superglue-sr-private",
+                }
+            },
             "splits": {"public": ["test"], "labeled_public": ["test"]},
         },
         "inputs": {

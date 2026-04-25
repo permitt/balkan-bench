@@ -32,8 +32,13 @@ def _copa_cfg() -> dict:
         "languages": {"available": ["sr"], "ranked": ["sr"]},
         "num_choices": 2,
         "dataset": {
-            "public_repo": "permitt/superglue-serbian",
             "config": "copa",
+            "per_language": {
+                "sr": {
+                    "public_repo": "permitt/superglue-sr",
+                    "private_repo": "permitt/superglue-sr-private",
+                }
+            },
             "splits": {"public": ["train"], "labeled_public": ["train"]},
         },
         "inputs": {

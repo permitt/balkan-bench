@@ -6,8 +6,12 @@ languages:
   available: [sr]
   ranked: [sr]
 dataset:
-  public_repo: permitt/superglue-serbian
+  source_type: huggingface
   config: boolq
+  per_language:
+    sr:
+      public_repo: permitt/superglue-sr
+      private_repo: permitt/superglue-sr-private
   splits:
     public: [train, validation, test]
     labeled_public: [train, validation]

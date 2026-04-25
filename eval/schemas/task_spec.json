@@ -46,7 +46,7 @@
     },
     "dataset": {
       "type": "object",
-      "required": ["public_repo", "config", "splits"],
+      "required": ["config", "splits", "per_language"],
       "additionalProperties": false,
       "properties": {
         "source_type": {
@@ -55,9 +55,21 @@
           "default": "huggingface",
           "description": "Where the data lives. Non-huggingface source_types require different fields (added to the schema as those benchmarks land)."
         },
-        "public_repo":  { "type": "string", "minLength": 1 },
-        "private_repo": { "type": "string" },
-        "config":       { "type": "string", "minLength": 1 },
+        "config": { "type": "string", "minLength": 1 },
+        "per_language": {
+          "type": "object",
+          "minProperties": 1,
+          "description": "BCMS-language-keyed map of HF repo pairs. The runtime selects the entry that matches the requested --language at call time.",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["public_repo", "private_repo"],
+            "additionalProperties": false,
+            "properties": {
+              "public_repo":  { "type": "string", "minLength": 1 },
+              "private_repo": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
         "splits": {
           "type": "object",
           "required": ["public", "labeled_public"],

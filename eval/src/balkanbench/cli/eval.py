@@ -9,6 +9,7 @@ import typer
 
 from balkanbench.cli._paths import resolve_model_config, resolve_task_config, schemas_root
 from balkanbench.config import load_yaml_with_schema
+from balkanbench.data.repo import DatasetRepoError, resolve_dataset_repo, resolve_hf_token
 from balkanbench.evaluation import aggregate_seed_results, run_multiseed
 from balkanbench.provenance import collect_provenance
 from balkanbench.scoring.artifact import write_result_artifact
@@ -114,17 +115,21 @@ def eval_cmd(
             )
         )
 
-    typer.echo(
-        _green(
-            f"Loading dataset {task_cfg['dataset']['public_repo']}:{task_cfg['dataset']['config']}"
-        )
-    )
+    try:
+        repo_id = resolve_dataset_repo(task_cfg, language, prefer="private")
+    except DatasetRepoError as exc:
+        typer.echo(_red(str(exc)))
+        raise typer.Exit(code=1) from exc
+    token = resolve_hf_token()
+
+    typer.echo(_green(f"Loading dataset {repo_id}:{task_cfg['dataset']['config']}"))
     from balkanbench.cli import eval as _self
 
     datasets = _self.load_dataset(
-        task_cfg["dataset"]["public_repo"],
+        repo_id,
         task_cfg["dataset"]["config"],
         revision=dataset_revision,
+        token=token,
     )
 
     typer.echo(

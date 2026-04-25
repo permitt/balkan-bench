@@ -3,14 +3,22 @@ task: multirc
 status: ranked
 task_type: grouped_binary_classification
 languages:
-  available: [sr]
-  ranked: [sr]
-  roadmap: [hr, cnr, bs]
+  available: [sr, hr, mne]
+  ranked: [sr, hr, mne]
+  roadmap: [bs]
 dataset:
   source_type: huggingface
-  public_repo: permitt/superglue-serbian
-  private_repo: permitt/superglue-private
   config: multirc
+  per_language:
+    sr:
+      public_repo: permitt/superglue-sr
+      private_repo: permitt/superglue-sr-private
+    hr:
+      public_repo: permitt/superglue-hr
+      private_repo: permitt/superglue-hr-private
+    mne:
+      public_repo: permitt/superglue-mne
+      private_repo: permitt/superglue-mne-private
   splits:
     public: [train, validation, test]
     labeled_public: [train, validation]
@@ -24,8 +32,9 @@ metrics:
   report: [f1_a, exact_match]
   task_score: f1_a
 prompts:
-  sr:
-    template_id: multirc_sr_v1
+  sr:  { template_id: multirc_sr_v1 }
+  hr:  { template_id: multirc_hr_v1 }
+  mne: { template_id: multirc_mne_v1 }
 tokenizer:
   max_length: 512
   padding: longest

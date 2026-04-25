@@ -32,8 +32,13 @@ def _cfg(
         "task_type": "wsc",
         "languages": {"available": ["sr"], "ranked": ["sr"]},
         "dataset": {
-            "public_repo": "permitt/superglue-serbian",
             "config": "wsc",
+            "per_language": {
+                "sr": {
+                    "public_repo": "permitt/superglue-sr",
+                    "private_repo": "permitt/superglue-sr-private",
+                }
+            },
             "splits": {"public": ["train"], "labeled_public": ["train"]},
         },
         "inputs": {

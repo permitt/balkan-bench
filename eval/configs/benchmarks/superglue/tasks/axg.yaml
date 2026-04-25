@@ -1,16 +1,18 @@
 benchmark: superglue
-task: ax_g
+task: axg
 status: diagnostic
 task_type: diagnostic
 languages:
   available: [sr]
   ranked: []
-  roadmap: [hr, cnr, bs]
+  roadmap: [hr, mne, bs]
 dataset:
   source_type: huggingface
-  public_repo: permitt/superglue-serbian
-  private_repo: permitt/superglue-private
-  config: ax_g
+  config: axg
+  per_language:
+    sr:
+      public_repo: permitt/superglue-sr
+      private_repo: permitt/superglue-sr-private
   splits:
     public: [test]
     labeled_public: [test]
@@ -19,16 +21,14 @@ inputs:
   fields: [premise, hypothesis]
   id_field: example_id
   # metric_columns: [is_pro_stereotype]
-  # ^ re-enable once the published permitt/superglue-serbian AXg split
-  #   carries an `is_pro_stereotype` column. Until then gender_parity is
-  #   dropped from the reported metric list.
+  # ^ re-enable once the AXg split exposes is_pro_stereotype; until then
+  #   gender_parity is dropped from metrics.report and only accuracy ships.
 metrics:
   primary: [accuracy]
   report: [accuracy]
   task_score: accuracy
 prompts:
-  sr:
-    template_id: ax_g_sr_v1
+  sr: { template_id: axg_sr_v1 }
 tokenizer:
   max_length: 256
   padding: longest

@@ -1,19 +1,20 @@
 """Score a predictions.jsonl against private test labels.
 
 Loads predictions from disk, downloads the private test split from
-``task_cfg.dataset.private_repo`` via ``HF_OFFICIAL_TOKEN``, aligns by
-``example_id``, computes metrics via the task's ``score()`` method, and
-writes a schema-valid result artifact. Ensures no silent misalignment:
-missing or extra prediction ids abort with a loud ``ScoreError``.
+``task_cfg.dataset.per_language[language].private_repo`` via ``HF_TOKEN``
+(or ``HF_OFFICIAL_TOKEN`` as fallback), aligns by ``example_id``, computes
+metrics via the task's ``score()`` method, and writes a schema-valid
+result artifact. Ensures no silent misalignment: missing or extra
+prediction ids abort with a loud ``ScoreError``.
 """
 
 from __future__ import annotations
 
 import json
-import os
 from pathlib import Path
 from typing import Any
 
+from balkanbench.data.repo import DatasetRepoError, resolve_dataset_repo, resolve_hf_token
 from balkanbench.evaluation import Aggregate, SeedResult
 from balkanbench.provenance import collect_provenance
 from balkanbench.scoring.artifact import write_result_artifact
@@ -37,12 +38,12 @@ class ScoreError(RuntimeError):
 
 
 def _token_or_raise() -> str:
-    token = os.environ.get("HF_OFFICIAL_TOKEN")
+    token = resolve_hf_token()
     if not token:
         raise ScoreError(
-            "HF_OFFICIAL_TOKEN is not set. Private-label scoring requires a "
-            "Hugging Face token with read access to the private labels repo. "
-            "Export HF_OFFICIAL_TOKEN=<token> and retry."
+            "No Hugging Face token in env. Private-label scoring requires a "
+            "token with read access to the private labels repo. Export "
+            "HF_TOKEN=<token> (preferred) or HF_OFFICIAL_TOKEN=<token> and retry."
         )
     return token
 
@@ -85,12 +86,10 @@ def score_predictions(
     token = _token_or_raise()
     predictions_map = _load_predictions(predictions_path)
 
-    private_repo = task_cfg["dataset"].get("private_repo")
-    if not private_repo:
-        raise ScoreError(
-            f"task_cfg.dataset.private_repo not set for {task_cfg['task']!r}; "
-            "private-label scoring requires a private repo"
-        )
+    try:
+        private_repo = resolve_dataset_repo(task_cfg, language, prefer="private")
+    except DatasetRepoError as exc:
+        raise ScoreError(str(exc)) from exc
 
     from balkanbench.scoring import score as _self
 

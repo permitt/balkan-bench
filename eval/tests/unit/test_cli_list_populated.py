@@ -71,12 +71,12 @@ def test_list_languages_discovers_from_task_yamls(tmp_path, monkeypatch) -> None
     monkeypatch.setenv("BALKANBENCH_CONFIGS_DIR", str(tmp_path))
     task_yaml = tmp_path / "benchmarks" / "superglue" / "tasks" / "boolq.yaml"
     task_yaml.parent.mkdir(parents=True)
-    task_yaml.write_text("languages:\n  available: [sr]\n  ranked: [sr]\n  roadmap: [hr, cnr]\n")
+    task_yaml.write_text("languages:\n  available: [sr]\n  ranked: [sr]\n  roadmap: [hr, mne]\n")
     result = runner.invoke(app, ["list", "languages"])
     assert result.exit_code == 0, result.output
     assert "sr\tavailable" in result.stdout
     assert "hr\troadmap" in result.stdout
-    assert "cnr\troadmap" in result.stdout
+    assert "mne\troadmap" in result.stdout
 
 
 def test_list_languages_merges_across_benchmarks(tmp_path, monkeypatch) -> None:

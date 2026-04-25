@@ -38,8 +38,13 @@ def _boolq_cfg() -> dict:
         "task_type": "binary_classification",
         "languages": {"available": ["sr"], "ranked": ["sr"]},
         "dataset": {
-            "public_repo": "permitt/superglue-serbian",
             "config": "boolq",
+            "per_language": {
+                "sr": {
+                    "public_repo": "permitt/superglue-sr",
+                    "private_repo": "permitt/superglue-sr-private",
+                }
+            },
             "splits": {"public": ["validation"], "labeled_public": ["validation"]},
         },
         "inputs": {"fields": ["question", "passage"], "id_field": "example_id"},

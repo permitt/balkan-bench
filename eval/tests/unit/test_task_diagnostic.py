@@ -14,12 +14,17 @@ from balkanbench.tasks.diagnostic import (
 def _axb_cfg() -> dict:
     return {
         "benchmark": "superglue",
-        "task": "ax_b",
+        "task": "axb",
         "task_type": "diagnostic",
         "languages": {"available": ["sr"], "ranked": []},
         "dataset": {
-            "public_repo": "permitt/superglue-serbian",
-            "config": "ax_b",
+            "config": "axb",
+            "per_language": {
+                "sr": {
+                    "public_repo": "permitt/superglue-sr",
+                    "private_repo": "permitt/superglue-sr-private",
+                }
+            },
             "splits": {
                 "public": ["test"],
                 "labeled_public": ["test"],
@@ -45,12 +50,17 @@ def _axb_cfg() -> dict:
 def _axg_cfg() -> dict:
     return {
         "benchmark": "superglue",
-        "task": "ax_g",
+        "task": "axg",
         "task_type": "diagnostic",
         "languages": {"available": ["sr"], "ranked": []},
         "dataset": {
-            "public_repo": "permitt/superglue-serbian",
-            "config": "ax_g",
+            "config": "axg",
+            "per_language": {
+                "sr": {
+                    "public_repo": "permitt/superglue-sr",
+                    "private_repo": "permitt/superglue-sr-private",
+                }
+            },
             "splits": {
                 "public": ["test"],
                 "labeled_public": ["test"],

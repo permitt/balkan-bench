@@ -24,10 +24,10 @@ const TASK_DESCRIPTIONS = {
 }
 
 const LANGUAGES = {
-  sr:  { flag: '🇷🇸', name: 'Serbian',    nativeName: 'Srpski' },
-  hr:  { flag: '🇭🇷', name: 'Croatian',   nativeName: 'Hrvatski' },
-  cnr: { flag: '🇲🇪', name: 'Montenegrin', nativeName: 'Crnogorski' },
-  bs:  { flag: '🇧🇦', name: 'Bosnian',    nativeName: 'Bosanski' },
+  sr:  { flag: '🇷🇸', name: 'Serbian',     nativeName: 'Srpski' },
+  hr:  { flag: '🇭🇷', name: 'Croatian',    nativeName: 'Hrvatski' },
+  mne: { flag: '🇲🇪', name: 'Montenegrin', nativeName: 'Crnogorski' },
+  bs:  { flag: '🇧🇦', name: 'Bosnian',     nativeName: 'Bosanski' },
 }
 
 const BENCHMARKS = {
@@ -64,11 +64,11 @@ const BENCHMARKS = {
 // Discoverable leaderboards. When a new (benchmark, language) pair publishes
 // its benchmark_results.json, flip `available: true`; no other code changes.
 const LEADERBOARDS = [
-  { benchmark: 'superglue', language: 'sr',  path: 'superglue-serbian',    available: true,  availableIn: null   },
-  { benchmark: 'superglue', language: 'hr',  path: 'superglue-croatian',   available: false, availableIn: 'v0.2' },
-  { benchmark: 'superglue', language: 'cnr', path: 'superglue-montenegrin',available: false, availableIn: 'v0.2' },
-  { benchmark: 'superglue', language: 'bs',  path: 'superglue-bosnian',    available: false, availableIn: 'v0.2' },
-  { benchmark: 'sle',       language: 'sr',  path: 'sle-serbian',          available: false, availableIn: 'v0.2' },
+  { benchmark: 'superglue', language: 'sr',  path: 'superglue-sr',  available: true,  availableIn: null   },
+  { benchmark: 'superglue', language: 'hr',  path: 'superglue-hr',  available: true,  availableIn: null   },
+  { benchmark: 'superglue', language: 'mne', path: 'superglue-mne', available: true,  availableIn: null   },
+  { benchmark: 'superglue', language: 'bs',  path: 'superglue-bs',  available: false, availableIn: 'v0.2' },
+  { benchmark: 'sle',       language: 'sr',  path: 'sle-sr',        available: false, availableIn: 'v0.2' },
 ]
 
 function chipLabel(entry) {

@@ -210,6 +210,7 @@ def run_hp_search(
         model_cfg=best_model_cfg,
         sweep_id=sweep_id,
         sampler_seed=sampler_seed,
+        seed_for_trials=seed_for_trials,
         n_trials=n_trials,
         best_value=best_value,
         best_trial_number=int(best.number),
@@ -265,6 +266,7 @@ def _write_best_config(
     model_cfg: dict[str, Any],
     sweep_id: str,
     sampler_seed: int,
+    seed_for_trials: int,
     n_trials: int,
     best_value: float,
     best_trial_number: int,
@@ -281,6 +283,7 @@ def _write_best_config(
         f"# best_trial_number: {best_trial_number}",
         f"# best_value: {best_value:.6f}",
         f"# sampler_seed: {sampler_seed}",
+        f"# seed_for_trials: {seed_for_trials}",
         f"# n_trials: {n_trials}",
         f"# benchmark: {task_cfg['benchmark']}",
         f"# task: {task_cfg['task']}",
@@ -297,7 +300,9 @@ def _write_best_config(
     body = yaml.safe_dump(model_cfg, sort_keys=False)
     path.write_text("\n".join(header) + body)
 
-    # Also write a json study summary for quick inspection.
+    # Also write a json study summary for quick inspection. The settings
+    # block is what `balkanbench run`'s HP cache compares against, so any
+    # cache-relevant param must live here.
     summary = {
         "sweep_id": sweep_id,
         "dataset_revision": dataset_revision,
@@ -306,6 +311,7 @@ def _write_best_config(
         "best_trial_number": best_trial_number,
         "best_value": best_value,
         "sampler_seed": sampler_seed,
+        "seed_for_trials": seed_for_trials,
         "n_trials": n_trials,
         "benchmark": task_cfg["benchmark"],
         "task": task_cfg["task"],

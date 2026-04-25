@@ -198,8 +198,166 @@ def test_run_resumes_by_skipping_existing_results(tmp_path, monkeypatch) -> None
             str(out),
         ],
     )
-    # cb has no validation split etc on the leaderboard side, so allow either pass
-    # or a leaderboard-stage error. The thing we care about is the resume skip.
+    assert result.exit_code == 0, result.output
     assert "skip boolq" in result.output
     assert hp_calls == ["cb"]
     assert eval_calls == ["cb"]
+    # Subset run (boolq+cb out of 5 ranked HR tasks) must NOT emit a leaderboard;
+    # otherwise stale or partial rows would leak into a run that wasn't asked
+    # to compute the full set.
+    assert not (out / "benchmark_results.json").exists()
+    assert "subset run" in result.output
+
+
+def test_run_aborts_on_fingerprint_mismatch(tmp_path, monkeypatch) -> None:
+    """A second run with different invocation params into the same --out must abort."""
+    monkeypatch.setattr("balkanbench.cli.run.run_hp_search", lambda **_: None)
+    monkeypatch.setattr("balkanbench.cli.run.run_multiseed", lambda **_: [])
+    monkeypatch.setattr(
+        "balkanbench.cli.run.load_dataset",
+        lambda repo, cfg, **_: _fake_datasets(),
+    )
+    monkeypatch.setenv("HF_TOKEN", "fake-token")
+
+    out = tmp_path / "runs"
+    # Manually plant a fingerprint matching a prior --seeds 42 invocation.
+    out.mkdir(parents=True)
+    (out / ".run_fingerprint.json").write_text(
+        '{"hash": "stale", "fields": {"seeds": [42]}}'
+    )
+
+    result = runner.invoke(
+        app,
+        [
+            "run",
+            "--model",
+            "bertic",
+            "--benchmark",
+            "superglue",
+            "--language",
+            "hr",
+            "--tasks",
+            "boolq",
+            "--seeds",
+            "43",
+            "--n-trials",
+            "1",
+            "--out",
+            str(out),
+        ],
+    )
+    assert result.exit_code == 1
+    assert "different settings" in result.output
+    assert "seeds:" in result.output
+
+
+def test_run_hp_cache_rejects_when_settings_differ(tmp_path, monkeypatch) -> None:
+    """The HP cache must not reuse a winner from a sweep with different settings."""
+    hp_calls: list[dict[str, Any]] = []
+
+    def fake_run_hp_search(**kwargs: Any) -> HPSearchResult:
+        hp_calls.append(
+            {k: kwargs[k] for k in ("n_trials", "sampler_seed", "seed_for_trials")}
+        )
+        return HPSearchResult(
+            best_trial_number=0,
+            best_value=0.9,
+            best_model_cfg={
+                "name": "bertic",
+                "hf_repo": "classla/bcms-bertic",
+                "family": "electra",
+                "params_hint": "110M",
+                "tier": "official",
+                "training": {
+                    "learning_rate": 2e-5,
+                    "batch_size": 16,
+                    "num_epochs": 1,
+                    "fp16": False,
+                },
+            },
+            best_config_path=tmp_path / "_x.yaml",
+            sweep_id="sweep-new",
+        )
+
+    def fake_run_multiseed(**kwargs: Any) -> list[SeedResult]:
+        seeds = kwargs["seeds"]
+        primary = kwargs["task_cfg"]["metrics"]["task_score"]
+        return [
+            SeedResult(
+                seed=s,
+                primary={primary: 0.7},
+                secondary={},
+                task_score=0.7,
+                predictions=[0],
+                references=[0],
+                group_ids=None,
+            )
+            for s in seeds
+        ]
+
+    monkeypatch.setattr("balkanbench.cli.run.run_hp_search", fake_run_hp_search)
+    monkeypatch.setattr("balkanbench.cli.run.run_multiseed", fake_run_multiseed)
+    monkeypatch.setattr(
+        "balkanbench.cli.run.load_dataset",
+        lambda repo, cfg, **_: _fake_datasets(),
+    )
+    monkeypatch.setenv("HF_TOKEN", "fake-token")
+
+    out = tmp_path / "runs"
+    # Pre-plant a sweep_summary.json from a sweep with different settings
+    # (n_trials=99, sampler_seed=999) and a fingerprint that matches the
+    # *current* invocation - so the only thing under test is HP-cache logic.
+    sweep_dir = out / "sweeps" / "boolq" / "sweep-stale"
+    sweep_dir.mkdir(parents=True)
+    (sweep_dir / "sweep_summary.json").write_text(
+        json.dumps(
+            {
+                "sweep_id": "sweep-stale",
+                "dataset_revision": "v0.1.0-data",
+                "search_space_id": "default-binary_classification-v1",
+                "early_stopping_policy": "patience=5 on accuracy",
+                "best_trial_number": 7,
+                "best_value": 0.42,
+                "sampler_seed": 999,
+                "seed_for_trials": 999,
+                "n_trials": 99,
+                "benchmark": "superglue",
+                "task": "boolq",
+                "task_score_metric": "accuracy",
+                "best_model_cfg": {"name": "bertic", "tag": "stale"},
+            }
+        )
+    )
+
+    result = runner.invoke(
+        app,
+        [
+            "run",
+            "--model",
+            "bertic",
+            "--benchmark",
+            "superglue",
+            "--language",
+            "hr",
+            "--tasks",
+            "boolq",
+            "--n-trials",
+            "1",
+            "--sampler-seed",
+            "42",
+            "--seed-for-trials",
+            "42",
+            "--out",
+            str(out),
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    # HP search must have been invoked with the CURRENT settings, ignoring the cache.
+    assert hp_calls == [{"n_trials": 1, "sampler_seed": 42, "seed_for_trials": 42}]
+    artifact_path = (
+        out / "results" / "superglue-hr" / "bertic" / "boolq" / "result.json"
+    )
+    assert artifact_path.is_file()
+    artifact = json.loads(artifact_path.read_text())
+    assert artifact["hp_search"]["sweep_id"] == "sweep-new"
+    assert artifact["hp_search"]["num_trials"] == 1

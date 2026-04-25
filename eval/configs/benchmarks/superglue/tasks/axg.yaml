@@ -19,7 +19,7 @@ dataset:
     labeled_private: []
 inputs:
   fields: [premise, hypothesis]
-  id_field: example_id
+  id_field: idx
   # metric_columns: [is_pro_stereotype]
   # ^ re-enable once the AXg split exposes is_pro_stereotype; until then
   #   gender_parity is dropped from metrics.report and only accuracy ships.

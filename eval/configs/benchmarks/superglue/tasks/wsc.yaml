@@ -19,7 +19,7 @@ dataset:
     labeled_private: [test]
 inputs:
   fields: [text, span1_text, span2_text]
-  id_field: example_id
+  id_field: idx
 metrics:
   primary: [accuracy]
   report: [accuracy]

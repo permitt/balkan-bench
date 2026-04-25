@@ -44,6 +44,7 @@ publish = [
     "datasets>=2.20",
     "huggingface_hub>=0.24",
     "hf-transfer>=0.1",
+    "google-cloud-storage>=2.10",
 ]
 ml = [
     "torch>=2.1",

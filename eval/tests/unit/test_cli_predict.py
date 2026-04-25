@@ -17,7 +17,9 @@ runner = CliRunner()
 def _fake_test_dataset() -> DatasetDict:
     test = Dataset.from_dict(
         {
-            "example_id": ["ex0", "ex1", "ex2"],
+            # Real datasets expose the id under `idx` (matches the published
+            # SuperGLUE-BCMS schema and the boolq.yaml id_field).
+            "idx": [0, 1, 2],
             "question": ["q0", "q1", "q2"],
             "passage": ["p0", "p1", "p2"],
         }

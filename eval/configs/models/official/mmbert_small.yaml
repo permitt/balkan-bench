@@ -1,0 +1,11 @@
+name: mmbert_small
+hf_repo: jhu-clsp/mmBERT-small
+family: modernbert
+params_hint: 140M
+tier: official
+training:
+  learning_rate: 2.0e-5
+  batch_size: 16
+  num_epochs: 10
+  fp16: true
+seeds: [42, 43, 44, 45, 46]

@@ -25,7 +25,7 @@ dataset:
     labeled_private: [test]
 inputs:
   fields: [paragraph, question, answer]
-  id_field: example_id
+  id_field: idx
   group_fields: [paragraph_id, question_id]
 metrics:
   primary: [f1_a]

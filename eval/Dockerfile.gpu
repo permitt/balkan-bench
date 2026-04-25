@@ -36,6 +36,11 @@ WORKDIR /workspace
 COPY pyproject.toml /workspace/pyproject.toml
 COPY README.md /workspace/README.md
 COPY src /workspace/src
+# configs/ + schemas/ are loaded at runtime by the CLI via paths relative
+# to the installed package (see cli/_paths.py + cli/leaderboard.py); both
+# must ship in the image or `balkanbench run` can't resolve model/task YAMLs.
+COPY configs /workspace/configs
+COPY schemas /workspace/schemas
 
 # Install with the [ml] extra (torch + transformers + datasets + optuna)
 # and the [publish] extra (huggingface_hub) since `balkanbench run` loads

@@ -71,17 +71,18 @@ TIMESTAMP="$(date -u +%Y%m%d-%H%M%S)"
 JOB_NAME="bb-${BENCHMARK}-${LANGUAGE}-${MODEL}-${TIMESTAMP}"
 BASE_OUTPUT_DIR="gs://${GCS_BUCKET}/runs/${BENCHMARK}-${LANGUAGE}/${MODEL}/${TIMESTAMP}"
 
-# Replace the local /workspace/results target with $AIP_MODEL_DIR so the
-# orchestrator writes straight to GCS (FUSE-mounted by Vertex AI).
-SUBCMD="${SUBCMD//\/workspace\/results/\$AIP_MODEL_DIR}"
-
-# args list: shell-split SUBCMD into one element per token. The Vertex AI
-# config block builds a worker_pool_spec with one machine + one accelerator
-# and runs the container's ENTRYPOINT (`balkanbench`) with these args.
+# Local-write-then-upload pattern: balkanbench writes to /workspace/results
+# inside the container, then `balkanbench gcs-upload` syncs the tree to
+# $BALKANBENCH_GCS_OUT before the worker tears down. AIP_MODEL_DIR isn't
+# usable directly because Vertex sets it to a `gs://` URI string, not a
+# FUSE mount, so direct Path writes go nowhere.
+LOCAL_OUT=/workspace/results
+SUBCMD="${SUBCMD//\/workspace\/results/${LOCAL_OUT}}"
+WRAPPED_CMD="balkanbench ${SUBCMD} && balkanbench gcs-upload ${LOCAL_OUT} \"\$BALKANBENCH_GCS_OUT\""
 ARGS_JSON="$(python3 -c '
-import json, shlex, sys
-print(",".join(json.dumps(t) for t in shlex.split(sys.argv[1])))
-' "${SUBCMD}")"
+import json, sys
+print(json.dumps(sys.argv[1]))
+' "${WRAPPED_CMD}")"
 
 CONFIG_FILE="$(mktemp -t balkanbench-vertex.XXXXXX.json)"
 cat > "${CONFIG_FILE}" <<EOF
@@ -95,17 +96,21 @@ cat > "${CONFIG_FILE}" <<EOF
     "replicaCount": 1,
     "containerSpec": {
       "imageUri": "${CONTAINER_URI}",
-      "command": ["balkanbench"],
+      "command": ["sh", "-c"],
       "args": [${ARGS_JSON}],
       "env": [
-        {"name": "HF_TOKEN", "value": "${HF_TOKEN}"}
+        {"name": "HF_TOKEN", "value": "${HF_TOKEN}"},
+        {"name": "BALKANBENCH_GCS_OUT", "value": "${BASE_OUTPUT_DIR}"}
       ]
     },
     "diskSpec": {
       "bootDiskType": "pd-ssd",
       "bootDiskSizeGb": 200
     }
-  }]
+  }],
+  "baseOutputDirectory": {
+    "outputUriPrefix": "${BASE_OUTPUT_DIR}"
+  }
 }
 EOF
 

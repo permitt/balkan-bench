@@ -19,7 +19,7 @@ dataset:
     labeled_private: []
 inputs:
   fields: [premise, hypothesis]
-  id_field: example_id
+  id_field: idx
 metrics:
   primary: [matthews_correlation]
   report: [matthews_correlation]

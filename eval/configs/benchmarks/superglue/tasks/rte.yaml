@@ -25,7 +25,7 @@ dataset:
     labeled_private: [test]
 inputs:
   fields: [premise, hypothesis]
-  id_field: example_id
+  id_field: idx
 metrics:
   primary: [accuracy]
   report: [accuracy]

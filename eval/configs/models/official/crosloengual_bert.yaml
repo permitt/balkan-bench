@@ -1,0 +1,11 @@
+name: crosloengual_bert
+hf_repo: EMBEDDIA/crosloengual-bert
+family: bert
+params_hint: 124M
+tier: official
+training:
+  learning_rate: 2.0e-5
+  batch_size: 16
+  num_epochs: 10
+  fp16: true
+seeds: [42, 43, 44, 45, 46]

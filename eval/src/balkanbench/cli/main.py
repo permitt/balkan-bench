@@ -7,6 +7,7 @@ import typer
 from balkanbench import __version__
 from balkanbench.cli import validate as validate_cmds
 from balkanbench.cli.eval import eval_cmd
+from balkanbench.cli.gcs import gcs_upload_cmd
 from balkanbench.cli.hp_search import hp_search_cmd
 from balkanbench.cli.leaderboard import leaderboard_app
 from balkanbench.cli.listcmd import list_app
@@ -56,6 +57,10 @@ app.command(
     "run",
     help="End-to-end pipeline: HP search per ranked task -> multi-seed eval -> leaderboard export.",
 )(run_cmd)
+app.command(
+    "gcs-upload",
+    help="Upload a local results directory to a gs://bucket/prefix (used by GCP runs).",
+)(gcs_upload_cmd)
 
 
 def _version_callback(value: bool) -> None:

@@ -79,9 +79,13 @@ function chipLabel(entry) {
 }
 
 function formatCell(cell) {
-  if (cell === null || cell === undefined) return { main: '—', stdev: null }
-  const mean = Number(cell.mean).toFixed(2)
-  const stdev = cell.stdev === undefined ? null : Number(cell.stdev).toFixed(2)
+  if (cell === null || cell === undefined) return { main: '-', stdev: null }
+  // Artifacts store sklearn-native 0-1 metric values; we render as 0-100
+  // for human readability. Doing the rescale at display time keeps the
+  // on-disk artifacts consistent with sklearn so that anyone reading
+  // result.json directly gets the canonical metric value.
+  const mean = (Number(cell.mean) * 100).toFixed(2)
+  const stdev = cell.stdev === undefined ? null : (Number(cell.stdev) * 100).toFixed(2)
   return { main: mean, stdev }
 }
 
@@ -328,7 +332,7 @@ export default function Leaderboard() {
                         )
                       })}
                       <td className={`lb-num lb-avg ${rankBy === 'avg' ? 'lb-col-active' : ''}`}>
-                        <div className="lb-cell-main"><b>{row.avg.toFixed(2)}</b></div>
+                        <div className="lb-cell-main"><b>{(row.avg * 100).toFixed(2)}</b></div>
                         {!row.complete && <div className="lb-cell-stdev">{row.partial_flag}</div>}
                       </td>
                     </tr>

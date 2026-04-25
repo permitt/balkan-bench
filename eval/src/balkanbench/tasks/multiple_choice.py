@@ -63,6 +63,13 @@ class MultipleChoiceTask(Task):
 
         tokenizer_cfg = self.cfg.get("tokenizer", {})
         max_length = int(tokenizer_cfg.get("max_length", 256))
+        # Force padding to max_length so every example produces input_ids
+        # of identical shape (num_choices, max_length). This lets the
+        # default Trainer collator stack them straight into a 3D tensor;
+        # with `padding=longest` (which inside a single-call tokenize is a
+        # no-op anyway), the per-choice sequences would have varying
+        # lengths and the collator would refuse to build the batch
+        # ("excessive nesting (inputs type list where type int is expected)").
         input_ids: list[list[int]] = []
         attention_mask: list[list[int]] = []
         for choice in choices:
@@ -71,7 +78,7 @@ class MultipleChoiceTask(Task):
                 text_pair=choice,
                 truncation=True,
                 max_length=max_length,
-                padding=tokenizer_cfg.get("padding", "longest"),
+                padding="max_length",
             )
             input_ids.append(list(encoded["input_ids"]))
             attention_mask.append(list(encoded["attention_mask"]))

@@ -150,16 +150,23 @@ def run_single_seed(
     )
 
     # Note: in transformers >=5 the `tokenizer` kwarg became `processing_class`.
-    # We pre-tokenise the datasets ourselves, but the per-example tokenisation
-    # produces variable-length sequences. The default Trainer collator stacks
-    # them as fixed tensors (and explodes), so we pass DataCollatorWithPadding
-    # which pads each batch to its longest member at iteration time.
+    # We pre-tokenise the datasets ourselves, but the right collator depends
+    # on the task family:
+    # - classification: per-example input_ids is 1D and varies across examples;
+    #   DataCollatorWithPadding pads to the batch's longest member.
+    # - multiple_choice: input_ids is 2D (num_choices, seq_len) and pre-padded
+    #   to max_length in preprocess; the default collator stacks straight to
+    #   a 3D tensor. DataCollatorWithPadding can't handle the choice axis.
+    if task_cfg["task_type"] == "multiple_choice":
+        collator = None  # default_data_collator
+    else:
+        collator = _self.DataCollatorWithPadding(tokenizer=encoder.tokenizer)
     trainer = _self.Trainer(
         model=encoder.model,
         args=training_args,
         train_dataset=tokenized.get("train"),
         eval_dataset=tokenized.get(eval_split),
-        data_collator=_self.DataCollatorWithPadding(tokenizer=encoder.tokenizer),
+        data_collator=collator,
     )
     if train:
         trainer.train()

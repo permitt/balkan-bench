@@ -5,7 +5,14 @@
   "generated_at": "2026-04-27T09:00:00Z",
   "sponsor": "Recrewty",
   "seeds": 5,
-  "ranked_tasks": ["boolq", "cb", "copa", "rte", "multirc", "wsc"],
+  "ranked_tasks": [
+    "boolq",
+    "cb",
+    "copa",
+    "rte",
+    "multirc",
+    "wsc"
+  ],
   "task_primary_metrics": {
     "boolq": "accuracy",
     "cb": "f1_macro",
@@ -24,57 +31,111 @@
   "rows": [
     {
       "rank": 1,
-      "model": "ModernBERTić large",
+      "model": "ModernBERTi\u0107 large",
       "model_id": "permitt/galton-modernbertic-large-bcms-v1",
       "params": 395000000,
       "params_display": "395M",
       "results": {
-        "cb":      { "mean": 78.52, "stdev": 3.82 },
-        "copa":    { "mean": 76.84, "stdev": 1.29 },
-        "rte":     { "mean": 73.13, "stdev": 0.84 },
-        "wsc":     { "mean": 63.56, "stdev": 2.39 },
-        "boolq":   { "mean": 80.70, "stdev": 0.44 },
-        "multirc": { "mean": 67.90, "stdev": 0.47 }
+        "cb": {
+          "mean": 0.7852,
+          "stdev": 0.0382
+        },
+        "copa": {
+          "mean": 0.7684,
+          "stdev": 0.0129
+        },
+        "rte": {
+          "mean": 0.7313,
+          "stdev": 0.0084
+        },
+        "wsc": {
+          "mean": 0.6356,
+          "stdev": 0.0239
+        },
+        "boolq": {
+          "mean": 0.807,
+          "stdev": 0.0044
+        },
+        "multirc": {
+          "mean": 0.679,
+          "stdev": 0.0047
+        }
       },
-      "avg": 73.44,
+      "avg": 0.7344,
       "complete": true,
       "tasks_completed": 6,
       "tasks_total": 6
     },
     {
       "rank": 2,
-      "model": "BERTić",
+      "model": "BERTi\u0107",
       "model_id": "classla/bcms-bertic",
       "params": 110000000,
       "params_display": "110M",
       "results": {
-        "cb":      { "mean": 78.61, "stdev": 2.90 },
-        "copa":    { "mean": 68.87, "stdev": 0.52 },
-        "rte":     { "mean": 71.70, "stdev": 0.87 },
-        "wsc":     { "mean": 65.07, "stdev": 0.00 },
-        "boolq":   { "mean": 77.79, "stdev": 0.18 },
-        "multirc": { "mean": 66.75, "stdev": 0.87 }
+        "cb": {
+          "mean": 0.7861,
+          "stdev": 0.029
+        },
+        "copa": {
+          "mean": 0.6887,
+          "stdev": 0.0052
+        },
+        "rte": {
+          "mean": 0.717,
+          "stdev": 0.0087
+        },
+        "wsc": {
+          "mean": 0.6507,
+          "stdev": 0.0
+        },
+        "boolq": {
+          "mean": 0.7779,
+          "stdev": 0.0018
+        },
+        "multirc": {
+          "mean": 0.6675,
+          "stdev": 0.0087
+        }
       },
-      "avg": 71.46,
+      "avg": 0.7146,
       "complete": true,
       "tasks_completed": 6,
       "tasks_total": 6
     },
     {
       "rank": 3,
-      "model": "ModernBERTić base",
+      "model": "ModernBERTi\u0107 base",
       "model_id": "permitt/galton-modernbertic-base-bcms-v1",
       "params": 149000000,
       "params_display": "149M",
       "results": {
-        "cb":      { "mean": 76.96, "stdev": 3.19 },
-        "copa":    { "mean": 65.76, "stdev": 2.42 },
-        "rte":     { "mean": 65.82, "stdev": 1.14 },
-        "wsc":     { "mean": 64.11, "stdev": 1.11 },
-        "boolq":   { "mean": 76.02, "stdev": 0.63 },
-        "multirc": { "mean": 66.90, "stdev": 0.69 }
+        "cb": {
+          "mean": 0.7696,
+          "stdev": 0.0319
+        },
+        "copa": {
+          "mean": 0.6576,
+          "stdev": 0.0242
+        },
+        "rte": {
+          "mean": 0.6582,
+          "stdev": 0.0114
+        },
+        "wsc": {
+          "mean": 0.6411,
+          "stdev": 0.0111
+        },
+        "boolq": {
+          "mean": 0.7602,
+          "stdev": 0.0063
+        },
+        "multirc": {
+          "mean": 0.669,
+          "stdev": 0.0069
+        }
       },
-      "avg": 69.73,
+      "avg": 0.6973,
       "complete": true,
       "tasks_completed": 5,
       "tasks_total": 6,
@@ -87,33 +148,69 @@
       "params": 307000000,
       "params_display": "307M",
       "results": {
-        "cb":      { "mean": 78.93, "stdev": 0.88 },
-        "copa":    { "mean": 56.00, "stdev": 3.64 },
-        "rte":     { "mean": 73.10, "stdev": 0.50 },
-        "wsc":     { "mean": 62.33, "stdev": 2.56 },
-        "boolq":   { "mean": 78.17, "stdev": 0.31 },
-        "multirc": { "mean": 63.79, "stdev": 1.42 }
+        "cb": {
+          "mean": 0.7893,
+          "stdev": 0.0088
+        },
+        "copa": {
+          "mean": 0.56,
+          "stdev": 0.0364
+        },
+        "rte": {
+          "mean": 0.731,
+          "stdev": 0.005
+        },
+        "wsc": {
+          "mean": 0.6233,
+          "stdev": 0.0256
+        },
+        "boolq": {
+          "mean": 0.7817,
+          "stdev": 0.0031
+        },
+        "multirc": {
+          "mean": 0.6379,
+          "stdev": 0.0142
+        }
       },
-      "avg": 68.72,
+      "avg": 0.6872,
       "complete": true,
       "tasks_completed": 6,
       "tasks_total": 6
     },
     {
       "rank": 5,
-      "model": "XLM-R BERTić",
+      "model": "XLM-R BERTi\u0107",
       "model_id": "classla/xlm-r-bertic",
       "params": 560000000,
       "params_display": "560M",
       "results": {
-        "cb":      { "mean": 83.90, "stdev": 2.76 },
-        "copa":    { "mean": 58.60, "stdev": 4.91 },
-        "rte":     { "mean": 73.78, "stdev": 1.37 },
-        "wsc":     { "mean": 64.16, "stdev": 1.29 },
-        "boolq":   { "mean": 73.98, "stdev": 8.25 },
-        "multirc": { "mean": 47.43, "stdev": 27.39 }
+        "cb": {
+          "mean": 0.839,
+          "stdev": 0.0276
+        },
+        "copa": {
+          "mean": 0.586,
+          "stdev": 0.0491
+        },
+        "rte": {
+          "mean": 0.7378,
+          "stdev": 0.0137
+        },
+        "wsc": {
+          "mean": 0.6416,
+          "stdev": 0.0129
+        },
+        "boolq": {
+          "mean": 0.7398,
+          "stdev": 0.0825
+        },
+        "multirc": {
+          "mean": 0.4743,
+          "stdev": 0.2739
+        }
       },
-      "avg": 66.97,
+      "avg": 0.6697,
       "complete": true,
       "tasks_completed": 6,
       "tasks_total": 6
@@ -125,14 +222,32 @@
       "params": 124000000,
       "params_display": "124M",
       "results": {
-        "cb":      { "mean": 79.77, "stdev": 1.73 },
-        "copa":    { "mean": 59.47, "stdev": 1.89 },
-        "rte":     { "mean": 65.30, "stdev": 1.52 },
-        "wsc":     { "mean": 63.24, "stdev": 0.85 },
-        "boolq":   { "mean": 72.30, "stdev": 0.09 },
-        "multirc": { "mean": 59.82, "stdev": 0.82 }
+        "cb": {
+          "mean": 0.7977,
+          "stdev": 0.0173
+        },
+        "copa": {
+          "mean": 0.5947,
+          "stdev": 0.0189
+        },
+        "rte": {
+          "mean": 0.653,
+          "stdev": 0.0152
+        },
+        "wsc": {
+          "mean": 0.6324,
+          "stdev": 0.0085
+        },
+        "boolq": {
+          "mean": 0.723,
+          "stdev": 0.0009
+        },
+        "multirc": {
+          "mean": 0.5982,
+          "stdev": 0.0082
+        }
       },
-      "avg": 66.65,
+      "avg": 0.6665,
       "complete": true,
       "tasks_completed": 6,
       "tasks_total": 6
@@ -144,14 +259,32 @@
       "params": 560000000,
       "params_display": "560M",
       "results": {
-        "cb":      { "mean": 72.87, "stdev": 9.62 },
-        "copa":    { "mean": 49.40, "stdev": 1.50 },
-        "rte":     { "mean": 58.49, "stdev": 11.53 },
-        "wsc":     { "mean": 63.93, "stdev": 1.16 },
-        "boolq":   { "mean": 80.63, "stdev": 0.40 },
-        "multirc": { "mean": 65.00, "stdev": 3.98 }
+        "cb": {
+          "mean": 0.7287,
+          "stdev": 0.0962
+        },
+        "copa": {
+          "mean": 0.494,
+          "stdev": 0.015
+        },
+        "rte": {
+          "mean": 0.5849,
+          "stdev": 0.1153
+        },
+        "wsc": {
+          "mean": 0.6393,
+          "stdev": 0.0116
+        },
+        "boolq": {
+          "mean": 0.8063,
+          "stdev": 0.004
+        },
+        "multirc": {
+          "mean": 0.65,
+          "stdev": 0.0398
+        }
       },
-      "avg": 65.05,
+      "avg": 0.6505,
       "complete": true,
       "tasks_completed": 6,
       "tasks_total": 6
@@ -163,14 +296,32 @@
       "params": 354000000,
       "params_display": "354M",
       "results": {
-        "cb":      { "mean": 75.00, "stdev": 2.61 },
-        "copa":    { "mean": 57.93, "stdev": 0.09 },
-        "rte":     { "mean": 59.60, "stdev": 0.73 },
-        "wsc":     { "mean": 64.61, "stdev": 0.65 },
-        "boolq":   { "mean": 71.68, "stdev": 1.40 },
-        "multirc": { "mean": 60.68, "stdev": 0.67 }
+        "cb": {
+          "mean": 0.75,
+          "stdev": 0.0261
+        },
+        "copa": {
+          "mean": 0.5793,
+          "stdev": 0.0009
+        },
+        "rte": {
+          "mean": 0.596,
+          "stdev": 0.0073
+        },
+        "wsc": {
+          "mean": 0.6461,
+          "stdev": 0.0065
+        },
+        "boolq": {
+          "mean": 0.7168,
+          "stdev": 0.014
+        },
+        "multirc": {
+          "mean": 0.6068,
+          "stdev": 0.0067
+        }
       },
-      "avg": 64.92,
+      "avg": 0.6492,
       "complete": true,
       "tasks_completed": 6,
       "tasks_total": 6
@@ -182,14 +333,32 @@
       "params": 140000000,
       "params_display": "140M",
       "results": {
-        "cb":      { "mean": 72.65, "stdev": 2.24 },
-        "copa":    { "mean": 53.20, "stdev": 1.70 },
-        "rte":     { "mean": 64.56, "stdev": 1.56 },
-        "wsc":     { "mean": 64.38, "stdev": 0.97 },
-        "boolq":   { "mean": 73.62, "stdev": 0.31 },
-        "multirc": { "mean": 59.69, "stdev": 2.84 }
+        "cb": {
+          "mean": 0.7265,
+          "stdev": 0.0224
+        },
+        "copa": {
+          "mean": 0.532,
+          "stdev": 0.017
+        },
+        "rte": {
+          "mean": 0.6456,
+          "stdev": 0.0156
+        },
+        "wsc": {
+          "mean": 0.6438,
+          "stdev": 0.0097
+        },
+        "boolq": {
+          "mean": 0.7362,
+          "stdev": 0.0031
+        },
+        "multirc": {
+          "mean": 0.5969,
+          "stdev": 0.0284
+        }
       },
-      "avg": 64.68,
+      "avg": 0.6468,
       "complete": true,
       "tasks_completed": 6,
       "tasks_total": 6

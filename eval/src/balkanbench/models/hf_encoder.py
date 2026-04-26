@@ -20,10 +20,20 @@ from typing import Any
 # work because monkeypatching sets the name in the module dict, which is
 # consulted before __getattr__.
 _LAZY = {
+    "AutoConfig": "transformers",
+    "AutoModel": "transformers",
     "AutoModelForMultipleChoice": "transformers",
     "AutoModelForSequenceClassification": "transformers",
     "AutoTokenizer": "transformers",
 }
+
+# Architectures whose built-in *ForMultipleChoice impl assumes a pretrained
+# pooler that the published BCMS checkpoints (te-sla/teslaXLM,
+# classla/xlm-r-bertic) don't carry. transformers >=5 raises
+# `IndexError: tuple index out of range` on `outputs[1]` in that case.
+# We swap in a generic CLS-pool MultipleChoice head for these to bypass
+# the broken path.
+_MULTIPLE_CHOICE_NEEDS_CLS_POOL: set[str] = {"xlm-roberta"}
 
 
 def __getattr__(name: str) -> Any:
@@ -82,10 +92,17 @@ class HFEncoder:
                 num_labels=num_labels,
             )
         elif task_type == "multiple_choice":
-            model = _self.AutoModelForMultipleChoice.from_pretrained(
-                repo,
-                revision=revision,
-            )
+            cfg = _self.AutoConfig.from_pretrained(repo, revision=revision)
+            arch = (cfg.model_type or "").lower()
+            if arch in _MULTIPLE_CHOICE_NEEDS_CLS_POOL:
+                model = _build_cls_pool_multiple_choice(
+                    repo=repo, revision=revision, num_choices=int(task_cfg.get("num_choices", 2))
+                )
+            else:
+                model = _self.AutoModelForMultipleChoice.from_pretrained(
+                    repo,
+                    revision=revision,
+                )
         else:
             raise ValueError(f"unknown task_type {task_type!r}; cannot pick an AutoModel* family")
 
@@ -121,3 +138,69 @@ def _merge_training_args(
     merged.update(overrides)
 
     return merged
+
+
+def _build_cls_pool_multiple_choice(
+    *,
+    repo: str,
+    revision: str | None,
+    num_choices: int,
+) -> Any:
+    """Construct a generic CLS-pool MultipleChoice model around AutoModel.
+
+    The built-in XLMRobertaForMultipleChoice does ``pooled_output =
+    outputs[1]``, which raises IndexError when the pretrained checkpoint
+    has no pooler weights (most v3+ XLM-R checkpoints, including the
+    ones we ship in v0.1). This wrapper:
+      1. loads the encoder via AutoModel(add_pooling_layer=False),
+      2. takes the CLS token from last_hidden_state per choice,
+      3. classifies through a fresh Linear(hidden_size, 1),
+      4. reshapes to (batch, num_choices) logits + computes CE loss.
+    Output schema matches MultipleChoiceModelOutput so the HF Trainer
+    consumes it without changes.
+    """
+    import torch
+    from torch import nn
+    from transformers import AutoConfig, AutoModel
+    from transformers.modeling_outputs import MultipleChoiceModelOutput
+
+    config = AutoConfig.from_pretrained(repo, revision=revision)
+    base = AutoModel.from_pretrained(repo, revision=revision, add_pooling_layer=False)
+    hidden = config.hidden_size
+    drop_p = float(getattr(config, "hidden_dropout_prob", 0.1))
+
+    class _CLSPoolMultipleChoice(nn.Module):
+        def __init__(self) -> None:
+            super().__init__()
+            self.encoder = base
+            self.dropout = nn.Dropout(drop_p)
+            self.classifier = nn.Linear(hidden, 1)
+            self.config = config
+            self._num_choices = num_choices
+
+        def forward(  # type: ignore[no-untyped-def]
+            self,
+            input_ids=None,
+            attention_mask=None,
+            token_type_ids=None,
+            labels=None,
+            **_kw,
+        ):
+            # input_ids: (batch, num_choices, seq_len) -> (batch*num_choices, seq_len)
+            n = input_ids.shape[1]
+            flat = lambda t: None if t is None else t.view(-1, t.size(-1))
+            outputs = self.encoder(
+                input_ids=flat(input_ids),
+                attention_mask=flat(attention_mask),
+                token_type_ids=flat(token_type_ids),
+            )
+            pooled = outputs.last_hidden_state[:, 0, :]  # CLS
+            pooled = self.dropout(pooled)
+            logits = self.classifier(pooled).view(-1, n)  # (batch, num_choices)
+
+            loss = None
+            if labels is not None:
+                loss = nn.functional.cross_entropy(logits, labels.view(-1))
+            return MultipleChoiceModelOutput(loss=loss, logits=logits)
+
+    return _CLSPoolMultipleChoice()

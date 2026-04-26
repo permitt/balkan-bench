@@ -148,13 +148,18 @@ def _build_cls_pool_multiple_choice(
 ) -> Any:
     """Construct a generic CLS-pool MultipleChoice model around AutoModel.
 
-    See ``CLSPoolMultipleChoice`` for what this returns and why.
+    See ``CLSPoolMultipleChoice`` for what this returns and why. The
+    class is exposed via the module-level lazy ``__getattr__``, so we
+    fetch it through the module rather than as a bare name (the lazy
+    hook only fires on attribute access).
     """
     from transformers import AutoConfig, AutoModel
 
+    from balkanbench.models import hf_encoder as _self
+
     config = AutoConfig.from_pretrained(repo, revision=revision)
     base = AutoModel.from_pretrained(repo, revision=revision, add_pooling_layer=False)
-    return CLSPoolMultipleChoice(
+    return _self.CLSPoolMultipleChoice(
         encoder=base,
         config=config,
         num_choices=num_choices,

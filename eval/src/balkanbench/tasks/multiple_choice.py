@@ -18,9 +18,17 @@ import numpy as np
 from balkanbench.tasks import register_task
 from balkanbench.tasks.base import Task
 
+# Map COPA's `question` field value to the prompt key in the task YAML.
+# Original SuperGLUE uses English ("cause"/"effect"); the BCMS-COPA
+# datasets reuse those values for sr/hr but Montenegrin (mne) translates
+# them ("uzrok" = cause, "posljedica" = effect). Both forms map to the
+# same English-keyed prompt so the per-language prompt YAML stays simple.
 _QUESTION_TO_PROMPT_KEY: dict[str, str] = {
     "cause": "cause_prompt",
     "effect": "effect_prompt",
+    "uzrok": "cause_prompt",
+    "posljedica": "effect_prompt",
+    "posledica": "effect_prompt",  # Serbian Cyrillic-Latin variant
 }
 
 

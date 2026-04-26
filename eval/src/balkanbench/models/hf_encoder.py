@@ -148,35 +148,54 @@ def _build_cls_pool_multiple_choice(
 ) -> Any:
     """Construct a generic CLS-pool MultipleChoice model around AutoModel.
 
-    The built-in XLMRobertaForMultipleChoice does ``pooled_output =
-    outputs[1]``, which raises IndexError when the pretrained checkpoint
-    has no pooler weights (most v3+ XLM-R checkpoints, including the
-    ones we ship in v0.1). This wrapper:
-      1. loads the encoder via AutoModel(add_pooling_layer=False),
-      2. takes the CLS token from last_hidden_state per choice,
-      3. classifies through a fresh Linear(hidden_size, 1),
-      4. reshapes to (batch, num_choices) logits + computes CE loss.
-    Output schema matches MultipleChoiceModelOutput so the HF Trainer
-    consumes it without changes.
+    See ``CLSPoolMultipleChoice`` for what this returns and why.
     """
-    import torch
-    from torch import nn
     from transformers import AutoConfig, AutoModel
-    from transformers.modeling_outputs import MultipleChoiceModelOutput
 
     config = AutoConfig.from_pretrained(repo, revision=revision)
     base = AutoModel.from_pretrained(repo, revision=revision, add_pooling_layer=False)
-    hidden = config.hidden_size
-    drop_p = float(getattr(config, "hidden_dropout_prob", 0.1))
+    return CLSPoolMultipleChoice(
+        encoder=base,
+        config=config,
+        num_choices=num_choices,
+    )
 
-    class _CLSPoolMultipleChoice(nn.Module):
-        def __init__(self) -> None:
+
+def _make_cls_pool_class() -> Any:
+    """Build the CLSPoolMultipleChoice nn.Module class lazily.
+
+    Lives behind a lazy factory so importing this module doesn't pull in
+    torch / transformers. The class itself is module-level (assigned to
+    ``CLSPoolMultipleChoice`` below on first use) so HF Trainer's
+    checkpoint save can pickle it - inner classes defined inside a
+    function silently break ``torch.save`` and the worker hangs on the
+    first save callback.
+    """
+    from torch import nn
+    from transformers.modeling_outputs import MultipleChoiceModelOutput
+
+    class CLSPoolMultipleChoice(nn.Module):
+        """Generic CLS-pool MultipleChoice head used in place of
+        ``AutoModelForMultipleChoice`` for architectures whose stock impl
+        crashes when the checkpoint has no pooler (XLM-R in transformers
+        >=5: ``XLMRobertaForMultipleChoice.forward`` does ``outputs[1]``
+        which raises IndexError when ``pooler_output`` is None).
+
+        Layout: AutoModel(add_pooling_layer=False) -> CLS token ->
+        Dropout -> Linear(hidden, 1) -> reshape to (batch, num_choices) +
+        CrossEntropy loss. Output schema matches
+        ``MultipleChoiceModelOutput`` so the Trainer consumes it without
+        changes.
+        """
+
+        def __init__(self, *, encoder: Any, config: Any, num_choices: int) -> None:
             super().__init__()
-            self.encoder = base
-            self.dropout = nn.Dropout(drop_p)
-            self.classifier = nn.Linear(hidden, 1)
+            self.encoder = encoder
             self.config = config
             self._num_choices = num_choices
+            drop_p = float(getattr(config, "hidden_dropout_prob", 0.1))
+            self.dropout = nn.Dropout(drop_p)
+            self.classifier = nn.Linear(config.hidden_size, 1)
 
         def forward(  # type: ignore[no-untyped-def]
             self,
@@ -186,21 +205,44 @@ def _build_cls_pool_multiple_choice(
             labels=None,
             **_kw,
         ):
-            # input_ids: (batch, num_choices, seq_len) -> (batch*num_choices, seq_len)
             n = input_ids.shape[1]
-            flat = lambda t: None if t is None else t.view(-1, t.size(-1))
+
+            def _flat(t: Any) -> Any:
+                return None if t is None else t.view(-1, t.size(-1))
+
             outputs = self.encoder(
-                input_ids=flat(input_ids),
-                attention_mask=flat(attention_mask),
-                token_type_ids=flat(token_type_ids),
+                input_ids=_flat(input_ids),
+                attention_mask=_flat(attention_mask),
+                token_type_ids=_flat(token_type_ids),
             )
-            pooled = outputs.last_hidden_state[:, 0, :]  # CLS
+            pooled = outputs.last_hidden_state[:, 0, :]
             pooled = self.dropout(pooled)
-            logits = self.classifier(pooled).view(-1, n)  # (batch, num_choices)
+            logits = self.classifier(pooled).view(-1, n)
 
             loss = None
             if labels is not None:
                 loss = nn.functional.cross_entropy(logits, labels.view(-1))
             return MultipleChoiceModelOutput(loss=loss, logits=logits)
 
-    return _CLSPoolMultipleChoice()
+    return CLSPoolMultipleChoice
+
+
+# Hook into the module-level __getattr__ defined above by extending its
+# table. We can't add a second `def __getattr__` so we patch the existing
+# one to also handle the lazy CLSPoolMultipleChoice export.
+_orig_getattr = __getattr__
+
+
+def __getattr__(name: str) -> Any:  # type: ignore[no-redef]
+    if name == "CLSPoolMultipleChoice":
+        cls = _make_cls_pool_class()
+        # Pickle (used by torch.save inside HF Trainer's checkpoint save)
+        # locates a class via __module__.__qualname__. The factory's inner
+        # class qualname is `_make_cls_pool_class.<locals>.CLSPoolMultipleChoice`,
+        # which pickle can't resolve and silently hangs the worker. Rebrand
+        # so it looks module-level.
+        cls.__module__ = __name__
+        cls.__qualname__ = "CLSPoolMultipleChoice"
+        globals()[name] = cls
+        return cls
+    return _orig_getattr(name)

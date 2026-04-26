@@ -1,0 +1,82 @@
+{
+  "benchmark_name": "balkanbench",
+  "benchmark_version": "0.1.0",
+  "run_type": "official",
+  "task_id": "superglue.rte.hr",
+  "language": "hr",
+  "model": "xlm_r_bertic",
+  "model_id": "classla/xlm-r-bertic",
+  "model_revision": "unknown",
+  "code_revision": "unknown",
+  "dataset_revision": "v0.1.0-data",
+  "image_digest": "sha256:local",
+  "config_hash": "sha256:8215529db0f12e15ad6939eeaa05c6735d0404615916e58edf34e8c00422b91f",
+  "selection_metric": "accuracy",
+  "hp_search": {
+    "tool": "optuna",
+    "sampler": "TPESampler",
+    "sampler_seed": 42,
+    "num_trials": 20,
+    "search_space_id": "default-binary_classification-v1",
+    "early_stopping_policy": "patience=5 on accuracy",
+    "best_trial_number": 19,
+    "best_value": 0.779783393501805,
+    "sweep_id": "sweep-20260426-000346"
+  },
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "seed_results": [
+    {
+      "seed": 42,
+      "primary": {
+        "accuracy": 0.7643333333333333
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 43,
+      "primary": {
+        "accuracy": 0.5033333333333333
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 44,
+      "primary": {
+        "accuracy": 0.7186666666666667
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 45,
+      "primary": {
+        "accuracy": 0.49666666666666665
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 46,
+      "primary": {
+        "accuracy": 0.7503333333333333
+      },
+      "secondary": {}
+    }
+  ],
+  "aggregate": {
+    "mean": {
+      "accuracy": 0.6466666666666667
+    },
+    "stdev": {
+      "accuracy": 0.13492652321418006
+    }
+  },
+  "task_score": 0.6466666666666667,
+  "rankable": true,
+  "test_predictions_hash": "sha256:80a85bf217ca46688f1d15cf8616ea3818f5bab668f1b86e5bf616a0ed20cfbf",
+  "sponsor": "Recrewty"
+}

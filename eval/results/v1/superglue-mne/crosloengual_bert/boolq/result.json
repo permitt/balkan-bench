@@ -1,0 +1,82 @@
+{
+  "benchmark_name": "balkanbench",
+  "benchmark_version": "0.1.0",
+  "run_type": "official",
+  "task_id": "superglue.boolq.mne",
+  "language": "mne",
+  "model": "crosloengual_bert",
+  "model_id": "EMBEDDIA/crosloengual-bert",
+  "model_revision": "unknown",
+  "code_revision": "unknown",
+  "dataset_revision": "v0.1.0-data",
+  "image_digest": "sha256:local",
+  "config_hash": "sha256:b72a293158b0871ddb0c2aa3f11935c86ac06242b013df5bfbc8c594a73df3a7",
+  "selection_metric": "accuracy",
+  "hp_search": {
+    "tool": "optuna",
+    "sampler": "TPESampler",
+    "sampler_seed": 42,
+    "num_trials": 5,
+    "search_space_id": "default-binary_classification-v1",
+    "early_stopping_policy": "patience=5 on accuracy",
+    "best_trial_number": 1,
+    "best_value": 0.753822629969419,
+    "sweep_id": "sweep-20260426-045332"
+  },
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "seed_results": [
+    {
+      "seed": 42,
+      "primary": {
+        "accuracy": 0.7164869029275809
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 43,
+      "primary": {
+        "accuracy": 0.7303543913713405
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 44,
+      "primary": {
+        "accuracy": 0.7346687211093991
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 45,
+      "primary": {
+        "accuracy": 0.7346687211093991
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 46,
+      "primary": {
+        "accuracy": 0.7395993836671803
+      },
+      "secondary": {}
+    }
+  ],
+  "aggregate": {
+    "mean": {
+      "accuracy": 0.73115562403698
+    },
+    "stdev": {
+      "accuracy": 0.008828846633945137
+    }
+  },
+  "task_score": 0.73115562403698,
+  "rankable": true,
+  "test_predictions_hash": "sha256:d0dc1bd52b1f731dbf93190afc910cab5d559a4b2b307c87901189d6f99443e6",
+  "sponsor": "Recrewty"
+}

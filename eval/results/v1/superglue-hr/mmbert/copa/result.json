@@ -1,0 +1,82 @@
+{
+  "benchmark_name": "balkanbench",
+  "benchmark_version": "0.1.0",
+  "run_type": "official",
+  "task_id": "superglue.copa.hr",
+  "language": "hr",
+  "model": "mmbert",
+  "model_id": "jhu-clsp/mmBERT-base",
+  "model_revision": "unknown",
+  "code_revision": "unknown",
+  "dataset_revision": "v0.1.0-data",
+  "image_digest": "sha256:local",
+  "config_hash": "sha256:940892b4c5ee9d6adfb4f339c9febaa3e206e8dc8073245d1fcdb8398cb63827",
+  "selection_metric": "accuracy",
+  "hp_search": {
+    "tool": "optuna",
+    "sampler": "TPESampler",
+    "sampler_seed": 42,
+    "num_trials": 20,
+    "search_space_id": "default-multiple_choice-v1",
+    "early_stopping_policy": "patience=10 on accuracy",
+    "best_trial_number": 16,
+    "best_value": 0.6,
+    "sweep_id": "sweep-20260426-022541"
+  },
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "seed_results": [
+    {
+      "seed": 42,
+      "primary": {
+        "accuracy": 0.584
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 43,
+      "primary": {
+        "accuracy": 0.614
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 44,
+      "primary": {
+        "accuracy": 0.594
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 45,
+      "primary": {
+        "accuracy": 0.524
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 46,
+      "primary": {
+        "accuracy": 0.644
+      },
+      "secondary": {}
+    }
+  ],
+  "aggregate": {
+    "mean": {
+      "accuracy": 0.592
+    },
+    "stdev": {
+      "accuracy": 0.04438468204234429
+    }
+  },
+  "task_score": 0.592,
+  "rankable": true,
+  "test_predictions_hash": "sha256:929ce224a9c961be1be3d37b3af82370813df4eb74a96eb8d2f58a3f68c80d6b",
+  "sponsor": "Recrewty"
+}

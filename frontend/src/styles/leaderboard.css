@@ -219,6 +219,14 @@
   letter-spacing: 0.08em;
 }
 
+/* Test-split + seed badge: signals these are eval-on-test numbers, not
+   validation. Inverted colours so it reads as a separate provenance tag. */
+.lb-eyebrow .chip-test {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--ink);
+}
+
 .lb-title {
   font-family: var(--sans);
   font-weight: 700;

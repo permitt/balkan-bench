@@ -1,0 +1,92 @@
+{
+  "benchmark_name": "balkanbench",
+  "benchmark_version": "0.1.0",
+  "run_type": "official",
+  "task_id": "superglue.cb.mne",
+  "language": "mne",
+  "model": "xlm_r_bertic",
+  "model_id": "classla/xlm-r-bertic",
+  "model_revision": "unknown",
+  "code_revision": "unknown",
+  "dataset_revision": "v0.1.0-data",
+  "image_digest": "sha256:local",
+  "config_hash": "sha256:aefb39ceb9f78f26ce639e6a2ceea2c68454cd05782b8c1fe07c287b1ec7356b",
+  "selection_metric": "f1_macro",
+  "hp_search": {
+    "tool": "optuna",
+    "sampler": "TPESampler",
+    "sampler_seed": 42,
+    "num_trials": 20,
+    "search_space_id": "default-multiclass_classification-v1",
+    "early_stopping_policy": "patience=10 on f1_macro",
+    "best_trial_number": 10,
+    "best_value": 0.9019810508182601,
+    "sweep_id": "sweep-20260426-000308"
+  },
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "seed_results": [
+    {
+      "seed": 42,
+      "primary": {
+        "f1_macro": 0.8682057276446522
+      },
+      "secondary": {
+        "accuracy": 0.916
+      }
+    },
+    {
+      "seed": 43,
+      "primary": {
+        "f1_macro": 0.8418350769795689
+      },
+      "secondary": {
+        "accuracy": 0.896
+      }
+    },
+    {
+      "seed": 44,
+      "primary": {
+        "f1_macro": 0.5153066757998688
+      },
+      "secondary": {
+        "accuracy": 0.748
+      }
+    },
+    {
+      "seed": 45,
+      "primary": {
+        "f1_macro": 0.7679580306698951
+      },
+      "secondary": {
+        "accuracy": 0.82
+      }
+    },
+    {
+      "seed": 46,
+      "primary": {
+        "f1_macro": 0.8662880486810208
+      },
+      "secondary": {
+        "accuracy": 0.904
+      }
+    }
+  ],
+  "aggregate": {
+    "mean": {
+      "f1_macro": 0.7719187119550012
+    },
+    "stdev": {
+      "f1_macro": 0.14910607239370044
+    }
+  },
+  "task_score": 0.7719187119550012,
+  "rankable": true,
+  "test_predictions_hash": "sha256:1d22c07d4c3dc6cb5024d026c1ef3ca5e65025c66c6eda3f4ca2a5a747a14803",
+  "sponsor": "Recrewty"
+}

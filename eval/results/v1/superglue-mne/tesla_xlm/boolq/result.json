@@ -1,0 +1,82 @@
+{
+  "benchmark_name": "balkanbench",
+  "benchmark_version": "0.1.0",
+  "run_type": "official",
+  "task_id": "superglue.boolq.mne",
+  "language": "mne",
+  "model": "tesla_xlm",
+  "model_id": "te-sla/teslaXLM",
+  "model_revision": "unknown",
+  "code_revision": "unknown",
+  "dataset_revision": "v0.1.0-data",
+  "image_digest": "sha256:local",
+  "config_hash": "sha256:442506c0bcd4662cb1f34e31b508f33b72935b7c10c6f67bfd1c9c698e9bae77",
+  "selection_metric": "accuracy",
+  "hp_search": {
+    "tool": "optuna",
+    "sampler": "TPESampler",
+    "sampler_seed": 42,
+    "num_trials": 5,
+    "search_space_id": "default-binary_classification-v1",
+    "early_stopping_policy": "patience=5 on accuracy",
+    "best_trial_number": 0,
+    "best_value": 0.6217125382262997,
+    "sweep_id": "sweep-20260426-045324"
+  },
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "seed_results": [
+    {
+      "seed": 42,
+      "primary": {
+        "accuracy": 0.6231124807395994
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 43,
+      "primary": {
+        "accuracy": 0.6231124807395994
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 44,
+      "primary": {
+        "accuracy": 0.6231124807395994
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 45,
+      "primary": {
+        "accuracy": 0.6231124807395994
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 46,
+      "primary": {
+        "accuracy": 0.6231124807395994
+      },
+      "secondary": {}
+    }
+  ],
+  "aggregate": {
+    "mean": {
+      "accuracy": 0.6231124807395994
+    },
+    "stdev": {
+      "accuracy": 0.0
+    }
+  },
+  "task_score": 0.6231124807395994,
+  "rankable": true,
+  "test_predictions_hash": "sha256:f0fd42aecab5cf2ff7ea8c52d3930a48654cecedd181c1ad00c211a961d17745",
+  "sponsor": "Recrewty"
+}

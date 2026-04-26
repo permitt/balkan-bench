@@ -1,0 +1,92 @@
+{
+  "benchmark_name": "balkanbench",
+  "benchmark_version": "0.1.0",
+  "run_type": "official",
+  "task_id": "superglue.cb.hr",
+  "language": "hr",
+  "model": "bertic",
+  "model_id": "classla/bcms-bertic",
+  "model_revision": "unknown",
+  "code_revision": "unknown",
+  "dataset_revision": "v0.1.0-data",
+  "image_digest": "sha256:local",
+  "config_hash": "sha256:360b4917c0fb70aa7717bee87a5065d1ef9fb117e1c382aede0bfa56019a4e70",
+  "selection_metric": "f1_macro",
+  "hp_search": {
+    "tool": "optuna",
+    "sampler": "TPESampler",
+    "sampler_seed": 42,
+    "num_trials": 20,
+    "search_space_id": "default-multiclass_classification-v1",
+    "early_stopping_policy": "patience=10 on f1_macro",
+    "best_trial_number": 19,
+    "best_value": 0.8702260702260701,
+    "sweep_id": "sweep-20260425-232452"
+  },
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "seed_results": [
+    {
+      "seed": 42,
+      "primary": {
+        "f1_macro": 0.76414556868972
+      },
+      "secondary": {
+        "accuracy": 0.796
+      }
+    },
+    {
+      "seed": 43,
+      "primary": {
+        "f1_macro": 0.7326361631769903
+      },
+      "secondary": {
+        "accuracy": 0.824
+      }
+    },
+    {
+      "seed": 44,
+      "primary": {
+        "f1_macro": 0.5517149050108376
+      },
+      "secondary": {
+        "accuracy": 0.752
+      }
+    },
+    {
+      "seed": 45,
+      "primary": {
+        "f1_macro": 0.7162052741780722
+      },
+      "secondary": {
+        "accuracy": 0.8
+      }
+    },
+    {
+      "seed": 46,
+      "primary": {
+        "f1_macro": 0.7013663585092157
+      },
+      "secondary": {
+        "accuracy": 0.8
+      }
+    }
+  ],
+  "aggregate": {
+    "mean": {
+      "f1_macro": 0.6932136539129672
+    },
+    "stdev": {
+      "f1_macro": 0.08246582308157255
+    }
+  },
+  "task_score": 0.6932136539129672,
+  "rankable": true,
+  "test_predictions_hash": "sha256:55c1fe7a220cbecc5444203eaaef685fe9503adbf615555656fb7760e1312ed1",
+  "sponsor": "Recrewty"
+}

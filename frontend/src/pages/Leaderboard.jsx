@@ -209,12 +209,15 @@ export default function Leaderboard() {
               {BENCHMARKS[target.benchmark].label.toUpperCase()} ·{' '}
               {LANGUAGES[target.language].flag} {LANGUAGES[target.language].name.toUpperCase()} · V0.1
             </span>
+            <span className="chip chip-test" title="Numbers reported are mean ± stdev across 5 seeds, evaluated on the held-out test split">
+              TEST · 5 SEEDS
+            </span>
           </div>
           <h1 className="lb-title">
             Every model, <span className="stroke">measured</span><span className="slash">.</span>
           </h1>
           <p className="lb-sub">
-            {data ? `${data.seeds} seeds per row, primary metric per task.` : 'Loading…'}
+            {data ? `${data.seeds} seeds per row, evaluated on the held-out test split, mean ± stdev shown.` : 'Loading…'}
             {' '}Compute sponsored by <b>Recrewty</b>.
           </p>
         </div>

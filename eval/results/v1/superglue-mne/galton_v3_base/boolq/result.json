@@ -1,0 +1,82 @@
+{
+  "benchmark_name": "balkanbench",
+  "benchmark_version": "0.1.0",
+  "run_type": "official",
+  "task_id": "superglue.boolq.mne",
+  "language": "mne",
+  "model": "galton_v3_base",
+  "model_id": "permitt/galton-bcms-v3-base-ctx8192",
+  "model_revision": "unknown",
+  "code_revision": "unknown",
+  "dataset_revision": "v0.1.0-data",
+  "image_digest": "sha256:local",
+  "config_hash": "sha256:1748c9c7c9a012dfa7c566e9d0c098f1c7d262daf8f46c30d3245c95bb1867e2",
+  "selection_metric": "accuracy",
+  "hp_search": {
+    "tool": "optuna",
+    "sampler": "TPESampler",
+    "sampler_seed": 42,
+    "num_trials": 5,
+    "search_space_id": "default-binary_classification-v1",
+    "early_stopping_policy": "patience=5 on accuracy",
+    "best_trial_number": 1,
+    "best_value": 0.7850152905198777,
+    "sweep_id": "sweep-20260426-045346"
+  },
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "seed_results": [
+    {
+      "seed": 42,
+      "primary": {
+        "accuracy": 0.7611710323574731
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 43,
+      "primary": {
+        "accuracy": 0.762095531587057
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 44,
+      "primary": {
+        "accuracy": 0.7596302003081664
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 45,
+      "primary": {
+        "accuracy": 0.7627118644067796
+      },
+      "secondary": {}
+    },
+    {
+      "seed": 46,
+      "primary": {
+        "accuracy": 0.7707241910631741
+      },
+      "secondary": {}
+    }
+  ],
+  "aggregate": {
+    "mean": {
+      "accuracy": 0.7632665639445301
+    },
+    "stdev": {
+      "accuracy": 0.004327516716558885
+    }
+  },
+  "task_score": 0.7632665639445301,
+  "rankable": true,
+  "test_predictions_hash": "sha256:4f47c12dcc1904198800f3437b848c1f66372c0062d68705b2fbda243f57ec24",
+  "sponsor": "Recrewty"
+}

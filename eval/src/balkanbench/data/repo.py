@@ -19,9 +19,7 @@ class DatasetRepoError(RuntimeError):
     """Raised when the dataset repo cannot be resolved for the language."""
 
 
-def resolve_dataset_repo(
-    task_cfg: dict[str, Any], language: str, *, prefer: str = "public"
-) -> str:
+def resolve_dataset_repo(task_cfg: dict[str, Any], language: str, *, prefer: str = "public") -> str:
     """Return the HF repo id for ``language`` from ``task_cfg.dataset.per_language``.
 
     ``prefer`` selects between the public split (train/validation labels +

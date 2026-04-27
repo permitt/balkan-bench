@@ -45,6 +45,7 @@ def test_predict_emits_predictions_jsonl(tmp_path, monkeypatch) -> None:
         )
 
     monkeypatch.setattr("balkanbench.cli.predict.run_single_seed", fake_run_single_seed)
+
     def fake_load_dataset(repo: str, config: str, **_: Any) -> DatasetDict:
         captured_repo["repo"] = repo
         return _fake_test_dataset()

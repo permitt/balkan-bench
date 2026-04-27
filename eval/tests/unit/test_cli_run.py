@@ -229,9 +229,7 @@ def test_run_aborts_on_fingerprint_mismatch(tmp_path, monkeypatch) -> None:
     out = tmp_path / "runs"
     # Manually plant a fingerprint matching a prior --seeds 42 invocation.
     out.mkdir(parents=True)
-    (out / ".run_fingerprint.json").write_text(
-        '{"hash": "stale", "fields": {"seeds": [42]}}'
-    )
+    (out / ".run_fingerprint.json").write_text('{"hash": "stale", "fields": {"seeds": [42]}}')
 
     result = runner.invoke(
         app,
@@ -263,9 +261,7 @@ def test_run_hp_cache_rejects_when_settings_differ(tmp_path, monkeypatch) -> Non
     hp_calls: list[dict[str, Any]] = []
 
     def fake_run_hp_search(**kwargs: Any) -> HPSearchResult:
-        hp_calls.append(
-            {k: kwargs[k] for k in ("n_trials", "sampler_seed", "seed_for_trials")}
-        )
+        hp_calls.append({k: kwargs[k] for k in ("n_trials", "sampler_seed", "seed_for_trials")})
         return HPSearchResult(
             best_trial_number=0,
             best_value=0.9,
@@ -361,9 +357,7 @@ def test_run_hp_cache_rejects_when_settings_differ(tmp_path, monkeypatch) -> Non
     assert result.exit_code == 0, result.output
     # HP search must have been invoked with the CURRENT settings, ignoring the cache.
     assert hp_calls == [{"n_trials": 1, "sampler_seed": 42, "seed_for_trials": 42}]
-    artifact_path = (
-        out / "results" / "superglue-hr" / "bertic" / "boolq" / "result.json"
-    )
+    artifact_path = out / "results" / "superglue-hr" / "bertic" / "boolq" / "result.json"
     assert artifact_path.is_file()
     artifact = json.loads(artifact_path.read_text())
     assert artifact["hp_search"]["sweep_id"] == "sweep-new"

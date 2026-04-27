@@ -103,7 +103,11 @@ pick_balkanbench_cmd() {
       # repeats --tasks; empty TASKS means "every ranked task for LANGUAGE".
       local cmd
       cmd="balkanbench run --model ${MODEL} --benchmark ${BENCHMARK} --language ${LANGUAGE}"
-      cmd+=" --n-trials ${N_TRIALS:-20}"
+      if [[ "${SKIP_HP_SEARCH:-0}" == "1" || "${SKIP_HP_SEARCH:-0}" == "true" ]]; then
+        cmd+=" --skip-hp-search"
+      else
+        cmd+=" --n-trials ${N_TRIALS:-20}"
+      fi
       cmd+=" --eval-split ${EVAL_SPLIT:-test}"
       cmd+=" --dataset-revision ${DATASET_REVISION}"
       cmd+=" --benchmark-version ${BENCHMARK_VERSION:-0.1.0}"

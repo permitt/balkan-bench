@@ -11,7 +11,10 @@ training:
 task_overrides:
   # 560M XLM-R + multiple_choice on L4 24GB needs the smaller batch to
   # leave headroom for the per-seed allocator pressure that wedged earlier
-  # COPA runs.
+  # COPA runs. fp16 also forced off here to rule out half-precision NaN/
+  # overflow as the cause of the silent training hang we kept hitting.
   superglue.copa:
     batch_size: 8
+    fp16: false
+    num_epochs: 10
 seeds: [42, 43, 44, 45, 46]

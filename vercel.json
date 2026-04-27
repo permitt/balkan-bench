@@ -3,7 +3,7 @@
   "buildCommand": "cd frontend && npm install && npm run build",
   "outputDirectory": "frontend/dist",
   "framework": null,
-  "installCommand": "echo skipping root install; frontend handles its own",
+  "installCommand": "true",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]

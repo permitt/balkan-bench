@@ -116,7 +116,8 @@ def eval_cmd(
         )
 
     try:
-        repo_preference = "private" if effective_eval_split == "test" and not is_diagnostic else "public"
+        on_test_split = effective_eval_split == "test" and not is_diagnostic
+        repo_preference = "private" if on_test_split else "public"
         repo_id = resolve_dataset_repo(task_cfg, language, prefer=repo_preference)
     except DatasetRepoError as exc:
         typer.echo(_red(str(exc)))

@@ -143,13 +143,20 @@ def test_run_resumes_by_skipping_existing_results(tmp_path, monkeypatch) -> None
                 "family": "electra",
                 "params_hint": "110M",
                 "tier": "official",
-                "training": {"learning_rate": 2e-5, "batch_size": 16, "num_epochs": 1, "fp16": False},
+                "training": {
+                    "learning_rate": 2e-5,
+                    "batch_size": 16,
+                    "num_epochs": 1,
+                    "fp16": False,
+                },
             },
             best_config_path=tmp_path / "_x" / "bertic_best.yaml",
             sweep_id="sweep-fake",
         )
 
-    def fake_run_multiseed(*, task_cfg: dict[str, Any], seeds: list[int], **_: Any) -> list[SeedResult]:
+    def fake_run_multiseed(
+        *, task_cfg: dict[str, Any], seeds: list[int], **_: Any
+    ) -> list[SeedResult]:
         eval_calls.append(task_cfg["task"])
         return [
             SeedResult(
@@ -387,7 +394,9 @@ def test_run_uses_public_repo_for_validation_split(tmp_path, monkeypatch) -> Non
             sweep_id="sweep-fake",
         )
 
-    def fake_run_multiseed(*, seeds: list[int], task_cfg: dict[str, Any], **_: Any) -> list[SeedResult]:
+    def fake_run_multiseed(
+        *, seeds: list[int], task_cfg: dict[str, Any], **_: Any
+    ) -> list[SeedResult]:
         primary = task_cfg["metrics"]["task_score"]
         return [
             SeedResult(

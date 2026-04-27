@@ -66,7 +66,9 @@ def run_cmd(
     model: str = typer.Option(..., "--model", help="Model config name (e.g. 'bertic')."),
     benchmark: str = typer.Option(..., "--benchmark", help="Benchmark identifier."),
     language: str = typer.Option(..., "--language", help="BCMS language code."),
-    out: Path = typer.Option(..., "--out", help="Run output directory (state + artifacts live here)."),
+    out: Path = typer.Option(
+        ..., "--out", help="Run output directory (state + artifacts live here)."
+    ),
     tasks: list[str] = typer.Option(
         None,
         "--tasks",

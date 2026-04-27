@@ -2,7 +2,7 @@
   "benchmark": "superglue",
   "language": "hr",
   "benchmark_version": "0.1.0",
-  "generated_at": "2026-04-26T17:51:52Z",
+  "generated_at": "2026-04-27T09:13:13Z",
   "sponsor": "Recrewty",
   "seeds": 5,
   "ranked_tasks": [
@@ -79,7 +79,7 @@
       "model_revision": "unknown"
     },
     {
-      "rank": 6,
+      "rank": 7,
       "model": "galton_v3_base",
       "model_id": "permitt/galton-bcms-v3-base-ctx8192",
       "params": 0,
@@ -139,7 +139,7 @@
       "model_revision": "unknown"
     },
     {
-      "rank": 5,
+      "rank": 6,
       "model": "jerteh_355",
       "model_id": "jerteh/Jerteh-355",
       "params": 0,
@@ -199,7 +199,7 @@
       "model_revision": "unknown"
     },
     {
-      "rank": 7,
+      "rank": 8,
       "model": "mmbert_small",
       "model_id": "jhu-clsp/mmBERT-small",
       "params": 0,
@@ -229,7 +229,7 @@
       "model_revision": "unknown"
     },
     {
-      "rank": null,
+      "rank": 9,
       "model": "tesla_xlm",
       "model_id": "te-sla/teslaXLM",
       "params": 0,
@@ -243,21 +243,23 @@
           "mean": 0.26599224389211185,
           "stdev": 0.05664105431022633
         },
-        "copa": null,
+        "copa": {
+          "mean": 0.5104,
+          "stdev": 0.015126136320951243
+        },
         "rte": {
           "mean": 0.5022,
           "stdev": 0.008814760348415631
         }
       },
-      "avg": 0.4638,
-      "complete": false,
-      "tasks_completed": 3,
+      "avg": 0.4754,
+      "complete": true,
+      "tasks_completed": 4,
       "tasks_total": 4,
-      "model_revision": "unknown",
-      "partial_flag": "(3/4) partial"
+      "model_revision": "unknown"
     },
     {
-      "rank": null,
+      "rank": 5,
       "model": "xlm_r_bertic",
       "model_id": "classla/xlm-r-bertic",
       "params": 0,
@@ -271,18 +273,20 @@
           "mean": 0.8292812835190302,
           "stdev": 0.05942719351557818
         },
-        "copa": null,
+        "copa": {
+          "mean": 0.5364,
+          "stdev": 0.02393324048264253
+        },
         "rte": {
           "mean": 0.6466666666666667,
           "stdev": 0.13492652321418006
         }
       },
-      "avg": 0.7668,
-      "complete": false,
-      "tasks_completed": 3,
+      "avg": 0.7092,
+      "complete": true,
+      "tasks_completed": 4,
       "tasks_total": 4,
-      "model_revision": "unknown",
-      "partial_flag": "(3/4) partial"
+      "model_revision": "unknown"
     }
   ]
 }

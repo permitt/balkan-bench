@@ -8,4 +8,10 @@ training:
   batch_size: 16
   num_epochs: 10
   fp16: true
+task_overrides:
+  # 560M XLM-R + multiple_choice on L4 24GB needs the smaller batch to
+  # leave headroom for the per-seed allocator pressure that wedged earlier
+  # COPA runs.
+  superglue.copa:
+    batch_size: 8
 seeds: [42, 43, 44, 45, 46]

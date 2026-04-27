@@ -191,6 +191,19 @@ def run_hp_search(
             output_dir=sweep_dir / f"trial-{trial.number}",
             eval_split="validation",
         )
+        # Free GPU memory between trials. Without this, big-model XLM-R
+        # sweeps wedge the worker silently after ~5 trials when CUDA's
+        # caching allocator can no longer find a contiguous block.
+        import gc as _gc
+
+        _gc.collect()
+        try:
+            import torch as _torch
+
+            if _torch.cuda.is_available():
+                _torch.cuda.empty_cache()
+        except ImportError:
+            pass
         # Optuna maximises; return the task's task_score (which mirrors the
         # primary metric). Fall back to task_score field if the metric is not
         # itself in primary (shouldn't happen with the v0.1 configs).

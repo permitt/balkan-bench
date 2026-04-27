@@ -240,22 +240,38 @@ def run_multiseed(
     train: bool = True,
     compute_metrics: bool = True,
 ) -> list[SeedResult]:
-    """Run ``run_single_seed`` for every seed; return the list in order."""
+    """Run ``run_single_seed`` for every seed; return the list in order.
+
+    Each iteration loads a fresh model + tokenizer + Trainer. On big models
+    (e.g. XLM-R-560M) the per-seed allocations accumulate in CUDA's caching
+    allocator and the worker eventually wedges silently mid-training. We
+    explicitly drop references and call ``torch.cuda.empty_cache()`` after
+    every seed so the next iteration starts on a clean GPU.
+    """
+    import gc
+
     results: list[SeedResult] = []
     for seed in seeds:
-        results.append(
-            run_single_seed(
-                model_cfg=model_cfg,
-                task_cfg=task_cfg,
-                language=language,
-                datasets=datasets,
-                seed=seed,
-                output_dir=Path(output_dir) / f"seed-{seed}",
-                eval_split=eval_split,
-                train=train,
-                compute_metrics=compute_metrics,
-            )
+        result = run_single_seed(
+            model_cfg=model_cfg,
+            task_cfg=task_cfg,
+            language=language,
+            datasets=datasets,
+            seed=seed,
+            output_dir=Path(output_dir) / f"seed-{seed}",
+            eval_split=eval_split,
+            train=train,
+            compute_metrics=compute_metrics,
         )
+        results.append(result)
+        gc.collect()
+        try:
+            import torch
+
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+        except ImportError:  # pragma: no cover - torch is a hard dep at runtime
+            pass
     return results
 
 

@@ -25,17 +25,27 @@ export default function About() {
 
         <h2>What ships in v0.1</h2>
         <ul>
-          <li>SuperGLUE adapted for Serbian, 6 ranked tasks, AXb + AXg diagnostics.</li>
-          <li>9 baseline models evaluated with 5 fixed seeds each.</li>
-          <li>Public Hugging Face dataset with hidden test labels held privately.</li>
-          <li>Open-source framework for local + GCP evaluation.</li>
+          <li>
+            <b>Serbian SuperGLUE</b> (official frozen track): 6 ranked tasks
+            (BoolQ, CB, COPA, RTE, MultiRC, WSC) and 2 diagnostics (AX-b, AX-g),
+            totalling <b>67,313 items</b> across train, validation, and held-out
+            test splits.
+          </li>
+          <li>
+            <b>Croatian + Montenegrin SuperGLUE</b> as released previews: 5 ranked
+            tasks each (no WSC adaptation yet); HR/MNE rows publish on the same
+            leaderboard, scored on the same private test labels.
+          </li>
+          <li>9 baseline encoder models evaluated with 5 fixed seeds each on the held-out test split.</li>
+          <li>Public Hugging Face datasets with hidden test labels held in gated sibling repos.</li>
+          <li>Open-source framework for local + GCP (Vertex AI) evaluation.</li>
         </ul>
 
         <h2>What's next</h2>
         <ul>
-          <li>Croatian, Montenegrin, Bosnian datasets (sibling HF repos).</li>
+          <li>Bosnian SuperGLUE adaptation (sibling HF repo).</li>
           <li>Serbian-LLM-Eval (Aleksa Gordić) as a second benchmark suite.</li>
-          <li>MTEB-BCMS embeddings and LLM Arena.</li>
+          <li>MTEB-BCMS embeddings, LLM Arena, and community-submitted tracks (sentiment, NER, domain-specific).</li>
         </ul>
 
         <h2>Hidden test labels</h2>

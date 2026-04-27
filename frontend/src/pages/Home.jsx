@@ -95,8 +95,8 @@ export default function Home() {
         <div className="right">
           <div className="status-card">
             <div className="status-head">
-              <span>BUILD / <b>v1.2</b></span>
-              <span>BUILDING · PROD</span>
+              <span>BUILD / <b>v0.1</b></span>
+              <span>RELEASED · PROD</span>
             </div>
 
             <div className="status-body">
@@ -123,16 +123,16 @@ export default function Home() {
             </div>
 
             <div className="progress">
-              <div className="progress-top"><span>LAUNCH READINESS</span><b>62%</b></div>
+              <div className="progress-top"><span>LAUNCH READINESS</span><b>v0.1</b></div>
               <div className="progress-bar"></div>
             </div>
 
             <div className="term">
-              <div><span className="g">$</span> <span className="w">balkanbench</span> <span className="y">--pre-release</span></div>
-              <div><span className="c">› loading 28,104 items across 4 languages</span></div>
-              <div><span className="c">› validating 42 model baselines</span></div>
-              <div><span className="c">› building leaderboard ui</span></div>
-              <div><span className="g">›</span> <span className="w">eta</span> <span className="y">Q2 2026</span><span className="cursor"></span></div>
+              <div><span className="g">$</span> <span className="w">balkanbench</span> <span className="y">--version</span></div>
+              <div><span className="c">› v0.1 - 67,313 items across 3 released languages</span></div>
+              <div><span className="c">› 9 models · 5 seeds · held-out test split</span></div>
+              <div><span className="c">› results live at balkanbench.com/leaderboard</span></div>
+              <div><span className="g">›</span> <span className="w">released</span> <span className="y">2026-04-27</span><span className="cursor"></span></div>
             </div>
           </div>
         </div>

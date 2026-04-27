@@ -33,10 +33,13 @@ repo:
 The repository is designed for contributions. Adding a new benchmark, task,
 language, or model should be a schema-validated PR, not a core-code rewrite.
 
-At launch, BalkanBench v0.1 covers 3 released languages, up to 7 NLU tasks plus
-diagnostics, and more than 42k items across the released SuperGLUE datasets.
-The public leaderboard ships with 9 evaluated models, each run across 5 fixed
-seeds on the held-out test split.
+At launch, BalkanBench **v0.1** covers 3 released languages. The Serbian
+SuperGLUE track is the official frozen track and ships with **6 ranked NLU
+tasks** (BoolQ, CB, COPA, RTE, MultiRC, WSC) plus **2 diagnostics** (AX-b,
+AX-g), totalling **67,313 items** across train, validation, and held-out test
+splits. Croatian and Montenegrin release alongside as 5-task previews (no WSC
+adaptation yet). The public leaderboard ships with **9 evaluated models**,
+each run across **5 fixed seeds** on the held-out test split.
 
 ## Vision
 

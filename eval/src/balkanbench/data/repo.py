@@ -20,14 +20,14 @@ class DatasetRepoError(RuntimeError):
 
 
 def resolve_dataset_repo(
-    task_cfg: dict[str, Any], language: str, *, prefer: str = "private"
+    task_cfg: dict[str, Any], language: str, *, prefer: str = "public"
 ) -> str:
     """Return the HF repo id for ``language`` from ``task_cfg.dataset.per_language``.
 
-    ``prefer`` selects between the public split (no test labels) and the
-    private split (full test labels, gated). v0.1 runtime callers default
-    to ``"private"`` because the published private repos are the only ones
-    that carry the labeled test split needed for end-to-end runs.
+    ``prefer`` selects between the public split (train/validation labels +
+    public test inputs) and the private split (hidden test labels, gated).
+    Runtime callers default to ``"public"``; only trusted official scoring
+    flows should request ``"private"`` explicitly.
     """
     if prefer not in ("public", "private"):
         raise ValueError(f"prefer must be 'public' or 'private'; got {prefer!r}")

@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import pickle
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
 
+from balkanbench.models import hf_encoder as hf_encoder_module
 from balkanbench.models.hf_encoder import HFEncoder
 
 
@@ -162,3 +165,41 @@ def test_rejects_unknown_task_type(monkeypatch) -> None:
     cfg["task_type"] = "regression_weirdness"
     with pytest.raises(ValueError, match="task_type"):
         HFEncoder.build(model_cfg=_bertic_model_cfg(), task_cfg=cfg)
+
+
+def test_build_multiple_choice_xlm_roberta_uses_cls_pool_wrapper(monkeypatch) -> None:
+    base_model = _FakeModel("classla/xlm-r-bertic")
+
+    monkeypatch.setattr(
+        "balkanbench.models.hf_encoder.AutoTokenizer.from_pretrained",
+        lambda path, **kwargs: _FakeTokenizer(path, **kwargs),
+    )
+    monkeypatch.setattr(
+        "balkanbench.models.hf_encoder.AutoConfig.from_pretrained",
+        lambda path, **kwargs: SimpleNamespace(
+            model_type="xlm-roberta",
+            hidden_size=8,
+            hidden_dropout_prob=0.1,
+        ),
+    )
+    monkeypatch.setattr(
+        "balkanbench.models.hf_encoder.AutoModel.from_pretrained",
+        lambda path, **kwargs: base_model,
+    )
+
+    model_cfg = _bertic_model_cfg()
+    model_cfg["hf_repo"] = "classla/xlm-r-bertic"
+    model_cfg["family"] = "xlm-roberta"
+    enc = HFEncoder.build(model_cfg=model_cfg, task_cfg=_multiple_choice_task_cfg())
+
+    assert enc.model.__class__.__name__ == "CLSPoolMultipleChoice"
+    assert enc.model.__class__.__module__ == "balkanbench.models.hf_encoder"
+    assert enc.model.__class__.__qualname__ == "CLSPoolMultipleChoice"
+    assert enc.model.encoder is base_model
+    assert enc.model._num_choices == 2
+
+
+def test_cls_pool_multiple_choice_class_is_picklable() -> None:
+    cls = hf_encoder_module.CLSPoolMultipleChoice
+    payload = pickle.dumps(cls)
+    assert payload

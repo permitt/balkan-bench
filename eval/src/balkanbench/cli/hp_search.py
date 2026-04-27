@@ -63,7 +63,7 @@ def hp_search_cmd(
         raise typer.Exit(code=1) from exc
 
     try:
-        repo_id = resolve_dataset_repo(task_cfg, language, prefer="private")
+        repo_id = resolve_dataset_repo(task_cfg, language, prefer="public")
     except DatasetRepoError as exc:
         typer.echo(_red(str(exc)))
         raise typer.Exit(code=1) from exc

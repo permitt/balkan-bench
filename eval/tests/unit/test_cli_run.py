@@ -361,3 +361,76 @@ def test_run_hp_cache_rejects_when_settings_differ(tmp_path, monkeypatch) -> Non
     artifact = json.loads(artifact_path.read_text())
     assert artifact["hp_search"]["sweep_id"] == "sweep-new"
     assert artifact["hp_search"]["num_trials"] == 1
+
+
+def test_run_uses_public_repo_for_validation_split(tmp_path, monkeypatch) -> None:
+    captured_repos: list[str] = []
+
+    def fake_run_hp_search(*, task_cfg: dict[str, Any], **_: Any) -> HPSearchResult:
+        return HPSearchResult(
+            best_trial_number=0,
+            best_value=0.8,
+            best_model_cfg={
+                "name": "bertic",
+                "hf_repo": "classla/bcms-bertic",
+                "family": "electra",
+                "params_hint": "110M",
+                "tier": "official",
+                "training": {
+                    "learning_rate": 2e-5,
+                    "batch_size": 16,
+                    "num_epochs": 1,
+                    "fp16": False,
+                },
+            },
+            best_config_path=tmp_path / "_unused.yaml",
+            sweep_id="sweep-fake",
+        )
+
+    def fake_run_multiseed(*, seeds: list[int], task_cfg: dict[str, Any], **_: Any) -> list[SeedResult]:
+        primary = task_cfg["metrics"]["task_score"]
+        return [
+            SeedResult(
+                seed=s,
+                primary={primary: 0.7},
+                secondary={},
+                task_score=0.7,
+                predictions=[0],
+                references=[0],
+                group_ids=None,
+            )
+            for s in seeds
+        ]
+
+    def fake_load_dataset(repo: str, cfg: str, **_: Any) -> DatasetDict:
+        captured_repos.append(repo)
+        return _fake_datasets()
+
+    monkeypatch.setattr("balkanbench.cli.run.run_hp_search", fake_run_hp_search)
+    monkeypatch.setattr("balkanbench.cli.run.run_multiseed", fake_run_multiseed)
+    monkeypatch.setattr("balkanbench.cli.run.load_dataset", fake_load_dataset)
+    monkeypatch.setenv("HF_TOKEN", "fake-token")
+
+    out = tmp_path / "runs"
+    result = runner.invoke(
+        app,
+        [
+            "run",
+            "--model",
+            "bertic",
+            "--benchmark",
+            "superglue",
+            "--language",
+            "hr",
+            "--tasks",
+            "boolq",
+            "--eval-split",
+            "validation",
+            "--n-trials",
+            "1",
+            "--out",
+            str(out),
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    assert captured_repos == ["permitt/superglue-hr"]

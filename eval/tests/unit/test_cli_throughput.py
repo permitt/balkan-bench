@@ -45,10 +45,13 @@ class _FakeEncoder:
 
 
 def test_throughput_cli_writes_per_task_and_aggregate(tmp_path, monkeypatch) -> None:
-    monkeypatch.setattr(
-        "balkanbench.cli.throughput.load_dataset",
-        lambda repo, config, **_: _val(32),
-    )
+    captured_repo: dict[str, str] = {}
+
+    def fake_load_dataset(repo: str, config: str, **_: Any) -> DatasetDict:
+        captured_repo["repo"] = repo
+        return _val(32)
+
+    monkeypatch.setattr("balkanbench.cli.throughput.load_dataset", fake_load_dataset)
     monkeypatch.setattr(
         "balkanbench.cli.throughput.HFEncoder.build",
         lambda model_cfg, task_cfg: _FakeEncoder(),
@@ -98,6 +101,7 @@ def test_throughput_cli_writes_per_task_and_aggregate(tmp_path, monkeypatch) -> 
     assert task_data["task"] == "boolq"
     assert task_data["sponsor"] == "Recrewty"
     assert task_data["throughput_ex_per_sec"] > 0
+    assert captured_repo["repo"] == "permitt/superglue-sr"
 
     agg = json.loads(aggregate_path.read_text())
     assert set(agg["tasks"]) == {"boolq"}

@@ -5,9 +5,10 @@ Serbian, Croatian, Montenegrin, and Bosnian (BCMS).
 
 [balkanbench.com](https://balkanbench.com) - public leaderboard and launch page.
 
-> v0.1 target release: **2026-04-27**. Scope: Serbian SuperGLUE (6 ranked tasks)
-> and 9 baseline models. Croatian, Montenegrin, Bosnian, and Serbian-LLM-Eval
-> (generative, Aleksa Gordić) land in v0.2.
+> v0.1 target release: **2026-04-27**. Scope: Serbian SuperGLUE is the
+> official frozen track. Croatian and Montenegrin SuperGLUE are published as
+> preview expansions, and Bosnian plus Serbian-LLM-Eval (generative, Aleksa
+> Gordić) land in v0.2.
 >
 > Compute for official evaluation is sponsored by [Recrewty](https://recrewty.com).
 
@@ -31,23 +32,35 @@ language, or model is a schema-validated PR, not a core-code rewrite.
 
 | Code | Language    | Status     |
 |------|-------------|------------|
-| sr   | Serbian     | available  |
-| hr   | Croatian    | roadmap    |
-| cnr  | Montenegrin | roadmap    |
+| sr   | Serbian     | official   |
+| hr   | Croatian    | preview    |
+| mne  | Montenegrin | preview    |
 | bs   | Bosnian     | roadmap    |
 
 ## Ranked tasks (v0.1, SuperGLUE)
 
-BoolQ, CB, COPA, RTE, MultiRC, WSC. Diagnostics: AX-b, AX-g.
+| Task    | sr  | hr  | mne |
+|---------|:---:|:---:|:---:|
+| BoolQ   | yes | yes | yes |
+| CB      | yes | yes | yes |
+| COPA    | yes | yes | yes |
+| RTE     | yes | yes | yes |
+| MultiRC | yes | yes | yes |
+| WSC     | yes | -   | -   |
+
+WSC is Serbian-only in v0.1 (no published HR/MNE adaptation yet), so
+the Croatian and Montenegrin previews expose 5 ranked tasks each;
+Serbian is the full 6-task SuperGLUE track. Diagnostics (AX-b, AX-g)
+are Serbian-only and don't enter the ranked average.
 
 ## Hidden test labels
 
-The public HuggingFace dataset (`permitt/superglue-serbian`) has train and
-validation splits with labels, test split without labels. Official scoring runs
-in a trusted environment that can read the private sibling repo
-(`permitt/superglue-private`) via `HF_OFFICIAL_TOKEN`. Public users can
-generate predictions locally with `balkanbench predict`; `balkanbench score`
-needs the private token.
+Each language track declares a public HuggingFace dataset for train/validation
+and public test inputs, plus a gated private sibling repo that carries the
+hidden test labels used for official scoring. Public users can tune and evaluate
+on labeled public train/validation data, generate public test predictions with
+`balkanbench predict`, and submit those predictions for trusted scoring.
+`balkanbench score` is the only path that needs the private test labels.
 
 ## Quickstart
 

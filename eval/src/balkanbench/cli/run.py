@@ -168,7 +168,8 @@ def run_cmd(
             continue
 
         try:
-            repo_id = resolve_dataset_repo(task_cfg, language, prefer="private")
+            repo_preference = "private" if eval_split == "test" else "public"
+            repo_id = resolve_dataset_repo(task_cfg, language, prefer=repo_preference)
         except DatasetRepoError as exc:
             typer.echo(_red(str(exc)))
             raise typer.Exit(code=1) from exc

@@ -29,6 +29,7 @@ def _fake_test_dataset() -> DatasetDict:
 
 def test_predict_emits_predictions_jsonl(tmp_path, monkeypatch) -> None:
     captured_kwargs: dict[str, Any] = {}
+    captured_repo: dict[str, str] = {}
 
     def fake_run_single_seed(**kwargs: Any) -> SeedResult:
         captured_kwargs.update(kwargs)
@@ -44,10 +45,11 @@ def test_predict_emits_predictions_jsonl(tmp_path, monkeypatch) -> None:
         )
 
     monkeypatch.setattr("balkanbench.cli.predict.run_single_seed", fake_run_single_seed)
-    monkeypatch.setattr(
-        "balkanbench.cli.predict.load_dataset",
-        lambda repo, config, **_: _fake_test_dataset(),
-    )
+    def fake_load_dataset(repo: str, config: str, **_: Any) -> DatasetDict:
+        captured_repo["repo"] = repo
+        return _fake_test_dataset()
+
+    monkeypatch.setattr("balkanbench.cli.predict.load_dataset", fake_load_dataset)
 
     result = runner.invoke(
         app,
@@ -94,3 +96,4 @@ def test_predict_emits_predictions_jsonl(tmp_path, monkeypatch) -> None:
         "predict CLI must pass train=False (no train split, no training wanted)"
     )
     assert captured_kwargs["eval_split"] == "test"
+    assert captured_repo["repo"] == "permitt/superglue-sr"

@@ -111,7 +111,7 @@ tasks:
   ranked: [sentiment]
 languages:
   available: [hr]
-  roadmap: [sr, bs, cnr]
+  roadmap: [sr, bs, mne]
 aggregation:
   formula: unweighted_mean
   over: primary_task_scores
@@ -136,18 +136,23 @@ task_type: multiclass_classification
 languages:
   available: [hr]
   ranked: [hr]
-  roadmap: [sr, bs, cnr]
+  roadmap: [sr, bs, mne]
 dataset:
   source_type: huggingface
-  public_repo: teacompany/croatian-sentiment-hr
   config: default
+  per_language:
+    hr:
+      public_repo: teacompany/croatian-sentiment-hr
+      private_repo: teacompany/croatian-sentiment-hr-private
   splits:
     public: [train, validation, test]
     labeled_public: [train, validation]
     labeled_private: [test]
 inputs:
   fields: [text]
-  id_field: example_id
+  # `idx` is the canonical row id used by the published BCMS-SuperGLUE
+  # datasets. Match that here so the predict + score alignment works.
+  id_field: idx
 metrics:
   primary: [f1_macro]
   report: [f1_macro, accuracy]

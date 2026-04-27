@@ -158,3 +158,49 @@ def test_eval_rejects_unknown_model(tmp_path) -> None:
     )
     assert result.exit_code == 1
     assert "not found" in result.output.lower()
+
+
+def test_eval_uses_public_repo_for_validation_flow(tmp_path, monkeypatch) -> None:
+    captured_repo: dict[str, str] = {}
+
+    def fake_run_multiseed(**kwargs: Any) -> list[SeedResult]:
+        return [
+            SeedResult(
+                seed=42,
+                primary={"accuracy": 0.77},
+                secondary={},
+                task_score=0.77,
+                predictions=[0, 1],
+                references=[0, 1],
+                group_ids=None,
+            )
+        ]
+
+    def fake_load_dataset(repo: str, config: str, **_: Any) -> DatasetDict:
+        captured_repo["repo"] = repo
+        return _fake_datasets()
+
+    monkeypatch.setattr("balkanbench.cli.eval.run_multiseed", fake_run_multiseed)
+    monkeypatch.setattr("balkanbench.cli.eval.load_dataset", fake_load_dataset)
+    monkeypatch.setenv("HF_TOKEN", "fake-token")
+
+    result = runner.invoke(
+        app,
+        [
+            "eval",
+            "--model",
+            "bertic",
+            "--benchmark",
+            "superglue",
+            "--task",
+            "boolq",
+            "--language",
+            "sr",
+            "--seeds",
+            "42",
+            "--out",
+            str(tmp_path),
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    assert captured_repo["repo"] == "permitt/superglue-sr"

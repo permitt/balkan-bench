@@ -1,0 +1,11 @@
+name: jerteh_355
+hf_repo: jerteh/Jerteh-355
+family: roberta
+params_hint: 354M
+tier: official
+training:
+  learning_rate: 2.0e-5
+  batch_size: 16
+  num_epochs: 10
+  fp16: true
+seeds: [42, 43, 44, 45, 46]

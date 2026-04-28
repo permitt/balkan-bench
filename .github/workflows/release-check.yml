@@ -1,0 +1,62 @@
+name: release-check
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch: {}
+
+jobs:
+  release:
+    name: release-gate (lint + type + test + docs) on ${{ github.ref_name }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: eval
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install package with dev extras
+        run: uv pip install --system -e ".[dev]"
+
+      - name: Ruff check
+        run: ruff check .
+
+      - name: Ruff format check
+        run: ruff format --check .
+
+      - name: Mypy
+        run: mypy
+
+      - name: Pytest with coverage (stricter on release, 85 percent)
+        run: pytest --cov-fail-under=85
+
+      - name: Verify every benchmark YAML validates
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          for yaml in configs/benchmarks/*/benchmark.yaml; do
+            balkanbench validate-config "$yaml" --schema benchmark_spec
+          done
+          for yaml in configs/benchmarks/*/tasks/*.yaml; do
+            balkanbench validate-config "$yaml" --schema task_spec
+          done
+          for yaml in configs/models/official/*.yaml; do
+            balkanbench validate-config "$yaml" --schema model_spec
+          done
+
+      - name: Verify launch docs exist
+        run: |
+          set -euo pipefail
+          for f in README.md CONTRIBUTING.md LICENSE ../docs/methodology/data_provenance.md; do
+            test -f "$f" || { echo "missing required launch doc: $f"; exit 1; }
+          done

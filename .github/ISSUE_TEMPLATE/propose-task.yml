@@ -1,0 +1,67 @@
+name: Propose a task
+description: Add a new task inside an existing benchmark.
+title: "[propose-task] <benchmark>.<task>"
+labels: ["proposal-task"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template to add a task to an existing benchmark (SuperGLUE, SLE once it lands, etc.).
+        To propose a brand-new benchmark suite, use the **Propose a benchmark** template instead.
+  - type: input
+    id: benchmark
+    attributes:
+      label: Target benchmark
+      placeholder: superglue
+    validations:
+      required: true
+  - type: input
+    id: task
+    attributes:
+      label: Task identifier
+      description: Lowercase, `a-z0-9_`. Becomes part of `{benchmark}.{task}.{language}`.
+      placeholder: record
+    validations:
+      required: true
+  - type: dropdown
+    id: task_type
+    attributes:
+      label: task_type
+      description: Must match the enum in `eval/schemas/task_spec.json`.
+      options:
+        - binary_classification
+        - multiclass_classification
+        - multiple_choice
+        - grouped_binary_classification
+        - wsc
+        - diagnostic
+    validations:
+      required: true
+  - type: textarea
+    id: metrics
+    attributes:
+      label: Metrics
+      description: Primary, report, and task_score (name of the single task score metric).
+      placeholder: "primary: [accuracy]; report: [accuracy]; task_score: accuracy"
+    validations:
+      required: true
+  - type: input
+    id: languages
+    attributes:
+      label: Supported languages
+      placeholder: sr (expand to hr, cnr, bs in follow-ups)
+    validations:
+      required: true
+  - type: input
+    id: data_source
+    attributes:
+      label: Data source
+      description: Hugging Face repo + config, or link to raw data.
+    validations:
+      required: true
+  - type: input
+    id: identity_handle
+    attributes:
+      label: Your GitHub or Hugging Face handle
+    validations:
+      required: true

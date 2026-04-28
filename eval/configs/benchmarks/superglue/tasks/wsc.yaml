@@ -1,0 +1,42 @@
+benchmark: superglue
+task: wsc
+status: ranked
+task_type: wsc
+languages:
+  available: [sr]
+  ranked: [sr]
+  roadmap: [hr, mne, bs]
+dataset:
+  source_type: huggingface
+  config: wsc
+  per_language:
+    sr:
+      public_repo: permitt/superglue-sr
+      private_repo: permitt/superglue-sr-private
+  splits:
+    public: [train, validation, test]
+    labeled_public: [train, validation]
+    labeled_private: [test]
+inputs:
+  fields: [text, span1_text, span2_text]
+  id_field: idx
+metrics:
+  primary: [accuracy]
+  report: [accuracy]
+  task_score: accuracy
+prompts:
+  sr:
+    template_id: wsc_sr_v1
+    template: "U rečenici: {text} Da li se '{span2_text}' odnosi na '{span1_text}'?"
+tokenizer:
+  max_length: 256
+  padding: longest
+  truncation: true
+training:
+  learning_rate: 1.0e-5
+  batch_size: 16
+  num_epochs: 30
+  warmup_ratio: 0.1
+  weight_decay: 0.01
+  early_stopping_patience: 10
+  metric_for_best_model: accuracy

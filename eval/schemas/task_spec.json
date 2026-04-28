@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://balkanbench.com/schemas/task_spec.json",
+  "title": "BalkanBench Task Specification",
+  "type": "object",
+  "required": [
+    "benchmark",
+    "task",
+    "status",
+    "task_type",
+    "languages",
+    "dataset",
+    "inputs",
+    "metrics",
+    "prompts",
+    "training"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "benchmark": { "type": "string", "minLength": 1 },
+    "task": { "type": "string", "minLength": 1 },
+    "status": {
+      "type": "string",
+      "enum": ["ranked", "diagnostic", "experimental", "archived"]
+    },
+    "task_type": {
+      "type": "string",
+      "enum": [
+        "binary_classification",
+        "multiclass_classification",
+        "multiple_choice",
+        "grouped_binary_classification",
+        "wsc",
+        "diagnostic"
+      ]
+    },
+    "languages": {
+      "type": "object",
+      "required": ["available", "ranked"],
+      "additionalProperties": false,
+      "properties": {
+        "available": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "ranked":    { "type": "array", "items": { "type": "string" } },
+        "roadmap":   { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "dataset": {
+      "type": "object",
+      "required": ["config", "splits", "per_language"],
+      "additionalProperties": false,
+      "properties": {
+        "source_type": {
+          "type": "string",
+          "enum": ["huggingface", "https", "gcs", "local"],
+          "default": "huggingface",
+          "description": "Where the data lives. Non-huggingface source_types require different fields (added to the schema as those benchmarks land)."
+        },
+        "config": { "type": "string", "minLength": 1 },
+        "per_language": {
+          "type": "object",
+          "minProperties": 1,
+          "description": "BCMS-language-keyed map of HF repo pairs. The runtime selects the entry that matches the requested --language at call time.",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["public_repo", "private_repo"],
+            "additionalProperties": false,
+            "properties": {
+              "public_repo":  { "type": "string", "minLength": 1 },
+              "private_repo": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "splits": {
+          "type": "object",
+          "required": ["public", "labeled_public"],
+          "additionalProperties": false,
+          "properties": {
+            "public":          { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+            "labeled_public":  { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+            "labeled_private": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      }
+    },
+    "inputs": {
+      "type": "object",
+      "required": ["fields", "id_field"],
+      "additionalProperties": false,
+      "properties": {
+        "fields":        { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "id_field":      { "type": "string", "minLength": 1 },
+        "group_fields":  {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Columns that identify a group for grouped-metric tasks (e.g. MultiRC paragraph_id + question_id)."
+        },
+        "metric_columns": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Extra dataset columns to forward to task.score() as kwargs (e.g. AXg's is_pro_stereotype for gender_parity)."
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "required": ["primary", "report", "task_score"],
+      "additionalProperties": false,
+      "properties": {
+        "primary":    { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "report":     { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "task_score": { "type": "string", "minLength": 1 }
+      }
+    },
+    "prompts": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["template_id"],
+        "additionalProperties": true,
+        "properties": {
+          "template_id":    { "type": "string", "minLength": 1 },
+          "template":       { "type": "string" },
+          "cause_prompt":   { "type": "string" },
+          "effect_prompt":  { "type": "string" }
+        }
+      }
+    },
+    "training": {
+      "type": "object",
+      "required": [
+        "learning_rate",
+        "batch_size",
+        "num_epochs",
+        "metric_for_best_model"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "learning_rate":           { "type": "number", "exclusiveMinimum": 0 },
+        "batch_size":              { "type": "integer", "minimum": 1 },
+        "num_epochs":              { "type": "integer", "minimum": 1 },
+        "warmup_ratio":            { "type": "number", "minimum": 0, "maximum": 1 },
+        "weight_decay":            { "type": "number", "minimum": 0 },
+        "early_stopping_patience": { "type": "integer", "minimum": 0 },
+        "metric_for_best_model":   { "type": "string", "minLength": 1 }
+      }
+    },
+    "num_labels":  { "type": "integer", "minimum": 2 },
+    "num_choices": { "type": "integer", "minimum": 2 },
+    "label_field": { "type": "string" },
+    "tokenizer": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "max_length": { "type": "integer", "minimum": 1 },
+        "padding":    { "type": "string" },
+        "truncation": { "type": "boolean" }
+      }
+    }
+  }
+}

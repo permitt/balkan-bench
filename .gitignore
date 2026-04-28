@@ -1,5 +1,30 @@
-# Logs
-logs
+# node
+node_modules/
+frontend/node_modules/
+frontend/dist/
+.vite/
+
+# python
+eval/.venv/
+eval/**/__pycache__/
+eval/**/*.egg-info/
+eval/.pytest_cache/
+eval/.mypy_cache/
+eval/.ruff_cache/
+eval/htmlcov/
+eval/.coverage
+eval/coverage.xml
+
+docs/
+
+# build
+dist/
+build/
+dist-ssr/
+*.local
+
+# logs
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -7,18 +32,22 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
+# editors
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# mac
+.DS_Store
+
+# local results (only /official/ is committed)
+eval/results/local/
+eval/results/submissions/
+
+# stray empty files from prior iterations
+/validation

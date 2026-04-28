@@ -1,0 +1,23 @@
+{
+  "submission_id": "sub_01HZN0X8E6PQK8P7",
+  "submitter": {
+    "name": "Mitar Perović",
+    "email": "perovicmitar@gmail.com",
+    "affiliation": "BalkanBench / Recrewty",
+    "identity": { "provider": "github", "handle": "permitt" }
+  },
+  "model": {
+    "name": "bertic",
+    "hf_repo": "classla/bcms-bertic",
+    "hf_revision": "abc123",
+    "license": "apache-2.0",
+    "params": 110000000
+  },
+  "benchmark": { "name": "balkanbench-superglue", "version": "0.1.0" },
+  "languages": ["sr"],
+  "predictions_package": {
+    "path": "submissions/bertic-sr-2026-04-27.tar.gz",
+    "sha256": "sha256:3333333333333333333333333333333333333333333333333333333333333333"
+  },
+  "notes": "Reference reproduction of BERTić on SuperGLUE-Serbian."
+}

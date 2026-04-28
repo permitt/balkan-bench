@@ -1,0 +1,28 @@
+benchmark: superglue
+task: boolq
+status: ranked
+task_type: binary_classification
+languages:
+  available: [sr]
+  ranked: [sr]
+dataset:
+  source_type: huggingface
+  config: boolq
+  per_language:
+    sr:
+      public_repo: permitt/superglue-sr
+      private_repo: permitt/superglue-sr-private
+  splits:
+    public: [train, validation, test]
+    labeled_public: [train, validation]
+inputs:
+  fields: [question, passage]
+  id_field: example_id
+prompts:
+  sr:
+    template_id: boolq_sr_v1
+training:
+  learning_rate: 2.0e-5
+  batch_size: 16
+  num_epochs: 10
+  metric_for_best_model: accuracy

@@ -1,0 +1,16 @@
+# Trim the Cloud Build upload tarball: don't ship the local venv,
+# pytest cache, build artifacts, etc.
+.venv/
+.venv*/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.pyc
+*.pyo
+coverage.xml
+htmlcov/
+runs/
+results/
+work/
+sweeps/

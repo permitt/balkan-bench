@@ -1,0 +1,55 @@
+# Cloud Build config for the GPU image.
+#
+# Submit from repo root:
+#
+#   gcloud builds submit eval \
+#     --config eval/scripts/gcp/cloudbuild.yaml \
+#     --substitutions _AR_HOST=us-central1-docker.pkg.dev,_REPO=balkanbench,_TAG=v0.1.0
+#
+# Cloud Build runs the Docker build on Google infra (no local docker daemon
+# needed) and pushes the resulting image to Artifact Registry. Two tags are
+# pushed: the explicit version tag and `latest`, so callers can pin in
+# production while we iterate locally against `latest`.
+
+substitutions:
+  _AR_HOST: us-central1-docker.pkg.dev
+  _REPO: balkanbench
+  _TAG: v0.1.0
+  _IMAGE_NAME: balkanbench-gpu
+
+options:
+  # The GPU base image is ~3 GB; an e2-highcpu-8 builds it in ~6 min.
+  machineType: E2_HIGHCPU_8
+  logging: CLOUD_LOGGING_ONLY
+
+steps:
+  - id: build
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - --file
+      - Dockerfile.gpu
+      - --tag
+      - ${_AR_HOST}/${PROJECT_ID}/${_REPO}/${_IMAGE_NAME}:${_TAG}
+      - --tag
+      - ${_AR_HOST}/${PROJECT_ID}/${_REPO}/${_IMAGE_NAME}:latest
+      - .
+
+  - id: push-tag
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_AR_HOST}/${PROJECT_ID}/${_REPO}/${_IMAGE_NAME}:${_TAG}
+
+  - id: push-latest
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_AR_HOST}/${PROJECT_ID}/${_REPO}/${_IMAGE_NAME}:latest
+
+images:
+  - ${_AR_HOST}/${PROJECT_ID}/${_REPO}/${_IMAGE_NAME}:${_TAG}
+  - ${_AR_HOST}/${PROJECT_ID}/${_REPO}/${_IMAGE_NAME}:latest
+
+# 30 min is plenty for the GPU image (CUDA + torch wheels are the long pole).
+timeout: 1800s

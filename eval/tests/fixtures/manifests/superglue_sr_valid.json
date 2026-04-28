@@ -1,0 +1,19 @@
+{
+  "benchmark": "superglue",
+  "language": "sr",
+  "public_repo": "permitt/superglue-sr",
+  "private_repo": "permitt/superglue-sr-private",
+  "dataset_revision": "v0.1.0-data",
+  "license": "CC-BY-4.0",
+  "hidden_test_labels": true,
+  "configs": {
+    "boolq": {
+      "splits": {
+        "train":      { "num_rows": 9427, "has_labels": true },
+        "validation": { "num_rows": 3270, "has_labels": true },
+        "test":       { "num_rows": 3245, "has_labels": false }
+      },
+      "fields": ["example_id", "question", "passage", "language", "task_id"]
+    }
+  }
+}

@@ -1,0 +1,129 @@
+.content-wrap {
+  max-width: 840px;
+  margin: 0 auto;
+  padding: 56px 28px 64px;
+  color: var(--ink-2);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.content-wrap .eyebrow {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+.content-wrap .eyebrow .chip {
+  display: inline-flex;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 4px 8px;
+  letter-spacing: 0.08em;
+}
+
+.content-title {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: clamp(44px, 5.8vw, 84px);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  margin: 0 0 24px;
+  color: var(--ink);
+}
+.content-title .stroke { -webkit-text-stroke: 1.5px var(--ink); color: transparent; }
+.content-title .slash { color: var(--signal); }
+
+.content-lede {
+  font-size: 19px;
+  line-height: 1.5;
+  color: var(--ink);
+  margin-bottom: 32px;
+  max-width: 680px;
+}
+
+.content-wrap h2 {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 24px;
+  letter-spacing: -0.02em;
+  margin: 40px 0 12px;
+  color: var(--ink);
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+
+.content-wrap p {
+  margin: 0 0 16px;
+  max-width: 680px;
+}
+
+.content-wrap ul {
+  margin: 0 0 16px 1.1em;
+  padding: 0;
+  max-width: 680px;
+}
+
+.content-wrap ul li {
+  margin: 6px 0;
+}
+
+.content-wrap a {
+  color: var(--signal);
+  border-bottom: 1px dashed var(--signal);
+}
+.content-wrap a b { color: inherit; font-weight: 600; }
+
+.content-wrap code {
+  font-family: var(--mono);
+  font-size: 13px;
+  background: var(--paper-2);
+  border: 1px solid var(--line);
+  padding: 1px 6px;
+  border-radius: 2px;
+}
+
+.content-wrap .code {
+  font-family: var(--mono);
+  font-size: 13px;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 18px 22px;
+  overflow-x: auto;
+  line-height: 1.6;
+  border: 1px solid var(--ink);
+  margin: 0 0 16px;
+}
+
+.content-ctarow {
+  display: flex;
+  gap: 12px;
+  margin: 16px 0 24px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 12px 20px;
+  background: var(--ink);
+  color: var(--paper);
+  border: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  transition: background 0.15s;
+}
+.btn:hover { background: var(--signal); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink);
+}
+.btn-ghost:hover { background: var(--ink); color: var(--paper); }

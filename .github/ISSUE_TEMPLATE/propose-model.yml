@@ -1,0 +1,59 @@
+name: Propose a model
+description: Add a new model to BalkanBench (experimental or official tier).
+title: "[propose-model] <model-name>"
+labels: ["proposal-model"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Models start in the `experimental` tier by default and are promoted to
+        `official` after community review and at least one successful official run.
+  - type: input
+    id: name
+    attributes:
+      label: Model name
+      description: Short identifier. Lowercase, `a-z0-9_`.
+      placeholder: modern_bertic_large
+    validations:
+      required: true
+  - type: input
+    id: hf_repo
+    attributes:
+      label: Hugging Face repo
+      placeholder: permitt/galton-modernbertic-large-bcms-v1
+    validations:
+      required: true
+  - type: input
+    id: params
+    attributes:
+      label: Parameter count
+      description: Human-readable (e.g. 350M, 7B).
+    validations:
+      required: true
+  - type: input
+    id: license
+    attributes:
+      label: License
+      description: SPDX identifier.
+    validations:
+      required: true
+  - type: dropdown
+    id: tier
+    attributes:
+      label: Target tier
+      options:
+        - experimental (default for first proposal)
+        - official (requires an existing scored official run)
+    validations:
+      required: true
+  - type: input
+    id: identity_handle
+    attributes:
+      label: Your GitHub or Hugging Face handle
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Anything unusual about this model (custom tokenizer, pooling, license caveats)?

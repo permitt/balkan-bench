@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://balkanbench.com/schemas/benchmark_spec.json",
+  "title": "BalkanBench Benchmark Specification",
+  "description": "Top-level manifest for a benchmark (e.g. SuperGLUE, SLE, MTEB-BCMS). Lives at configs/benchmarks/{benchmark}/benchmark.yaml.",
+  "type": "object",
+  "required": [
+    "benchmark",
+    "version",
+    "description",
+    "license",
+    "maintainers",
+    "tasks",
+    "languages",
+    "aggregation"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "benchmark": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Short identifier, must match the directory name. Used in task_id prefix."
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[a-z0-9.-]+)?$",
+      "description": "Semantic version for this benchmark, independent of the balkanbench package."
+    },
+    "description": { "type": "string", "minLength": 1 },
+    "license":     { "type": "string", "minLength": 1 },
+    "maintainers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "additionalProperties": false,
+        "properties": {
+          "name":    { "type": "string", "minLength": 1 },
+          "github":  { "type": "string" },
+          "huggingface": { "type": "string" },
+          "email":   { "type": "string", "format": "email" }
+        }
+      }
+    },
+    "citation": { "type": "string" },
+    "paper":    { "type": "string", "format": "uri" },
+    "homepage": { "type": "string", "format": "uri" },
+    "tasks": {
+      "type": "object",
+      "required": ["ranked"],
+      "additionalProperties": false,
+      "properties": {
+        "ranked":       { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "diagnostic":   { "type": "array", "items": { "type": "string" } },
+        "experimental": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "languages": {
+      "type": "object",
+      "required": ["available"],
+      "additionalProperties": false,
+      "properties": {
+        "available": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "roadmap":   { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "aggregation": {
+      "type": "object",
+      "required": ["formula", "over"],
+      "additionalProperties": false,
+      "properties": {
+        "formula": {
+          "type": "string",
+          "enum": ["unweighted_mean", "weighted_mean", "geometric_mean"],
+          "description": "Registered aggregation formula. Runtime registry in balkanbench.leaderboard picks the impl."
+        },
+        "over": {
+          "type": "string",
+          "enum": ["primary_task_scores", "task_scores_by_language", "raw_primary_metrics"]
+        },
+        "weights": {
+          "type": "object",
+          "additionalProperties": { "type": "number", "exclusiveMinimum": 0 },
+          "description": "Required when formula = weighted_mean. Keys are task names."
+        },
+        "require_complete_ranked_coverage": { "type": "boolean", "default": true }
+      }
+    },
+    "seeds": {
+      "type": "array",
+      "items": { "type": "integer" },
+      "minItems": 1,
+      "description": "Canonical seed list for official runs. Usually 5 seeds."
+    },
+    "sponsor": { "type": "string" }
+  }
+}

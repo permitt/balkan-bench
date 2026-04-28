@@ -1,0 +1,367 @@
+{
+  "benchmark": "superglue",
+  "language": "sr",
+  "benchmark_version": "1.0",
+  "generated_at": "2026-04-28T09:00:00Z",
+  "sponsor": "Recrewty",
+  "seeds": 5,
+  "ranked_tasks": [
+    "boolq",
+    "cb",
+    "copa",
+    "rte",
+    "multirc",
+    "wsc"
+  ],
+  "task_primary_metrics": {
+    "boolq": "accuracy",
+    "cb": "f1_macro",
+    "copa": "accuracy",
+    "rte": "accuracy",
+    "multirc": "f1_a",
+    "wsc": "accuracy"
+  },
+  "throughput": {
+    "hardware": "NVIDIA L4 24GB",
+    "precision": "fp16",
+    "batch_size_policy": "from_task_config",
+    "warmup_batches": 2,
+    "measurement_batches": 50
+  },
+  "rows": [
+    {
+      "rank": 1,
+      "model": "ModernBERTi\u0107 large",
+      "model_id": "COMING SOON",
+      "params": 395000000,
+      "params_display": "395M",
+      "results": {
+        "cb": {
+          "mean": 0.7852,
+          "stdev": 0.0382
+        },
+        "copa": {
+          "mean": 0.7684,
+          "stdev": 0.0129
+        },
+        "rte": {
+          "mean": 0.7313,
+          "stdev": 0.0084
+        },
+        "wsc": {
+          "mean": 0.6356,
+          "stdev": 0.0239
+        },
+        "boolq": {
+          "mean": 0.807,
+          "stdev": 0.0044
+        },
+        "multirc": {
+          "mean": 0.679,
+          "stdev": 0.0047
+        }
+      },
+      "avg": 0.7344,
+      "complete": true,
+      "tasks_completed": 6,
+      "tasks_total": 6
+    },
+    {
+      "rank": 2,
+      "model": "BERTi\u0107",
+      "model_id": "classla/bcms-bertic",
+      "params": 110000000,
+      "params_display": "110M",
+      "results": {
+        "cb": {
+          "mean": 0.7861,
+          "stdev": 0.029
+        },
+        "copa": {
+          "mean": 0.6887,
+          "stdev": 0.0052
+        },
+        "rte": {
+          "mean": 0.717,
+          "stdev": 0.0087
+        },
+        "wsc": {
+          "mean": 0.6507,
+          "stdev": 0.0
+        },
+        "boolq": {
+          "mean": 0.7779,
+          "stdev": 0.0018
+        },
+        "multirc": {
+          "mean": 0.6675,
+          "stdev": 0.0087
+        }
+      },
+      "avg": 0.7146,
+      "complete": true,
+      "tasks_completed": 6,
+      "tasks_total": 6
+    },
+    {
+      "rank": 3,
+      "model": "ModernBERTi\u0107 base",
+      "model_id": "COMING SOON",
+      "params": 149000000,
+      "params_display": "149M",
+      "results": {
+        "cb": {
+          "mean": 0.7696,
+          "stdev": 0.0319
+        },
+        "copa": {
+          "mean": 0.6576,
+          "stdev": 0.0242
+        },
+        "rte": {
+          "mean": 0.6582,
+          "stdev": 0.0114
+        },
+        "wsc": {
+          "mean": 0.6411,
+          "stdev": 0.0111
+        },
+        "boolq": {
+          "mean": 0.7602,
+          "stdev": 0.0063
+        },
+        "multirc": {
+          "mean": 0.669,
+          "stdev": 0.0069
+        }
+      },
+      "avg": 0.6973,
+      "complete": true,
+      "tasks_completed": 5,
+      "tasks_total": 6,
+      "partial_flag": ""
+    },
+    {
+      "rank": 4,
+      "model": "mmBERT",
+      "model_id": "jhu-clsp/mmBERT-base",
+      "params": 307000000,
+      "params_display": "307M",
+      "results": {
+        "cb": {
+          "mean": 0.7893,
+          "stdev": 0.0088
+        },
+        "copa": {
+          "mean": 0.56,
+          "stdev": 0.0364
+        },
+        "rte": {
+          "mean": 0.731,
+          "stdev": 0.005
+        },
+        "wsc": {
+          "mean": 0.6233,
+          "stdev": 0.0256
+        },
+        "boolq": {
+          "mean": 0.7817,
+          "stdev": 0.0031
+        },
+        "multirc": {
+          "mean": 0.6379,
+          "stdev": 0.0142
+        }
+      },
+      "avg": 0.6872,
+      "complete": true,
+      "tasks_completed": 6,
+      "tasks_total": 6
+    },
+    {
+      "rank": 5,
+      "model": "XLM-R BERTi\u0107",
+      "model_id": "classla/xlm-r-bertic",
+      "params": 560000000,
+      "params_display": "560M",
+      "results": {
+        "cb": {
+          "mean": 0.839,
+          "stdev": 0.0276
+        },
+        "copa": {
+          "mean": 0.586,
+          "stdev": 0.0491
+        },
+        "rte": {
+          "mean": 0.7378,
+          "stdev": 0.0137
+        },
+        "wsc": {
+          "mean": 0.6416,
+          "stdev": 0.0129
+        },
+        "boolq": {
+          "mean": 0.7398,
+          "stdev": 0.0825
+        },
+        "multirc": {
+          "mean": 0.4743,
+          "stdev": 0.2739
+        }
+      },
+      "avg": 0.6697,
+      "complete": true,
+      "tasks_completed": 6,
+      "tasks_total": 6
+    },
+    {
+      "rank": 6,
+      "model": "CroSloEngual BERT",
+      "model_id": "EMBEDDIA/crosloengual-bert",
+      "params": 124000000,
+      "params_display": "124M",
+      "results": {
+        "cb": {
+          "mean": 0.7977,
+          "stdev": 0.0173
+        },
+        "copa": {
+          "mean": 0.5947,
+          "stdev": 0.0189
+        },
+        "rte": {
+          "mean": 0.653,
+          "stdev": 0.0152
+        },
+        "wsc": {
+          "mean": 0.6324,
+          "stdev": 0.0085
+        },
+        "boolq": {
+          "mean": 0.723,
+          "stdev": 0.0009
+        },
+        "multirc": {
+          "mean": 0.5982,
+          "stdev": 0.0082
+        }
+      },
+      "avg": 0.6665,
+      "complete": true,
+      "tasks_completed": 6,
+      "tasks_total": 6
+    },
+    {
+      "rank": 7,
+      "model": "TeSLa-XLM",
+      "model_id": "te-sla/teslaXLM",
+      "params": 560000000,
+      "params_display": "560M",
+      "results": {
+        "cb": {
+          "mean": 0.7287,
+          "stdev": 0.0962
+        },
+        "copa": {
+          "mean": 0.494,
+          "stdev": 0.015
+        },
+        "rte": {
+          "mean": 0.5849,
+          "stdev": 0.1153
+        },
+        "wsc": {
+          "mean": 0.6393,
+          "stdev": 0.0116
+        },
+        "boolq": {
+          "mean": 0.8063,
+          "stdev": 0.004
+        },
+        "multirc": {
+          "mean": 0.65,
+          "stdev": 0.0398
+        }
+      },
+      "avg": 0.6505,
+      "complete": true,
+      "tasks_completed": 6,
+      "tasks_total": 6
+    },
+    {
+      "rank": 8,
+      "model": "Jerteh-355",
+      "model_id": "jerteh/Jerteh-355",
+      "params": 354000000,
+      "params_display": "354M",
+      "results": {
+        "cb": {
+          "mean": 0.75,
+          "stdev": 0.0261
+        },
+        "copa": {
+          "mean": 0.5793,
+          "stdev": 0.0009
+        },
+        "rte": {
+          "mean": 0.596,
+          "stdev": 0.0073
+        },
+        "wsc": {
+          "mean": 0.6461,
+          "stdev": 0.0065
+        },
+        "boolq": {
+          "mean": 0.7168,
+          "stdev": 0.014
+        },
+        "multirc": {
+          "mean": 0.6068,
+          "stdev": 0.0067
+        }
+      },
+      "avg": 0.6492,
+      "complete": true,
+      "tasks_completed": 6,
+      "tasks_total": 6
+    },
+    {
+      "rank": 9,
+      "model": "mmBERT-small",
+      "model_id": "jhu-clsp/mmBERT-small",
+      "params": 140000000,
+      "params_display": "140M",
+      "results": {
+        "cb": {
+          "mean": 0.7265,
+          "stdev": 0.0224
+        },
+        "copa": {
+          "mean": 0.532,
+          "stdev": 0.017
+        },
+        "rte": {
+          "mean": 0.6456,
+          "stdev": 0.0156
+        },
+        "wsc": {
+          "mean": 0.6438,
+          "stdev": 0.0097
+        },
+        "boolq": {
+          "mean": 0.7362,
+          "stdev": 0.0031
+        },
+        "multirc": {
+          "mean": 0.5969,
+          "stdev": 0.0284
+        }
+      },
+      "avg": 0.6468,
+      "complete": true,
+      "tasks_completed": 6,
+      "tasks_total": 6
+    }
+  ]
+}

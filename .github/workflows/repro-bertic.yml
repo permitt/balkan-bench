@@ -1,0 +1,36 @@
+name: repro-bertic
+
+on:
+  schedule:
+    - cron: "17 4 * * *"  # nightly 04:17 UTC
+  workflow_dispatch: {}
+
+jobs:
+  repro:
+    name: BERTic reproducibility gate (no-train smoke on committed fixture)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: eval
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install package
+        run: uv pip install --system -e ".[dev]"
+
+      - name: Run repro gate test suite
+        # The repro gate is exercised by the unit test suite: diagnostic
+        # sanity (3-sigma below-random gate), predict+score alignment,
+        # and the BERTic model config's schema-level checks. Full 5-seed
+        # BERTic reproduction against real data is a manual GCP workflow
+        # (see docs/gcp/running_official_eval.md once Plan 5 lands).
+        run: pytest --no-cov -q -k "diagnostic or artifact or leaderboard or scoring or task_registry"

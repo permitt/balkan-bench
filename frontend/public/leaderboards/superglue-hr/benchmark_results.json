@@ -1,0 +1,292 @@
+{
+  "benchmark": "superglue",
+  "language": "hr",
+  "benchmark_version": "1.0",
+  "generated_at": "2026-04-28T09:13:13Z",
+  "sponsor": "Recrewty",
+  "seeds": 5,
+  "ranked_tasks": [
+    "boolq",
+    "cb",
+    "copa",
+    "rte"
+  ],
+  "task_primary_metrics": {
+    "boolq": "accuracy",
+    "cb": "f1_macro",
+    "copa": "accuracy",
+    "rte": "accuracy"
+  },
+  "rows": [
+    {
+      "rank": 3,
+      "model": "BERTi\u0107",
+      "model_id": "classla/bcms-bertic",
+      "params": 110000000,
+      "params_display": "110M",
+      "results": {
+        "boolq": {
+          "mean": 0.7545146379044685,
+          "stdev": 0.07369128144530974
+        },
+        "cb": {
+          "mean": 0.6932136539129672,
+          "stdev": 0.08246582308157255
+        },
+        "copa": {
+          "mean": 0.6676,
+          "stdev": 0.02954318872430664
+        },
+        "rte": {
+          "mean": 0.7328,
+          "stdev": 0.008633268983029121
+        }
+      },
+      "avg": 0.712,
+      "complete": true,
+      "tasks_completed": 4,
+      "tasks_total": 4,
+      "model_revision": "unknown"
+    },
+    {
+      "rank": 4,
+      "model": "CroSloEngual BERT",
+      "model_id": "EMBEDDIA/crosloengual-bert",
+      "params": 124000000,
+      "params_display": "124M",
+      "results": {
+        "boolq": {
+          "mean": 0.7370107858243451,
+          "stdev": 0.008073136551012114
+        },
+        "cb": {
+          "mean": 0.8139509517195498,
+          "stdev": 0.013184020784198012
+        },
+        "copa": {
+          "mean": 0.6164,
+          "stdev": 0.014380542409798053
+        },
+        "rte": {
+          "mean": 0.6764666666666667,
+          "stdev": 0.004717579416984455
+        }
+      },
+      "avg": 0.711,
+      "complete": true,
+      "tasks_completed": 4,
+      "tasks_total": 4,
+      "model_revision": "unknown"
+    },
+    {
+      "rank": 7,
+      "model": "ModernBERTi\u0107 base",
+      "model_id": "COMING SOON",
+      "params": 149000000,
+      "params_display": "149M",
+      "results": {
+        "boolq": {
+          "mean": 0.779784283513097,
+          "stdev": 0.004787005867664402
+        },
+        "cb": {
+          "mean": 0.5517938346282737,
+          "stdev": 0.0587433032035521
+        },
+        "copa": {
+          "mean": 0.6355999999999999,
+          "stdev": 0.03395290856465764
+        },
+        "rte": {
+          "mean": 0.7034,
+          "stdev": 0.008056743207469847
+        }
+      },
+      "avg": 0.6676,
+      "complete": true,
+      "tasks_completed": 4,
+      "tasks_total": 4,
+      "model_revision": "unknown"
+    },
+    {
+      "rank": 1,
+      "model": "ModernBERTi\u0107 large",
+      "model_id": "COMING SOON",
+      "params": 395000000,
+      "params_display": "395M",
+      "results": {
+        "boolq": {
+          "mean": 0.81115562403698,
+          "stdev": 0.0031757591440340948
+        },
+        "cb": {
+          "mean": 0.6889928028690122,
+          "stdev": 0.0761077899161516
+        },
+        "copa": {
+          "mean": 0.762,
+          "stdev": 0.025179356624028367
+        },
+        "rte": {
+          "mean": 0.7894,
+          "stdev": 0.0028126697479638773
+        }
+      },
+      "avg": 0.7629,
+      "complete": true,
+      "tasks_completed": 4,
+      "tasks_total": 4,
+      "model_revision": "unknown"
+    },
+    {
+      "rank": 6,
+      "model": "Jerteh-355",
+      "model_id": "jerteh/Jerteh-355",
+      "params": 354000000,
+      "params_display": "354M",
+      "results": {
+        "boolq": {
+          "mean": 0.729060092449923,
+          "stdev": 0.00934054370882421
+        },
+        "cb": {
+          "mean": 0.7889579122425268,
+          "stdev": 0.00803355997377246
+        },
+        "copa": {
+          "mean": 0.5544,
+          "stdev": 0.021881499034572524
+        },
+        "rte": {
+          "mean": 0.6042,
+          "stdev": 0.005231315959361138
+        }
+      },
+      "avg": 0.6692,
+      "complete": true,
+      "tasks_completed": 4,
+      "tasks_total": 4,
+      "model_revision": "unknown"
+    },
+    {
+      "rank": 2,
+      "model": "mmBERT",
+      "model_id": "jhu-clsp/mmBERT-base",
+      "params": 307000000,
+      "params_display": "307M",
+      "results": {
+        "boolq": {
+          "mean": 0.7857627118644068,
+          "stdev": 0.006984576553299026
+        },
+        "cb": {
+          "mean": 0.779744809208864,
+          "stdev": 0.05557678471818066
+        },
+        "copa": {
+          "mean": 0.592,
+          "stdev": 0.04438468204234429
+        },
+        "rte": {
+          "mean": 0.7381333333333333,
+          "stdev": 0.007263301973314595
+        }
+      },
+      "avg": 0.7239,
+      "complete": true,
+      "tasks_completed": 4,
+      "tasks_total": 4,
+      "model_revision": "unknown"
+    },
+    {
+      "rank": 8,
+      "model": "mmBERT-small",
+      "model_id": "jhu-clsp/mmBERT-small",
+      "params": 140000000,
+      "params_display": "140M",
+      "results": {
+        "boolq": {
+          "mean": 0.7553775038520801,
+          "stdev": 0.008290191929257546
+        },
+        "cb": {
+          "mean": 0.6787245182645286,
+          "stdev": 0.06229405295116044
+        },
+        "copa": {
+          "mean": 0.5664,
+          "stdev": 0.017910890541790455
+        },
+        "rte": {
+          "mean": 0.6336666666666666,
+          "stdev": 0.016731540408594904
+        }
+      },
+      "avg": 0.6585,
+      "complete": true,
+      "tasks_completed": 4,
+      "tasks_total": 4,
+      "model_revision": "unknown"
+    },
+    {
+      "rank": 9,
+      "model": "TeSLa-XLM",
+      "model_id": "te-sla/teslaXLM",
+      "params": 560000000,
+      "params_display": "560M",
+      "results": {
+        "boolq": {
+          "mean": 0.6231124807395994,
+          "stdev": 0.0
+        },
+        "cb": {
+          "mean": 0.26599224389211185,
+          "stdev": 0.05664105431022633
+        },
+        "copa": {
+          "mean": 0.5104,
+          "stdev": 0.015126136320951243
+        },
+        "rte": {
+          "mean": 0.5022,
+          "stdev": 0.008814760348415631
+        }
+      },
+      "avg": 0.4754,
+      "complete": true,
+      "tasks_completed": 4,
+      "tasks_total": 4,
+      "model_revision": "unknown"
+    },
+    {
+      "rank": 5,
+      "model": "XLM-R BERTi\u0107",
+      "model_id": "classla/xlm-r-bertic",
+      "params": 560000000,
+      "params_display": "560M",
+      "results": {
+        "boolq": {
+          "mean": 0.8244067796610169,
+          "stdev": 0.005492801520189676
+        },
+        "cb": {
+          "mean": 0.8292812835190302,
+          "stdev": 0.05942719351557818
+        },
+        "copa": {
+          "mean": 0.5364,
+          "stdev": 0.02393324048264253
+        },
+        "rte": {
+          "mean": 0.6466666666666667,
+          "stdev": 0.13492652321418006
+        }
+      },
+      "avg": 0.7092,
+      "complete": true,
+      "tasks_completed": 4,
+      "tasks_total": 4,
+      "model_revision": "unknown"
+    }
+  ]
+}

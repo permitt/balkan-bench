@@ -1,0 +1,49 @@
+benchmark: superglue
+task: multirc
+status: ranked
+task_type: grouped_binary_classification
+languages:
+  available: [sr, hr, mne]
+  ranked: [sr, hr, mne]
+  roadmap: [bs]
+dataset:
+  source_type: huggingface
+  config: multirc
+  per_language:
+    sr:
+      public_repo: permitt/superglue-sr
+      private_repo: permitt/superglue-sr-private
+    hr:
+      public_repo: permitt/superglue-hr
+      private_repo: permitt/superglue-hr-private
+    mne:
+      public_repo: permitt/superglue-mne
+      private_repo: permitt/superglue-mne-private
+  splits:
+    public: [train, validation, test]
+    labeled_public: [train, validation]
+    labeled_private: [test]
+inputs:
+  fields: [paragraph, question, answer]
+  id_field: idx
+  group_fields: [paragraph_id, question_id]
+metrics:
+  primary: [f1_a]
+  report: [f1_a, exact_match]
+  task_score: f1_a
+prompts:
+  sr:  { template_id: multirc_sr_v1 }
+  hr:  { template_id: multirc_hr_v1 }
+  mne: { template_id: multirc_mne_v1 }
+tokenizer:
+  max_length: 512
+  padding: longest
+  truncation: true
+training:
+  learning_rate: 2.0e-5
+  batch_size: 16
+  num_epochs: 5
+  warmup_ratio: 0.1
+  weight_decay: 0.01
+  early_stopping_patience: 3
+  metric_for_best_model: f1_a

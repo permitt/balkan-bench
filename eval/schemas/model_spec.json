@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://balkanbench.com/schemas/model_spec.json",
+  "title": "BalkanBench Model Specification",
+  "type": "object",
+  "required": ["name", "hf_repo", "family", "params_hint", "training"],
+  "additionalProperties": false,
+  "properties": {
+    "name":         { "type": "string", "minLength": 1 },
+    "hf_repo":      { "type": "string", "minLength": 1 },
+    "hf_revision":  { "type": "string" },
+    "family":       { "type": "string", "minLength": 1 },
+    "params_hint":  { "type": "string", "minLength": 1 },
+    "tier":         { "type": "string", "enum": ["official", "experimental"] },
+    "hf_auth": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": { "required": { "type": "boolean" } }
+    },
+    "training": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "learning_rate": { "type": "number", "exclusiveMinimum": 0 },
+        "batch_size":    { "type": "integer", "minimum": 1 },
+        "num_epochs":    { "type": "integer", "minimum": 1 },
+        "fp16":          { "type": "boolean" }
+      }
+    },
+    "task_overrides": {
+      "type": "object",
+      "description": "Per-task training overrides. Keys must be namespaced {benchmark}.{task} to avoid collisions across benchmarks.",
+      "patternProperties": {
+        "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*$": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "seeds": {
+      "type": "array",
+      "items": { "type": "integer" },
+      "minItems": 1
+    }
+  }
+}

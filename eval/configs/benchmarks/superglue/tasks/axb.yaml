@@ -1,0 +1,37 @@
+benchmark: superglue
+task: axb
+status: diagnostic
+task_type: diagnostic
+languages:
+  available: [sr]
+  ranked: []
+  roadmap: [hr, mne, bs]
+dataset:
+  source_type: huggingface
+  config: axb
+  per_language:
+    sr:
+      public_repo: permitt/superglue-sr
+      private_repo: permitt/superglue-sr-private
+  splits:
+    public: [test]
+    labeled_public: [test]
+    labeled_private: []
+inputs:
+  fields: [premise, hypothesis]
+  id_field: idx
+metrics:
+  primary: [matthews_correlation]
+  report: [matthews_correlation]
+  task_score: matthews_correlation
+prompts:
+  sr: { template_id: axb_sr_v1 }
+tokenizer:
+  max_length: 256
+  padding: longest
+  truncation: true
+training:
+  learning_rate: 2.0e-5
+  batch_size: 16
+  num_epochs: 1
+  metric_for_best_model: matthews_correlation

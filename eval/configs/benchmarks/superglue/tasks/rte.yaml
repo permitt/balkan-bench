@@ -1,0 +1,48 @@
+benchmark: superglue
+task: rte
+status: ranked
+task_type: binary_classification
+languages:
+  available: [sr, hr, mne]
+  ranked: [sr, hr, mne]
+  roadmap: [bs]
+dataset:
+  source_type: huggingface
+  config: rte
+  per_language:
+    sr:
+      public_repo: permitt/superglue-sr
+      private_repo: permitt/superglue-sr-private
+    hr:
+      public_repo: permitt/superglue-hr
+      private_repo: permitt/superglue-hr-private
+    mne:
+      public_repo: permitt/superglue-mne
+      private_repo: permitt/superglue-mne-private
+  splits:
+    public: [train, validation, test]
+    labeled_public: [train, validation]
+    labeled_private: [test]
+inputs:
+  fields: [premise, hypothesis]
+  id_field: idx
+metrics:
+  primary: [accuracy]
+  report: [accuracy]
+  task_score: accuracy
+prompts:
+  sr:  { template_id: rte_sr_v1 }
+  hr:  { template_id: rte_hr_v1 }
+  mne: { template_id: rte_mne_v1 }
+tokenizer:
+  max_length: 256
+  padding: longest
+  truncation: true
+training:
+  learning_rate: 2.0e-5
+  batch_size: 16
+  num_epochs: 10
+  warmup_ratio: 0.1
+  weight_decay: 0.01
+  early_stopping_patience: 5
+  metric_for_best_model: accuracy

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/permitt/balkan-bench/blob/main/SECURITY.md
+    about: Please email perovicmitar@gmail.com directly instead of opening an issue.
+  - name: Governance questions
+    url: https://github.com/permitt/balkan-bench/blob/main/docs/governance/contributions.md
+    about: Read the contribution governance policy before filing a proposal.

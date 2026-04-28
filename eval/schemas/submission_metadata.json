@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://balkanbench.com/schemas/submission_metadata.json",
+  "title": "BalkanBench Submission Metadata",
+  "type": "object",
+  "required": [
+    "submission_id",
+    "submitter",
+    "model",
+    "benchmark",
+    "languages",
+    "predictions_package"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "submission_id": { "type": "string", "minLength": 1 },
+    "submitter": {
+      "type": "object",
+      "required": ["name", "identity"],
+      "additionalProperties": false,
+      "properties": {
+        "name":     { "type": "string", "minLength": 1 },
+        "email":    { "type": "string", "format": "email" },
+        "affiliation": { "type": "string" },
+        "identity": {
+          "type": "object",
+          "required": ["provider", "handle"],
+          "additionalProperties": false,
+          "properties": {
+            "provider": { "type": "string", "enum": ["github", "huggingface"] },
+            "handle":   { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    },
+    "model": {
+      "type": "object",
+      "required": ["name", "hf_repo", "license"],
+      "additionalProperties": false,
+      "properties": {
+        "name":        { "type": "string" },
+        "hf_repo":     { "type": "string" },
+        "hf_revision": { "type": "string" },
+        "license":     { "type": "string" },
+        "params":      { "type": "integer", "minimum": 0 }
+      }
+    },
+    "benchmark": {
+      "type": "object",
+      "required": ["name", "version"],
+      "additionalProperties": false,
+      "properties": {
+        "name":    { "type": "string" },
+        "version": { "type": "string" }
+      }
+    },
+    "languages": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "predictions_package": {
+      "type": "object",
+      "required": ["path", "sha256"],
+      "additionalProperties": false,
+      "properties": {
+        "path":   { "type": "string", "minLength": 1 },
+        "sha256": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+      }
+    },
+    "notes": { "type": "string" }
+  }
+}

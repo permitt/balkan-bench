@@ -1,0 +1,24 @@
+name: tesla_xlm
+hf_repo: te-sla/teslaXLM
+family: xlm-roberta
+params_hint: 560M
+tier: official
+training:
+  learning_rate: 2.0e-5
+  batch_size: 16
+  num_epochs: 10
+  fp16: true
+task_overrides:
+  # 560M XLM-R + multiple_choice on L4 24GB needs:
+  # - batch_size=8 + fp16=false: silent-hang during multi-seed eval was
+  #   caused by either fp16 numerics or per-seed allocator pressure.
+  # - lr=1e-6 + num_epochs=20: hand-picked from observed HP search trials
+  #   (best trial 3 was lr=1.26e-6, ep=27, value=0.57). Live HP search
+  #   itself wedges the worker for these models, so we promote winning HP
+  #   manually and run with --skip-hp-search.
+  superglue.copa:
+    batch_size: 8
+    fp16: false
+    learning_rate: 1.0e-6
+    num_epochs: 20
+seeds: [42, 43, 44, 45, 46]

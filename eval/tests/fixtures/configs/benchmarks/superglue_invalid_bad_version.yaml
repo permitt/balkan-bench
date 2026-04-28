@@ -1,0 +1,13 @@
+benchmark: superglue
+version: "not-a-semver"
+description: "Broken version"
+license: CC-BY-4.0
+maintainers:
+  - name: Someone
+tasks:
+  ranked: [boolq]
+languages:
+  available: [sr]
+aggregation:
+  formula: unweighted_mean
+  over: primary_task_scores

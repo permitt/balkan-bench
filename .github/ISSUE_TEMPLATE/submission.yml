@@ -1,0 +1,58 @@
+name: Submission (predictions for an existing model)
+description: Submit a predictions.jsonl for scoring against private test labels.
+title: "[submission] <model> / <benchmark>.<task>.<language>"
+labels: ["submission"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Submissions run through `balkanbench score` against the private labels.
+        Read [docs/governance/submissions.md](../blob/main/docs/governance/submissions.md)
+        for the full flow.
+  - type: input
+    id: model
+    attributes:
+      label: Model name
+      description: Must match `configs/models/{official,experimental}/<name>.yaml`.
+    validations:
+      required: true
+  - type: input
+    id: benchmark_task_language
+    attributes:
+      label: benchmark.task.language
+      placeholder: superglue.boolq.sr
+    validations:
+      required: true
+  - type: input
+    id: predictions_url
+    attributes:
+      label: Predictions package URL
+      description: Permanent URL (HF repo file, GitHub Release asset, GCS object).
+    validations:
+      required: true
+  - type: input
+    id: predictions_sha256
+    attributes:
+      label: sha256 of the predictions package
+      description: Must start with `sha256:` followed by 64 hex chars.
+      placeholder: "sha256:..."
+    validations:
+      required: true
+  - type: input
+    id: submission_json_url
+    attributes:
+      label: submission.json URL
+      description: Produced by `balkanbench submit`. Must include your identity + license.
+    validations:
+      required: true
+  - type: input
+    id: identity_handle
+    attributes:
+      label: Your GitHub or Hugging Face handle
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Anything a reviewer should know (training recipe, seeds, compute).

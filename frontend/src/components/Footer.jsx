@@ -12,7 +12,7 @@ export default function Footer() {
         <span className="sep">/</span>
         <span>MIT LICENSE</span>
         <span className="sep">/</span>
-        <span>V1.2 · PRE-RELEASE</span>
+        <span>V1.0 · RELEASED</span>
       </div>
     </div>
   )

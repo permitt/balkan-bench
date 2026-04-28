@@ -41,23 +41,23 @@ const BENCHMARKS = {
   sle: {
     label: 'Serbian-LLM-Eval',
     tagline: 'Generative few-shot',
-    description: 'Generative few-shot eval (Aleksa Gordić) — ARC, HellaSwag, PIQA, BoolQ, Winogrande, etc.',
+    description: 'Generative few-shot eval (Aleksa Gordić) - ARC, HellaSwag, PIQA, BoolQ, Winogrande, etc.',
     available: false,
-    availableIn: 'v0.2',
+    availableIn: 'v1.1',
   },
   mteb_bcms: {
     label: 'MTEB-BCMS',
     tagline: 'Embeddings · 4 tasks',
     description: 'Massive Text Embedding Benchmark, BCMS adaptation.',
     available: false,
-    availableIn: 'v0.3',
+    availableIn: 'v1.2',
   },
   llm_arena: {
     label: 'LLM Arena',
     tagline: 'Human-judged Elo',
     description: 'Head-to-head human preference ratings across BCMS LLMs.',
     available: false,
-    availableIn: 'v0.3',
+    availableIn: 'v1.2',
   },
 }
 
@@ -67,15 +67,15 @@ const LEADERBOARDS = [
   { benchmark: 'superglue', language: 'sr',  path: 'superglue-sr',  available: true,  availableIn: null   },
   { benchmark: 'superglue', language: 'hr',  path: 'superglue-hr',  available: true,  availableIn: null   },
   { benchmark: 'superglue', language: 'mne', path: 'superglue-mne', available: true,  availableIn: null   },
-  { benchmark: 'superglue', language: 'bs',  path: 'superglue-bs',  available: false, availableIn: 'v0.2' },
-  { benchmark: 'sle',       language: 'sr',  path: 'sle-sr',        available: false, availableIn: 'v0.2' },
+  { benchmark: 'superglue', language: 'bs',  path: 'superglue-bs',  available: false, availableIn: 'v1.1' },
+  { benchmark: 'sle',       language: 'sr',  path: 'sle-sr',        available: false, availableIn: 'v1.1' },
 ]
 
 function chipLabel(entry) {
   const lang = LANGUAGES[entry.language]
   const bench = BENCHMARKS[entry.benchmark]
   const tag = `${bench.label} · ${lang.name}`
-  return entry.available ? tag : `${tag} — coming in ${entry.availableIn}`
+  return entry.available ? tag : `${tag} - coming in ${entry.availableIn}`
 }
 
 function formatCell(cell) {
@@ -168,8 +168,8 @@ export default function Leaderboard() {
             {Object.entries(BENCHMARKS).map(([key, meta]) => {
               const isActive = target.benchmark === key
               const title = meta.available
-                ? `${meta.label} — ${meta.description}`
-                : `${meta.label} — coming in ${meta.availableIn}. ${meta.description}`
+                ? `${meta.label} - ${meta.description}`
+                : `${meta.label} - coming in ${meta.availableIn}. ${meta.description}`
               return (
                 <button
                   key={key}
@@ -207,7 +207,7 @@ export default function Leaderboard() {
             <span className="chip">LEADERBOARD</span>
             <span>
               {BENCHMARKS[target.benchmark].label.toUpperCase()} ·{' '}
-              {LANGUAGES[target.language].flag} {LANGUAGES[target.language].name.toUpperCase()} · V0.1
+              {LANGUAGES[target.language].flag} {LANGUAGES[target.language].name.toUpperCase()} · V1.0
             </span>
             <span className="chip chip-test" title="Numbers reported are mean ± stdev across 5 seeds, evaluated on the held-out test split">
               TEST · 5 SEEDS
@@ -254,7 +254,7 @@ export default function Leaderboard() {
                 <button
                   type="button"
                   className={rankBy === 'avg' ? 'active' : ''}
-                  title="Main score — unweighted mean of the 6 primary task scores"
+                  title="Main score - unweighted mean of the 6 primary task scores"
                   onClick={() => setRankBy('avg')}
                 >
                   Avg
@@ -264,7 +264,7 @@ export default function Leaderboard() {
                     key={t}
                     type="button"
                     className={rankBy === t ? 'active' : ''}
-                    title={`${TASK_LABELS[t] || t} (${data.task_primary_metrics[t]}) — ${TASK_DESCRIPTIONS[t] || ''}`}
+                    title={`${TASK_LABELS[t] || t} (${data.task_primary_metrics[t]}) - ${TASK_DESCRIPTIONS[t] || ''}`}
                     onClick={() => setRankBy(t)}
                   >
                     {TASK_LABELS[t] || t}
@@ -310,9 +310,9 @@ export default function Leaderboard() {
                   const rankByTaskValue = sortValue(row, rankBy)
                   const displayRank =
                     rankBy === 'avg'
-                      ? row.rank ?? (row.partial_flag || '—')
+                      ? row.rank ?? (row.partial_flag || '-')
                       : rankByTaskValue === null
-                      ? '—'
+                      ? '-'
                       : i + 1
                   return (
                     <tr key={row.model} className={!row.complete ? 'lb-partial' : ''}>

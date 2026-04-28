@@ -1,8 +1,8 @@
 {
   "benchmark": "superglue",
   "language": "sr",
-  "benchmark_version": "0.1.0",
-  "generated_at": "2026-04-27T09:00:00Z",
+  "benchmark_version": "1.0",
+  "generated_at": "2026-04-28T09:00:00Z",
   "sponsor": "Recrewty",
   "seeds": 5,
   "ranked_tasks": [
@@ -32,7 +32,7 @@
     {
       "rank": 1,
       "model": "ModernBERTi\u0107 large",
-      "model_id": "permitt/galton-modernbertic-large-bcms-v1",
+      "model_id": "COMING SOON",
       "params": 395000000,
       "params_display": "395M",
       "results": {
@@ -106,7 +106,7 @@
     {
       "rank": 3,
       "model": "ModernBERTi\u0107 base",
-      "model_id": "permitt/galton-modernbertic-base-bcms-v1",
+      "model_id": "COMING SOON",
       "params": 149000000,
       "params_display": "149M",
       "results": {

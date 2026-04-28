@@ -64,7 +64,7 @@ balkanbench submit results/local/ --out submission.json
 
         <h2>Sponsorship</h2>
         <p>
-          Official compute for v0.1 is sponsored by <b>Recrewty</b>. Community
+          Official compute for v1.0 is sponsored by <b>Recrewty</b>. Community
           submissions that use different compute may leave the sponsor field as-is or
           replace it with their own sponsor; the leaderboard renders per-row sponsor
           when it differs from the benchmark default.

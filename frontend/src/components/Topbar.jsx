@@ -2,9 +2,9 @@ export default function Topbar() {
   return (
     <div className="topbar">
       <div className="tickers">
-        <span className="ticker-item"><span className="dot" /><b>STATUS</b> · v0.1 LIVE</span>
+        <span className="ticker-item"><span className="dot" /><b>STATUS</b> · v1.0 LIVE</span>
         <span className="ticker-sep">//</span>
-        <span className="ticker-item">RELEASED 2026-04-27</span>
+        <span className="ticker-item">RELEASED 2026-04-28</span>
         <span className="ticker-sep">//</span>
         <span className="ticker-item">SR · HR · MNE · BS</span>
         <span className="ticker-sep">//</span>

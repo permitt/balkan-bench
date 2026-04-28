@@ -48,18 +48,6 @@ h1 .dot-acc { color: var(--signal); }
 }
 .sub b { color: var(--ink); font-weight: 600; }
 
-/* countdown */
-.countdown {
-  display: grid; grid-template-columns: repeat(4, 1fr);
-  border: 1px solid var(--ink);
-  max-width: 560px;
-  margin-bottom: 40px;
-}
-.cd-cell { padding: 18px 20px; border-right: 1px solid var(--line); background: var(--paper); }
-.cd-cell:last-child { border-right: none; }
-.cd-k { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 6px; }
-.cd-v { font-family: var(--sans); font-weight: 700; font-size: 36px; letter-spacing: -0.03em; line-height: 1; color: var(--ink); font-variant-numeric: tabular-nums; }
-
 /* signup */
 .signup {
   border: 1px solid var(--ink); background: var(--paper);
@@ -214,9 +202,6 @@ h1 .dot-acc { color: var(--signal); }
   .status-card { min-height: 0; }
 }
 @media (max-width: 640px) {
-  .countdown { grid-template-columns: repeat(2, 1fr); }
-  .cd-cell:nth-child(2) { border-right: none; }
-  .cd-cell:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
   .bottom { flex-direction: column; align-items: flex-start; }
   .mark-sub { display: none; }
   .tickers { font-size: 10px; gap: 14px; }

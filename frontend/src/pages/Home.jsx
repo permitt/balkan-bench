@@ -1,33 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Topbar from '../components/Topbar.jsx'
 import Nav from '../components/Nav.jsx'
 import Marquee from '../components/Marquee.jsx'
 import Footer from '../components/Footer.jsx'
 
-const LAUNCH_DATE = new Date('2026-04-27T09:00:00Z')
-
-function useCountdown(target) {
-  const [now, setNow] = useState(() => new Date())
-  useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 1000)
-    return () => clearInterval(id)
-  }, [])
-  const diff = Math.max(0, target.getTime() - now.getTime())
-  const s = Math.floor(diff / 1000)
-  return {
-    days: Math.floor(s / 86400),
-    hours: Math.floor((s % 86400) / 3600),
-    minutes: Math.floor((s % 3600) / 60),
-    seconds: s % 60,
-  }
-}
-
-const pad = (n) => String(n).padStart(2, '0')
-
 export default function Home() {
-  const { days, hours, minutes, seconds } = useCountdown(LAUNCH_DATE)
   const [email, setEmail] = useState('')
-  const [note, setNote] = useState('~ 420 researchers on the list')
+  const [note, setNote] = useState('~ occasional updates on new benchmarks, models, and leaderboard releases')
   const [sent, setSent] = useState(false)
 
   const onSubmit = (e) => {
@@ -47,30 +26,22 @@ export default function Home() {
         <div className="left">
           <div>
             <div className="eyebrow">
-              <span className="chip">● COMING SOON</span>
-              <span>V1.2 · ESTIMATED LAUNCH Q2 2026</span>
+              <span className="chip">● LIVE NOW</span>
+              <span>V1.0 · RELEASED 2026-04-28</span>
             </div>
             <h1>
               Every model,<br />
-              <span className="stroke">measured</span><span className="slash">.</span><br />
-              <span>Soon<span className="dot-acc">.</span></span>
+              <span className="stroke">measured</span><span className="slash">.</span>
             </h1>
             <p className="sub">
-              An open, reproducible evaluation suite for LLMs across <b>Serbian, Montenegrin, Croatian</b> and <b>Bosnian</b>. We're finalizing datasets, pipelines and the public leaderboard - drop your email and we'll ping you the day it ships.
+              An open, reproducible benchmark and leaderboard for language models across <b>Serbian, Montenegrin, Croatian</b> and <b>Bosnian</b>. Follow the release for new datasets, model evaluations, and benchmark expansions across the BCMS ecosystem.
             </p>
           </div>
 
           <div>
-            <div className="countdown">
-              <div className="cd-cell"><div className="cd-k">Days</div><div className="cd-v">{pad(days)}</div></div>
-              <div className="cd-cell"><div className="cd-k">Hours</div><div className="cd-v">{pad(hours)}</div></div>
-              <div className="cd-cell"><div className="cd-k">Minutes</div><div className="cd-v">{pad(minutes)}</div></div>
-              <div className="cd-cell"><div className="cd-k">Seconds</div><div className="cd-v">{pad(seconds)}</div></div>
-            </div>
-
             <form className="signup" onSubmit={onSubmit}>
               <div className="signup-k">§ NOTIFY ME</div>
-              <div className="signup-h">Get launch access.</div>
+              <div className="signup-h">Get updates.</div>
               <div className="signup-p">Early access to the leaderboard, eval harness, and submission pipeline. No spam, one email at launch.</div>
               <div className="signup-row">
                 <input
@@ -95,7 +66,7 @@ export default function Home() {
         <div className="right">
           <div className="status-card">
             <div className="status-head">
-              <span>BUILD / <b>v0.1</b></span>
+              <span>BUILD / <b>v1.0</b></span>
               <span>RELEASED · PROD</span>
             </div>
 
@@ -123,16 +94,16 @@ export default function Home() {
             </div>
 
             <div className="progress">
-              <div className="progress-top"><span>LAUNCH READINESS</span><b>v0.1</b></div>
+              <div className="progress-top"><span>LAUNCH READINESS</span><b>v1.0</b></div>
               <div className="progress-bar"></div>
             </div>
 
             <div className="term">
               <div><span className="g">$</span> <span className="w">balkanbench</span> <span className="y">--version</span></div>
-              <div><span className="c">› v0.1 - 67,313 items across 3 released languages</span></div>
+              <div><span className="c">› v1.0 - 67,313 items across 3 released languages</span></div>
               <div><span className="c">› 9 models · 5 seeds · held-out test split</span></div>
               <div><span className="c">› results live at balkanbench.com/leaderboard</span></div>
-              <div><span className="g">›</span> <span className="w">released</span> <span className="y">2026-04-27</span><span className="cursor"></span></div>
+              <div><span className="g">›</span> <span className="w">released</span> <span className="y">2026-04-28</span><span className="cursor"></span></div>
             </div>
           </div>
         </div>

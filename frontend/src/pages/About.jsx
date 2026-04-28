@@ -23,7 +23,7 @@ export default function About() {
           dataset, config, and seed that produced it.
         </p>
 
-        <h2>What ships in v0.1</h2>
+        <h2>What ships in v1.0</h2>
         <ul>
           <li>
             <b>Serbian SuperGLUE</b> (official frozen track): 6 ranked tasks
@@ -58,7 +58,7 @@ export default function About() {
 
         <h2>Sponsor</h2>
         <p>
-          Compute for the official v0.1 evaluation is sponsored by{' '}
+          Compute for the official v1.0 evaluation is sponsored by{' '}
           <a href="https://recrewty.com" target="_blank" rel="noopener noreferrer">
             <b>Recrewty</b>
           </a>. Every result artifact and the leaderboard export carry this acknowledgement.

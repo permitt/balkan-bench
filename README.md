@@ -135,7 +135,6 @@ balkan-bench/
 │   ├── schemas/         JSON Schemas that validate every config and artifact
 │   ├── scripts/         dataset publisher, GCP launchers, aggregators
 │   └── tests/           unit + integration + smoke
-├── docs/                methodology, governance, leaderboard, GCP, specs
 ├── .github/             issue templates, workflows
 └── README.md / CONTRIBUTING.md / LICENSE
 ```
@@ -166,17 +165,6 @@ scratch.
 - Montenegrin SuperGLUE dataset: <https://huggingface.co/datasets/permitt/superglue-mne>
 - Croatian SuperGLUE dataset: <https://huggingface.co/datasets/permitt/superglue-hr>
 - GitHub repository: <https://github.com/permitt/balkan-bench>
-
-## Full design and methodology
-
-- [`docs/superpowers/specs/2026-04-22-balkanbench-v0.1-design.md`](docs/superpowers/specs/2026-04-22-balkanbench-v0.1-design.md)
-  - the frozen v0.1 design
-- [`docs/methodology/`](docs/methodology/) - benchmark contract, data provenance, versioning, task lifecycle, throughput
-- [`docs/governance/`](docs/governance/) - submissions, contributions policy, anti-spam
-- [`docs/leaderboard/format.md`](docs/leaderboard/format.md) - `benchmark_results.json` schema
-- [`docs/gcp/`](docs/gcp/) - running official evaluation on GCP
-
-(Some of the docs above are still being filled in during the v0.1 build.)
 
 ## License
 

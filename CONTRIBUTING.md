@@ -26,8 +26,7 @@ full step-by-step example for the most common one: **adding a new benchmark**.
 2. **Identity is required** for any official contribution. Your submitter
    identity must be a public GitHub or Hugging Face handle. Anonymous
    contributions are fine for bug reports but not for benchmarks, tasks,
-   models, or submissions. Anti-spam rationale is documented in
-   [`docs/governance/submissions.md`](docs/governance/submissions.md).
+   models, or submissions. Maintainers triage proposals against an anti-spam policy before review.
 3. **Schemas are the source of truth.** Everything goes through JSON Schema
    validation in CI. You cannot invent fields; you can only change fields that
    the schema allows. Schemas live under
@@ -74,7 +73,7 @@ Use the `Propose Benchmark` issue template on GitHub. Required fields:
   will maintain this benchmark going forward.
 
 A maintainer will label the issue `proposal-benchmark` and triage within the
-SLA documented in [`docs/governance/submissions.md`](docs/governance/submissions.md).
+SLA documented in the governance policy.
 Triage can end in: accepted, needs-more-info, or declined (with reason). Only
 proceed past this step after the issue is accepted.
 
@@ -257,13 +256,13 @@ CI runs `validate-configs.yml` and the full test suite. A maintainer reviews:
 - dataset card on HF matches the manifest
 - schemas pass
 - task implementation (if custom) follows the
-  [task interface rules](docs/methodology/benchmark_contract.md)
+  the task interface rules in the benchmark contract
 
 ### Step 9 - Merge and release
 
 On merge, the new benchmark ships in the next minor release
 (`0.2.0`, `0.3.0`, ...) per
-[`docs/methodology/versioning.md`](docs/methodology/versioning.md). New
+the versioning policy. New
 benchmarks are always at least a minor bump.
 
 ---
@@ -307,7 +306,7 @@ A new task is a **minor** version bump for that benchmark.
 4. A maintainer scores the predictions against private labels on GCP and
    commits the scored artifact and updated `benchmark_results.json`.
 
-Full submission flow: [`docs/governance/submissions.md`](docs/governance/submissions.md).
+Full submission flow is documented in the governance policy.
 
 ## Local development setup
 
@@ -333,7 +332,7 @@ npm run dev
 ```
 
 See [`eval/README.md`](eval/README.md) for package layout, and the project
-specs under `docs/superpowers/` for the full design intent.
+internal design specs for the full intent.
 
 ## Commit conventions
 
@@ -358,6 +357,4 @@ No Claude or AI-authored co-author trailer lines. Human authors only.
 We expect courteous, respectful behaviour in issues, PRs, reviews, and any
 space that uses the BalkanBench name. In short: assume good faith, disagree on
 content not on people, and flag anything that crosses a line to a maintainer.
-A full code of conduct document lands alongside the v0.1 release. Until it is
-in the repo, reports go to
-[perovicmitar@gmail.com](mailto:perovicmitar@gmail.com).
+A full code of conduct document lands alongside the v0.1 release.

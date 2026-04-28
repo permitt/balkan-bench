@@ -5,7 +5,7 @@ Serbian, Croatian, Montenegrin, and Bosnian (BCMS).
 
 [balkanbench.com](https://balkanbench.com) - public leaderboard and launch page.
 
-> Public release: **2026-04-27**. BalkanBench v0.1 launches a South Slavic
+> Public release: **2026-04-28**. BalkanBench v1.0 launches a South Slavic
 > evaluation suite built around SuperGLUE, with Serbian as the official frozen
 > track and Croatian plus Montenegrin released alongside it as open preview
 > expansions.
@@ -33,7 +33,7 @@ repo:
 The repository is designed for contributions. Adding a new benchmark, task,
 language, or model should be a schema-validated PR, not a core-code rewrite.
 
-At launch, BalkanBench **v0.1** covers 3 released languages. The Serbian
+At launch, BalkanBench **v1.0** covers 3 released languages. The Serbian
 SuperGLUE track is the official frozen track and ships with **6 ranked NLU
 tasks** (BoolQ, CB, COPA, RTE, MultiRC, WSC) plus **2 diagnostics** (AX-b,
 AX-g), totalling **67,313 items** across train, validation, and held-out test
@@ -55,7 +55,7 @@ The roadmap extends beyond SuperGLUE. Planned next steps include:
 - community-submitted benchmarks such as sentiment, NER, and domain-specific
   evaluation suites
 
-## Languages (v0.1)
+## Languages (v1.0)
 
 | Code | Language    | Status     |
 |------|-------------|------------|
@@ -64,7 +64,7 @@ The roadmap extends beyond SuperGLUE. Planned next steps include:
 | mne  | Montenegrin | preview    |
 | bs   | Bosnian     | roadmap    |
 
-## Ranked tasks (v0.1, SuperGLUE)
+## Ranked tasks (v1.0, SuperGLUE)
 
 | Task    | sr  | hr  | mne |
 |---------|:---:|:---:|:---:|
@@ -75,7 +75,7 @@ The roadmap extends beyond SuperGLUE. Planned next steps include:
 | MultiRC | yes | yes | yes |
 | WSC     | yes | -   | -   |
 
-WSC is Serbian-only in v0.1 (no published HR/MNE adaptation yet), so
+WSC is Serbian-only in v1.0 (no published HR/MNE adaptation yet), so
 the Croatian and Montenegrin previews expose 5 ranked tasks each;
 Serbian is the full 6-task SuperGLUE track. Diagnostics (AX-b, AX-g)
 are Serbian-only and don't enter the ranked average.

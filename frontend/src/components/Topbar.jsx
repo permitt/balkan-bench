@@ -10,7 +10,15 @@ export default function Topbar() {
         <span className="ticker-sep">//</span>
         <span className="ticker-item">MIT LICENSED</span>
         <span style={{ marginLeft: 'auto' }} className="ticker-item">
-          SPONSORED BY <b style={{ marginLeft: 4 }}>RECREWTY</b>
+          SPONSORED BY{' '}
+          <a
+            href="https://recrewty.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ marginLeft: 4, color: 'inherit', textDecoration: 'underline' }}
+          >
+            <b>RECREWTY</b>
+          </a>
         </span>
       </div>
     </div>

@@ -66,10 +66,10 @@ export default function About() {
 
         <h2>Further reading</h2>
         <ul>
-          <li><a href="https://github.com/permitt/balkan-bench/blob/main/docs/superpowers/specs/2026-04-22-balkanbench-v0.1-design.md">v0.1 Design Spec</a></li>
-          <li><a href="https://github.com/permitt/balkan-bench/blob/main/docs/methodology/data_provenance.md">Data Provenance</a></li>
-          <li><a href="https://github.com/permitt/balkan-bench/blob/main/docs/methodology/throughput.md">Throughput Methodology</a></li>
-          <li><a href="https://github.com/permitt/balkan-bench/blob/main/CONTRIBUTING.md">How to Contribute</a></li>
+          <li><a href="https://medium.com/@permitt/release-of-balkanbench-vision-behind-it-fd1ba73be411" target="_blank" rel="noopener noreferrer">Release of BalkanBench: the vision behind it (Medium)</a></li>
+          <li><a href="https://github.com/permitt/balkan-bench" target="_blank" rel="noopener noreferrer">Source code on GitHub</a></li>
+          <li><a href="https://github.com/permitt/balkan-bench/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer">How to contribute</a></li>
+          <li><a href="https://huggingface.co/datasets/permitt/superglue-sr" target="_blank" rel="noopener noreferrer">Serbian SuperGLUE dataset</a></li>
         </ul>
       </section>
       <Footer />

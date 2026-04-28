@@ -319,7 +319,21 @@ export default function Leaderboard() {
                       <td className="lb-rank">{displayRank}</td>
                       <td className="lb-model">
                         <div className="lb-model-name">{row.model}</div>
-                        <div className="lb-model-id">{row.model_id}</div>
+                        <div className="lb-model-id">
+                          {/* Real HF repo IDs render as a link to the HF page;
+                              placeholder strings like "COMING SOON" stay plain. */}
+                          {row.model_id && row.model_id.includes('/') ? (
+                            <a
+                              href={`https://huggingface.co/${row.model_id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {row.model_id}
+                            </a>
+                          ) : (
+                            row.model_id
+                          )}
+                        </div>
                       </td>
                       <td className="lb-params">{row.params_display}</td>
                       {data.ranked_tasks.map((t) => {

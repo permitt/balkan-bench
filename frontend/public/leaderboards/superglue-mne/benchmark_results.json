@@ -20,10 +20,10 @@
   "rows": [
     {
       "rank": 2,
-      "model": "bertic",
+      "model": "BERTi\u0107",
       "model_id": "classla/bcms-bertic",
-      "params": 0,
-      "params_display": "0",
+      "params": 110000000,
+      "params_display": "110M",
       "results": {
         "boolq": {
           "mean": 0.7863790446841294,
@@ -50,10 +50,10 @@
     },
     {
       "rank": 5,
-      "model": "crosloengual_bert",
+      "model": "CroSloEngual BERT",
       "model_id": "EMBEDDIA/crosloengual-bert",
-      "params": 0,
-      "params_display": "0",
+      "params": 124000000,
+      "params_display": "124M",
       "results": {
         "boolq": {
           "mean": 0.73115562403698,
@@ -80,10 +80,10 @@
     },
     {
       "rank": 8,
-      "model": "galton_v3_base",
-      "model_id": "permitt/galton-bcms-v3-base-ctx8192",
-      "params": 0,
-      "params_display": "0",
+      "model": "ModernBERTi\u0107 base",
+      "model_id": "COMING SOON",
+      "params": 149000000,
+      "params_display": "149M",
       "results": {
         "boolq": {
           "mean": 0.7632665639445301,
@@ -110,10 +110,10 @@
     },
     {
       "rank": 1,
-      "model": "galton_v3_large",
-      "model_id": "permitt/galton-bcms-v3-large-ctx8192",
-      "params": 0,
-      "params_display": "0",
+      "model": "ModernBERTi\u0107 large",
+      "model_id": "COMING SOON",
+      "params": 395000000,
+      "params_display": "395M",
       "results": {
         "boolq": {
           "mean": 0.8150385208012327,
@@ -140,10 +140,10 @@
     },
     {
       "rank": 6,
-      "model": "jerteh_355",
+      "model": "Jerteh-355",
       "model_id": "jerteh/Jerteh-355",
-      "params": 0,
-      "params_display": "0",
+      "params": 354000000,
+      "params_display": "354M",
       "results": {
         "boolq": {
           "mean": 0.7228351309707242,
@@ -170,10 +170,10 @@
     },
     {
       "rank": 3,
-      "model": "mmbert",
+      "model": "mmBERT",
       "model_id": "jhu-clsp/mmBERT-base",
-      "params": 0,
-      "params_display": "0",
+      "params": 307000000,
+      "params_display": "307M",
       "results": {
         "boolq": {
           "mean": 0.7842218798151002,
@@ -200,10 +200,10 @@
     },
     {
       "rank": 7,
-      "model": "mmbert_small",
+      "model": "mmBERT-small",
       "model_id": "jhu-clsp/mmBERT-small",
-      "params": 0,
-      "params_display": "0",
+      "params": 140000000,
+      "params_display": "140M",
       "results": {
         "boolq": {
           "mean": 0.7530970724191063,
@@ -230,10 +230,10 @@
     },
     {
       "rank": 9,
-      "model": "tesla_xlm",
+      "model": "TeSLa-XLM",
       "model_id": "te-sla/teslaXLM",
-      "params": 0,
-      "params_display": "0",
+      "params": 560000000,
+      "params_display": "560M",
       "results": {
         "boolq": {
           "mean": 0.6231124807395994,
@@ -260,10 +260,10 @@
     },
     {
       "rank": 4,
-      "model": "xlm_r_bertic",
+      "model": "XLM-R BERTi\u0107",
       "model_id": "classla/xlm-r-bertic",
-      "params": 0,
-      "params_display": "0",
+      "params": 560000000,
+      "params_display": "560M",
       "results": {
         "boolq": {
           "mean": 0.8152234206471494,

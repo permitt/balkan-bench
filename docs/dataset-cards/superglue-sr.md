@@ -19,21 +19,6 @@ tags:
   - superglue
   - nlu
   - benchmark
-configs:
-  - config_name: boolq
-    data_files: { train: boolq/train-*.parquet, validation: boolq/validation-*.parquet, test: boolq/test-*.parquet }
-  - config_name: cb
-    data_files: { train: cb/train-*.parquet, validation: cb/validation-*.parquet, test: cb/test-*.parquet }
-  - config_name: copa
-    data_files: { train: copa/train-*.parquet, validation: copa/validation-*.parquet, test: copa/test-*.parquet }
-  - config_name: multirc
-    data_files: { train: multirc/train-*.parquet, validation: multirc/validation-*.parquet, test: multirc/test-*.parquet }
-  - config_name: record
-    data_files: { train: record/train-*.parquet, validation: record/validation-*.parquet, test: record/test-*.parquet }
-  - config_name: rte
-    data_files: { train: rte/train-*.parquet, validation: rte/validation-*.parquet, test: rte/test-*.parquet }
-  - config_name: wsc
-    data_files: { train: wsc/train-*.parquet, validation: wsc/validation-*.parquet, test: wsc/test-*.parquet }
 ---
 
 # BalkanBench SuperGLUE - Serbian

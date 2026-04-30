@@ -81,7 +81,7 @@
     {
       "rank": 8,
       "model": "ModernBERTi\u0107 base",
-      "model_id": "COMING SOON",
+      "model_id": "permitt/galton-modernbertic-base",
       "params": 149000000,
       "params_display": "149M",
       "results": {
@@ -111,7 +111,7 @@
     {
       "rank": 1,
       "model": "ModernBERTi\u0107 large",
-      "model_id": "COMING SOON",
+      "model_id": "permitt/galton-modernbertic-large",
       "params": 395000000,
       "params_display": "395M",
       "results": {

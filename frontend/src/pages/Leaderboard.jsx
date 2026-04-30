@@ -320,8 +320,6 @@ export default function Leaderboard() {
                       <td className="lb-model">
                         <div className="lb-model-name">{row.model}</div>
                         <div className="lb-model-id">
-                          {/* Real HF repo IDs render as a link to the HF page;
-                              placeholder strings like "COMING SOON" stay plain. */}
                           {row.model_id && row.model_id.includes('/') ? (
                             <a
                               href={`https://huggingface.co/${row.model_id}`}

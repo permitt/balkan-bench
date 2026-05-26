@@ -13,6 +13,7 @@ export default function Nav() {
           <NavLink to="/leaderboard" end>Leaderboard</NavLink>
           <NavLink to="/about">About</NavLink>
           <NavLink to="/submit">Submit</NavLink>
+          <NavLink to="/acknowledgements">Acknowledgements</NavLink>
           <a href="https://github.com/permitt/balkan-bench" target="_blank" rel="noopener noreferrer">
             GitHub
           </a>

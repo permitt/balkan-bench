@@ -127,3 +127,16 @@
   color: var(--ink);
 }
 .btn-ghost:hover { background: var(--ink); color: var(--paper); }
+
+.content-code {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.55;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 18px 20px;
+  margin: 18px 0 24px;
+  overflow-x: auto;
+  white-space: pre;
+  border: 1px solid var(--ink);
+}

@@ -92,7 +92,23 @@ class CausalLM:
         ids are the suffix of the full encoding past the context's length.
         Guards against an empty-context tokenization (never happens for our
         tasks, but matches harness behavior) by prepending BOS to both.
+
+        Before encoding, a trailing whitespace run on ``context`` is shifted
+        onto the front of ``continuation`` - ports lm-evaluation-harness
+        v0.3.0's ``BaseLM._encode_pair`` (vendored in
+        gordicaleksa/serbian-llm-eval, serb_eval_run branch,
+        lm_eval/base.py:200-209) verbatim. This keeps the continuation's
+        leading-space merge consistent whether the source text split as
+        "context " + "continuation" or "context" + " continuation" -
+        without it, the joint encoding can swallow the boundary into a
+        single token that is already fully covered by the context's own
+        encoding, silently emptying the continuation.
         """
+        n_spaces = len(context) - len(context.rstrip())
+        if n_spaces > 0:
+            continuation = context[-n_spaces:] + continuation
+            context = context[:-n_spaces]
+
         enc_ctx = self.tokenizer(context, add_special_tokens=False)["input_ids"]
         enc_full = self.tokenizer(context + continuation, add_special_tokens=False)["input_ids"]
         if len(enc_ctx) == 0:
@@ -102,6 +118,12 @@ class CausalLM:
             enc_ctx = [bos_id, *enc_ctx]
             enc_full = [bos_id, *enc_full]
         continuation_ids = enc_full[len(enc_ctx) :]
+        if len(continuation_ids) == 0:
+            raise ValueError(
+                f"empty continuation token ids for context={context!r} "
+                f"continuation={continuation!r}: the continuation contributes no "
+                "tokens beyond the context under joint encoding"
+            )
         return enc_full, continuation_ids
 
     def _loglikelihood_batch(self, batch: list[tuple[str, str]]) -> list[float]:

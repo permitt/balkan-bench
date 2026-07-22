@@ -102,6 +102,27 @@ def test_loglikelihood_raises_unsupported_protocol_error(tmp_path):
         model.loglikelihood([("ctx", "cont")])
 
 
+def test_generate_truncates_at_stop_sequence_client_side(tmp_path):
+    """Belt-and-braces: even if a provider client ignores stop_sequences and
+    returns text running past the stop marker, APIModel.generate truncates it
+    client-side before returning."""
+
+    class OverrunClient:
+        def complete(self, prompt, *, max_tokens, stop_sequences):
+            return APIResponse(
+                text="answer: 42\nEND\nunwanted trailing text",
+                input_tokens=3,
+                output_tokens=8,
+                cost_usd=0.0,
+            )
+
+    model = APIModel(_model_cfg(), cache_dir=tmp_path, client=OverrunClient())
+
+    results = model.generate(["prompt"], stop_sequences=["\nEND"], max_gen_tokens=32)
+
+    assert results == ["answer: 42"]
+
+
 def test_corrupted_cache_file_is_treated_as_miss(tmp_path):
     client = FakeClient()
     model = APIModel(_model_cfg(), cache_dir=tmp_path, client=client)

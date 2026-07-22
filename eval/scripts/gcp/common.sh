@@ -96,6 +96,16 @@ pick_balkanbench_cmd() {
       printf 'balkanbench throughput --model %s --benchmark %s --language %s --hardware %s --out %s' \
         "${MODEL}" "${BENCHMARK}" "${LANGUAGE}" "${HARDWARE:-NVIDIA L4 24GB}" "${out}"
       ;;
+    sle-eval)
+      # SLE (generative) tasks skip HP search and multi-seed training
+      # entirely - `balkanbench eval` short-circuits to a single generative
+      # dispatch before the seeds check, so no --seeds flag is needed here.
+      # The sle dataset repo and benchmark.yaml version don't match the
+      # generic superglue-era CLI defaults, so this case pins its own.
+      printf 'balkanbench eval --model %s --benchmark %s --task %s --language %s --dataset-revision %s --benchmark-version %s --run-type %s --out %s' \
+        "${MODEL}" "${BENCHMARK}" "${TASK}" "${LANGUAGE}" \
+        "${DATASET_REVISION:-main}" "${BENCHMARK_VERSION:-1.0.0}" "${RUN_TYPE:-official}" "${out}"
+      ;;
     run)
       # End-to-end: HP search per task -> 5-seed eval on the chosen split ->
       # leaderboard export (the latter is auto-skipped if TASKS is a strict
@@ -126,7 +136,7 @@ pick_balkanbench_cmd() {
       printf '%s' "${cmd}"
       ;;
     *)
-      die "unknown MODE=${MODE} (want one of eval, predict, score, hp-search, throughput, run)"
+      die "unknown MODE=${MODE} (want one of eval, predict, score, hp-search, throughput, run, sle-eval)"
       ;;
   esac
 }

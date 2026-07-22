@@ -394,6 +394,35 @@ def test_cli_export_with_access_api(tmp_path) -> None:
     assert data["task_primary_metrics"]["arc_easy"] == "acc"
 
 
+def test_cli_export_without_version_flag_reads_sle_benchmark_manifest(tmp_path) -> None:
+    """Regression: omitting --benchmark-version must not silently fall back to
+    the stale "0.1.0" default - it should read the sle benchmark's declared
+    manifest version (1.0.0) via configs/benchmarks/sle/benchmark.yaml."""
+    _seed_tree(tmp_path)
+    out_path = tmp_path / "sle-sr-open" / "benchmark_results.json"
+
+    result = runner.invoke(
+        app,
+        [
+            "leaderboard",
+            "export",
+            "--benchmark",
+            "sle",
+            "--language",
+            "sr",
+            "--results-dir",
+            str(tmp_path),
+            "--out",
+            str(out_path),
+            "--access",
+            "open_weights",
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    data = json.loads(out_path.read_text())
+    assert data["benchmark_version"] == "1.0.0"
+
+
 def test_cli_export_rejects_bad_access_value(tmp_path) -> None:
     result = runner.invoke(
         app,

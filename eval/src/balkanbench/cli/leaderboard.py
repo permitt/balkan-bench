@@ -6,7 +6,7 @@ from pathlib import Path
 
 import typer
 
-from balkanbench.cli._paths import schemas_root
+from balkanbench.cli._paths import configs_root, schemas_root
 from balkanbench.config import load_yaml_with_schema
 from balkanbench.leaderboard.export import ExportError, write_leaderboard_export
 
@@ -41,8 +41,11 @@ def export_cmd(
         help="Directory containing {benchmark}-{language}/ subtree of result artifacts.",
     ),
     out: Path = typer.Option(..., "--out", help="Path to write benchmark_results.json."),
-    benchmark_version: str = typer.Option(
-        "0.1.0", "--benchmark-version", help="Benchmark version recorded in the export."
+    benchmark_version: str | None = typer.Option(
+        None,
+        "--benchmark-version",
+        help="Benchmark version recorded in the export. Defaults to the "
+        "`version` declared in configs/benchmarks/{benchmark}/benchmark.yaml.",
     ),
     access: str | None = typer.Option(
         None,
@@ -60,6 +63,7 @@ def export_cmd(
 
     try:
         ranked_tasks, primary_metrics = _collect_ranked_tasks(benchmark, language, access=access)
+        resolved_version = benchmark_version or _default_benchmark_version(benchmark)
     except FileNotFoundError as exc:
         typer.echo(_red(str(exc)))
         raise typer.Exit(code=1) from exc
@@ -76,7 +80,7 @@ def export_cmd(
             results_root=target_root,
             ranked_tasks=ranked_tasks,
             task_primary_metrics=primary_metrics,
-            benchmark_version=benchmark_version,
+            benchmark_version=resolved_version,
             out_path=out,
             seeds=_DEFAULT_SEEDS,
             access=access,
@@ -86,6 +90,20 @@ def export_cmd(
         raise typer.Exit(code=1) from exc
 
     typer.echo(_green(f"Wrote leaderboard export to {out}"))
+
+
+def _default_benchmark_version(benchmark: str) -> str:
+    """Read ``version`` from ``configs/benchmarks/{benchmark}/benchmark.yaml``.
+
+    Used when ``--benchmark-version`` is omitted, so the export stays truthful
+    to the benchmark's declared manifest version instead of a stale hardcoded
+    default.
+    """
+    manifest = configs_root() / "benchmarks" / benchmark / "benchmark.yaml"
+    cfg = load_yaml_with_schema(manifest, schemas_root() / "benchmark_spec.json")
+    version = cfg["version"]
+    assert isinstance(version, str)
+    return version
 
 
 def _collect_ranked_tasks(

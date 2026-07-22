@@ -9,6 +9,7 @@ from typing import Any
 
 import typer
 
+from balkanbench.cli._generative import GENERATIVE_TASK_TYPES
 from balkanbench.cli._paths import resolve_model_config, resolve_task_config, schemas_root
 from balkanbench.config import load_yaml_with_schema
 from balkanbench.data.repo import DatasetRepoError, resolve_dataset_repo, resolve_hf_token
@@ -56,6 +57,12 @@ def predict_cmd(
     except FileNotFoundError as exc:
         typer.echo(_red(f"config not found: {exc}"))
         raise typer.Exit(code=1) from exc
+
+    if task_cfg["task_type"] in GENERATIVE_TASK_TYPES:
+        typer.echo(
+            _red("predict is not supported for generative tasks; sle labels are public, use eval")
+        )
+        raise typer.Exit(code=1)
 
     try:
         repo_id = resolve_dataset_repo(task_cfg, language, prefer="public")

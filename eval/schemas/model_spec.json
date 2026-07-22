@@ -3,7 +3,7 @@
   "$id": "https://balkanbench.com/schemas/model_spec.json",
   "title": "BalkanBench Model Specification",
   "type": "object",
-  "required": ["name", "hf_repo", "family", "params_hint", "training"],
+  "required": ["name", "family", "params_hint"],
   "additionalProperties": false,
   "properties": {
     "name":         { "type": "string", "minLength": 1 },
@@ -12,6 +12,9 @@
     "family":       { "type": "string", "minLength": 1 },
     "params_hint":  { "type": "string", "minLength": 1 },
     "tier":         { "type": "string", "enum": ["official", "experimental"] },
+    "access":       { "type": "string", "enum": ["open_weights", "api"], "default": "open_weights" },
+    "provider":     { "type": "string", "enum": ["anthropic", "openai", "gemini"] },
+    "api_model_id": { "type": "string", "minLength": 1 },
     "hf_auth": {
       "type": "object",
       "additionalProperties": false,
@@ -25,6 +28,17 @@
         "batch_size":    { "type": "integer", "minimum": 1 },
         "num_epochs":    { "type": "integer", "minimum": 1 },
         "fp16":          { "type": "boolean" }
+      }
+    },
+    "generation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "temperature":    { "type": "number", "minimum": 0 },
+        "max_tokens":     { "type": "integer", "minimum": 1 },
+        "batch_size":     { "type": "integer", "minimum": 1 },
+        "dtype":          { "type": "string" },
+        "concurrency":    { "type": "integer", "minimum": 1 }
       }
     },
     "task_overrides": {
@@ -43,5 +57,12 @@
       "items": { "type": "integer" },
       "minItems": 1
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "access": { "const": "api" } }, "required": ["access"] },
+      "then": { "required": ["provider", "api_model_id"] },
+      "else": { "required": ["hf_repo"] }
+    }
+  ]
 }

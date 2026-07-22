@@ -40,6 +40,22 @@ def compute_config_hash(cfg: dict[str, Any]) -> str:
     return "sha256:" + hashlib.sha256(canonical).hexdigest()
 
 
+def _parse_params_hint(params_hint: Any) -> int | None:
+    """Parse a model's ``params_hint`` (e.g. ``"4B"``, ``"9.7B"``) into a raw
+    parameter count. Returns ``None`` for ``"API"`` or any unparseable value
+    (open-weights params_hints are always a ``<float>B`` string; API models
+    use the literal ``"API"`` sentinel)."""
+    if not isinstance(params_hint, str):
+        return None
+    hint = params_hint.strip()
+    if not hint.upper().endswith("B"):
+        return None
+    try:
+        return int(float(hint[:-1]) * 1e9)
+    except ValueError:
+        return None
+
+
 def write_result_artifact(
     *,
     task_cfg: dict[str, Any],
@@ -214,6 +230,10 @@ def write_generative_result_artifact(
         "test_predictions_hash": predictions_hash,
         "sponsor": sponsor,
     }
+
+    params = _parse_params_hint(model_cfg.get("params_hint"))
+    if params is not None:
+        artifact["params"] = params
 
     _validate_against_schema(artifact)
 

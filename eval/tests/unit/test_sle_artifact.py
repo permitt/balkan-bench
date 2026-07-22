@@ -205,6 +205,71 @@ def test_generative_qa_string_predictions_hash_deterministic(tmp_path) -> None:
     assert data_1["test_predictions_hash"].startswith("sha256:")
 
 
+@pytest.mark.parametrize(
+    ("params_hint", "expected"),
+    [
+        ("4B", 4_000_000_000),
+        ("9.7B", 9_700_000_000),
+        ("8.9B", 8_900_000_000),
+        ("5.1B", 5_100_000_000),
+    ],
+)
+def test_open_artifact_carries_params_from_params_hint(tmp_path, params_hint, expected) -> None:
+    model_cfg = _fake_model_cfg(params_hint=params_hint)
+    out_path = write_generative_result_artifact(
+        task_cfg=_fake_task_cfg(),
+        model_cfg=model_cfg,
+        language="sr",
+        run_result=_mc_run_result(),
+        task_score_metric="acc",
+        provenance=_fake_provenance(),
+        dataset_revision="v0.1.0-data",
+        benchmark_version="0.1.0",
+        out_dir=tmp_path,
+    )
+    data = json.loads(out_path.read_text())
+    Draft202012Validator(_schema()).validate(data)
+    assert data["params"] == expected
+
+
+def test_api_artifact_omits_params(tmp_path) -> None:
+    model_cfg = _fake_model_cfg(access="api", provider="anthropic", params_hint="API")
+    del model_cfg["hf_repo"]
+    model_cfg["api_model_id"] = "claude-fake"
+    out_path = write_generative_result_artifact(
+        task_cfg=_fake_task_cfg(),
+        model_cfg=model_cfg,
+        language="sr",
+        run_result=_mc_run_result(api_cost_usd=0.05),
+        task_score_metric="acc",
+        provenance=_fake_provenance(),
+        dataset_revision="v0.1.0-data",
+        benchmark_version="0.1.0",
+        out_dir=tmp_path,
+    )
+    data = json.loads(out_path.read_text())
+    Draft202012Validator(_schema()).validate(data)
+    assert "params" not in data
+
+
+def test_open_artifact_omits_params_when_unparseable(tmp_path) -> None:
+    model_cfg = _fake_model_cfg(params_hint="unknown")
+    out_path = write_generative_result_artifact(
+        task_cfg=_fake_task_cfg(),
+        model_cfg=model_cfg,
+        language="sr",
+        run_result=_mc_run_result(),
+        task_score_metric="acc",
+        provenance=_fake_provenance(),
+        dataset_revision="v0.1.0-data",
+        benchmark_version="0.1.0",
+        out_dir=tmp_path,
+    )
+    data = json.loads(out_path.read_text())
+    Draft202012Validator(_schema()).validate(data)
+    assert "params" not in data
+
+
 def test_api_artifact_uses_api_model_id_when_hf_repo_absent(tmp_path) -> None:
     """Real API roster YAMLs (e.g. configs/models/official/sle-claude-sonnet-5.yaml)
     have no ``hf_repo`` - the artifact writer must fall back to ``api_model_id``

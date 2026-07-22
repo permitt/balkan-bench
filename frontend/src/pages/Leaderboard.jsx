@@ -12,6 +12,14 @@ const TASK_LABELS = {
   rte: 'RTE',
   multirc: 'MultiRC',
   wsc: 'WSC',
+  arc_challenge: 'ARC-C',
+  arc_easy: 'ARC-E',
+  hellaswag: 'HellaSwag',
+  nq_open: 'NQ',
+  openbookqa: 'OBQA',
+  piqa: 'PIQA',
+  triviaqa: 'TriviaQA',
+  winogrande: 'WinoG',
 }
 
 const TASK_DESCRIPTIONS = {
@@ -21,6 +29,14 @@ const TASK_DESCRIPTIONS = {
   rte: 'Binary textual entailment',
   multirc: 'Multi-sentence reading comprehension (grouped F1 + exact match)',
   wsc: 'Winograd Schema coreference reformulated as binary classification',
+  arc_challenge: 'Grade-school science questions, challenge split, Serbian adaptation',
+  arc_easy: 'Grade-school science questions, easy split, Serbian adaptation',
+  hellaswag: 'Commonsense sentence completion, Serbian adaptation',
+  nq_open: 'Open-domain question answering, Serbian adaptation',
+  openbookqa: 'Open-book science QA over elementary-level facts, Serbian adaptation',
+  piqa: 'Physical commonsense reasoning between two candidate solutions, Serbian adaptation',
+  triviaqa: 'Trivia question answering, Serbian adaptation',
+  winogrande: 'Winograd-style pronoun resolution, Serbian adaptation',
 }
 
 const LANGUAGES = {
@@ -42,8 +58,8 @@ const BENCHMARKS = {
     label: 'Serbian-LLM-Eval',
     tagline: 'Generative few-shot',
     description: 'Generative few-shot eval (Aleksa Gordić) - ARC, HellaSwag, PIQA, BoolQ, Winogrande, etc.',
-    available: false,
-    availableIn: 'v1.1',
+    available: true,
+    availableIn: null,
   },
   mteb_bcms: {
     label: 'MTEB-BCMS',
@@ -68,7 +84,7 @@ const LEADERBOARDS = [
   { benchmark: 'superglue', language: 'hr',  path: 'superglue-hr',  available: true,  availableIn: null   },
   { benchmark: 'superglue', language: 'mne', path: 'superglue-mne', available: true,  availableIn: null   },
   { benchmark: 'superglue', language: 'bs',  path: 'superglue-bs',  available: false, availableIn: 'v1.1' },
-  { benchmark: 'sle',       language: 'sr',  path: 'sle-sr',        available: false, availableIn: 'v1.1' },
+  { benchmark: 'sle',       language: 'sr',  path: 'sle-sr',        available: true,  availableIn: null   },
 ]
 
 function chipLabel(entry) {
@@ -95,6 +111,124 @@ function sortValue(row, rankBy) {
   return cell ? cell.mean : null
 }
 
+function sortRows(rows, rankBy) {
+  const sorted = [...rows]
+  sorted.sort((a, b) => {
+    const av = sortValue(a, rankBy)
+    const bv = sortValue(b, rankBy)
+    if (av === null && bv === null) return 0
+    if (av === null) return 1
+    if (bv === null) return -1
+    return bv - av
+  })
+  return sorted
+}
+
+// Renders one leaderboard table (+ its meta footer) from a benchmark_results.json
+// payload. Shared by every (benchmark, language) pair, including the two
+// access-split boards of the sle track.
+function LeaderboardTable({ data, rankBy, setRankBy }) {
+  const sortedRows = useMemo(() => sortRows(data.rows, rankBy), [data, rankBy])
+
+  if (data.rows.length === 0) {
+    return <div className="lb-empty">No results published yet.</div>
+  }
+
+  return (
+    <div className="lb-table-wrap">
+      <table className="lb-table">
+        <thead>
+          <tr>
+            <th className="lb-rank">#</th>
+            <th className="lb-model">Model</th>
+            <th className="lb-params">Params</th>
+            {data.ranked_tasks.map((t) => (
+              <th
+                key={t}
+                className={`lb-num ${rankBy === t ? 'lb-col-active' : ''}`}
+                onClick={() => setRankBy(t)}
+              >
+                {TASK_LABELS[t] || t}
+                <span className="lb-metric">({data.task_primary_metrics[t]})</span>
+                {rankBy === t && <span className="lb-caret">▼</span>}
+              </th>
+            ))}
+            <th
+              className={`lb-num lb-avg ${rankBy === 'avg' ? 'lb-col-active' : ''}`}
+              onClick={() => setRankBy('avg')}
+            >
+              Avg
+              {rankBy === 'avg' && <span className="lb-caret">▼</span>}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {sortedRows.map((row, i) => {
+            const rankByTaskValue = sortValue(row, rankBy)
+            const displayRank =
+              rankBy === 'avg'
+                ? row.rank ?? (row.partial_flag || '-')
+                : rankByTaskValue === null
+                ? '-'
+                : i + 1
+            return (
+              <tr key={row.model} className={!row.complete ? 'lb-partial' : ''}>
+                <td className="lb-rank">{displayRank}</td>
+                <td className="lb-model">
+                  <div className="lb-model-name">{row.model}</div>
+                  <div className="lb-model-id">
+                    {row.model_id && row.model_id.includes('/') ? (
+                      <a
+                        href={`https://huggingface.co/${row.model_id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {row.model_id}
+                      </a>
+                    ) : (
+                      row.model_id
+                    )}
+                  </div>
+                </td>
+                <td className="lb-params">{row.params_display}</td>
+                {data.ranked_tasks.map((t) => {
+                  const { main, stdev } = formatCell(row.results[t])
+                  return (
+                    <td
+                      key={t}
+                      className={`lb-num ${rankBy === t ? 'lb-col-active' : ''}`}
+                    >
+                      <div className="lb-cell-main">{main}</div>
+                      {stdev !== null && <div className="lb-cell-stdev">± {stdev}</div>}
+                    </td>
+                  )
+                })}
+                <td className={`lb-num lb-avg ${rankBy === 'avg' ? 'lb-col-active' : ''}`}>
+                  <div className="lb-cell-main"><b>{(row.avg * 100).toFixed(2)}</b></div>
+                  {!row.complete && <div className="lb-cell-stdev">{row.partial_flag}</div>}
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+      <div className="lb-meta">
+        <span>Benchmark version <b>{data.benchmark_version}</b></span>
+        {data.seeds !== undefined && (
+          <>
+            <span className="sep">/</span>
+            <span>{data.seeds} seeds</span>
+          </>
+        )}
+        <span className="sep">/</span>
+        <span>Generated {new Date(data.generated_at).toISOString().slice(0, 10)}</span>
+        <span className="sep">/</span>
+        <span>Compute sponsored by <b>{data.sponsor}</b></span>
+      </div>
+    </div>
+  )
+}
+
 export default function Leaderboard() {
   const [params, setParams] = useSearchParams()
   const bench = params.get('benchmark') || 'superglue'
@@ -107,13 +241,18 @@ export default function Leaderboard() {
     LEADERBOARDS[0]
 
   const langEntries = LEADERBOARDS.filter((l) => l.benchmark === target.benchmark)
+  const isSle = target.benchmark === 'sle'
 
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
+  // Only used for the sle track's second (closed-API) board. A missing/404
+  // export is treated as "no results yet", not as a page-breaking error.
+  const [apiData, setApiData] = useState(null)
 
   useEffect(() => {
     setData(null)
     setError(null)
+    setApiData(null)
     fetch(`/leaderboards/${target.path}/benchmark_results.json`)
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`)
@@ -121,21 +260,17 @@ export default function Leaderboard() {
       })
       .then(setData)
       .catch((e) => setError(e.message))
-  }, [target.path])
 
-  const sortedRows = useMemo(() => {
-    if (!data) return []
-    const rows = [...data.rows]
-    rows.sort((a, b) => {
-      const av = sortValue(a, rankBy)
-      const bv = sortValue(b, rankBy)
-      if (av === null && bv === null) return 0
-      if (av === null) return 1
-      if (bv === null) return -1
-      return bv - av
-    })
-    return rows
-  }, [data, rankBy])
+    if (target.benchmark === 'sle') {
+      fetch(`/leaderboards/${target.path}-api/benchmark_results.json`)
+        .then((r) => {
+          if (!r.ok) throw new Error(`HTTP ${r.status}`)
+          return r.json()
+        })
+        .then(setApiData)
+        .catch(() => setApiData({ rows: [] }))
+    }
+  }, [target.path, target.benchmark])
 
   const setLang = (nextLang) => {
     const next = new URLSearchParams(params)
@@ -209,15 +344,21 @@ export default function Leaderboard() {
               {BENCHMARKS[target.benchmark].label.toUpperCase()} ·{' '}
               {LANGUAGES[target.language].flag} {LANGUAGES[target.language].name.toUpperCase()} · V1.0
             </span>
-            <span className="chip chip-test" title="Numbers reported are mean ± stdev across 5 seeds, evaluated on the held-out test split">
-              TEST · 5 SEEDS
-            </span>
+            {data && data.seeds !== undefined && (
+              <span className="chip chip-test" title={`Numbers reported are mean ± stdev across ${data.seeds} seeds, evaluated on the held-out test split`}>
+                TEST · {data.seeds} SEEDS
+              </span>
+            )}
           </div>
           <h1 className="lb-title">
             Every model, <span className="stroke">measured</span><span className="slash">.</span>
           </h1>
           <p className="lb-sub">
-            {data ? `${data.seeds} seeds per row, evaluated on the held-out test split, mean ± stdev shown.` : 'Loading…'}
+            {data
+              ? data.seeds !== undefined
+                ? `${data.seeds} seeds per row, evaluated on the held-out test split, mean ± stdev shown.`
+                : 'Single run per row, evaluated on the held-out test split.'
+              : 'Loading…'}
             {' '}Compute sponsored by <b>Recrewty</b>.
           </p>
         </div>
@@ -254,7 +395,7 @@ export default function Leaderboard() {
                 <button
                   type="button"
                   className={rankBy === 'avg' ? 'active' : ''}
-                  title="Main score - unweighted mean of the 6 primary task scores"
+                  title={`Main score - unweighted mean of the ${data.ranked_tasks.length} primary task scores`}
                   onClick={() => setRankBy('avg')}
                 >
                   Avg
@@ -277,94 +418,22 @@ export default function Leaderboard() {
 
         {error && <div className="lb-error">Failed to load leaderboard: {error}</div>}
 
-        {data && (
-          <div className="lb-table-wrap">
-            <table className="lb-table">
-              <thead>
-                <tr>
-                  <th className="lb-rank">#</th>
-                  <th className="lb-model">Model</th>
-                  <th className="lb-params">Params</th>
-                  {data.ranked_tasks.map((t) => (
-                    <th
-                      key={t}
-                      className={`lb-num ${rankBy === t ? 'lb-col-active' : ''}`}
-                      onClick={() => setRankBy(t)}
-                    >
-                      {TASK_LABELS[t] || t}
-                      <span className="lb-metric">({data.task_primary_metrics[t]})</span>
-                      {rankBy === t && <span className="lb-caret">▼</span>}
-                    </th>
-                  ))}
-                  <th
-                    className={`lb-num lb-avg ${rankBy === 'avg' ? 'lb-col-active' : ''}`}
-                    onClick={() => setRankBy('avg')}
-                  >
-                    Avg
-                    {rankBy === 'avg' && <span className="lb-caret">▼</span>}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {sortedRows.map((row, i) => {
-                  const rankByTaskValue = sortValue(row, rankBy)
-                  const displayRank =
-                    rankBy === 'avg'
-                      ? row.rank ?? (row.partial_flag || '-')
-                      : rankByTaskValue === null
-                      ? '-'
-                      : i + 1
-                  return (
-                    <tr key={row.model} className={!row.complete ? 'lb-partial' : ''}>
-                      <td className="lb-rank">{displayRank}</td>
-                      <td className="lb-model">
-                        <div className="lb-model-name">{row.model}</div>
-                        <div className="lb-model-id">
-                          {row.model_id && row.model_id.includes('/') ? (
-                            <a
-                              href={`https://huggingface.co/${row.model_id}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              {row.model_id}
-                            </a>
-                          ) : (
-                            row.model_id
-                          )}
-                        </div>
-                      </td>
-                      <td className="lb-params">{row.params_display}</td>
-                      {data.ranked_tasks.map((t) => {
-                        const { main, stdev } = formatCell(row.results[t])
-                        return (
-                          <td
-                            key={t}
-                            className={`lb-num ${rankBy === t ? 'lb-col-active' : ''}`}
-                          >
-                            <div className="lb-cell-main">{main}</div>
-                            {stdev !== null && <div className="lb-cell-stdev">± {stdev}</div>}
-                          </td>
-                        )
-                      })}
-                      <td className={`lb-num lb-avg ${rankBy === 'avg' ? 'lb-col-active' : ''}`}>
-                        <div className="lb-cell-main"><b>{(row.avg * 100).toFixed(2)}</b></div>
-                        {!row.complete && <div className="lb-cell-stdev">{row.partial_flag}</div>}
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-            <div className="lb-meta">
-              <span>Benchmark version <b>{data.benchmark_version}</b></span>
-              <span className="sep">/</span>
-              <span>{data.seeds} seeds</span>
-              <span className="sep">/</span>
-              <span>Generated {new Date(data.generated_at).toISOString().slice(0, 10)}</span>
-              <span className="sep">/</span>
-              <span>Compute sponsored by <b>{data.sponsor}</b></span>
-            </div>
-          </div>
+        {isSle ? (
+          <>
+            <p className="lb-note">
+              The two boards use different scoring protocols and are not comparable to each other.
+            </p>
+            <h2 className="lb-board-heading">Open weights - loglikelihood protocol</h2>
+            {data && <LeaderboardTable data={data} rankBy={rankBy} setRankBy={setRankBy} />}
+            <h2 className="lb-board-heading">Closed API - generative protocol</h2>
+            {apiData ? (
+              <LeaderboardTable data={apiData} rankBy={rankBy} setRankBy={setRankBy} />
+            ) : (
+              <div className="lb-loading">Loading leaderboard…</div>
+            )}
+          </>
+        ) : (
+          data && <LeaderboardTable data={data} rankBy={rankBy} setRankBy={setRankBy} />
         )}
 
         {!data && !error && <div className="lb-loading">Loading leaderboard…</div>}

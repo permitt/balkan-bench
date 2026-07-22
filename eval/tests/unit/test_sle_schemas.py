@@ -15,6 +15,7 @@ FIXTURES = REPO_ROOT / "eval" / "tests" / "fixtures" / "configs"
 
 TASK_SPEC_SCHEMA = SCHEMAS_DIR / "task_spec.json"
 BENCHMARK_SPEC_SCHEMA = SCHEMAS_DIR / "benchmark_spec.json"
+MODEL_SPEC_SCHEMA = SCHEMAS_DIR / "model_spec.json"
 
 
 def _write(tmp_path: Path, text: str) -> Path:
@@ -80,3 +81,42 @@ def test_benchmark_spec_seeds_now_optional(tmp_path: Path) -> None:
     p.write_text(yaml.safe_dump(superglue_benchmark, sort_keys=False))
 
     load_yaml_with_schema(p, BENCHMARK_SPEC_SCHEMA)
+
+
+API_MODEL = """\
+name: claude-sonnet
+access: api
+provider: anthropic
+api_model_id: claude-sonnet-x-x
+family: claude
+params_hint: API
+generation: {temperature: 0.0, max_tokens: 64}
+"""
+
+OPEN_MODEL_SLE = """\
+name: some-slm
+access: open_weights
+hf_repo: org/some-slm
+family: qwen
+params_hint: 4B
+"""
+
+
+def test_api_model_validates(tmp_path: Path) -> None:
+    load_yaml_with_schema(_write(tmp_path, API_MODEL), MODEL_SPEC_SCHEMA)
+
+
+def test_api_model_rejects_missing_provider(tmp_path: Path) -> None:
+    with pytest.raises(ConfigError):
+        load_yaml_with_schema(
+            _write(tmp_path, API_MODEL.replace("provider: anthropic\n", "")), MODEL_SPEC_SCHEMA
+        )
+
+
+def test_open_weights_sle_model_without_training_validates(tmp_path: Path) -> None:
+    load_yaml_with_schema(_write(tmp_path, OPEN_MODEL_SLE), MODEL_SPEC_SCHEMA)
+
+
+def test_existing_encoder_model_still_validates() -> None:
+    bertic_yaml = REPO_ROOT / "eval" / "configs" / "models" / "official" / "bertic.yaml"
+    load_yaml_with_schema(bertic_yaml, MODEL_SPEC_SCHEMA)

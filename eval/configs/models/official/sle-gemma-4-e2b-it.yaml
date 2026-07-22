@@ -1,0 +1,9 @@
+name: sle-gemma-4-e2b-it
+access: open_weights
+hf_repo: google/gemma-4-E2B-it
+family: gemma4
+params_hint: 5.1B
+tier: official
+generation:
+  batch_size: 8
+  dtype: bfloat16

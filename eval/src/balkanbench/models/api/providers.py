@@ -11,9 +11,9 @@ and raises a clear ``RuntimeError`` naming the variable if it is unset.
 system prompt), ``temperature=0`` for greedy/deterministic decoding, and maps
 the provider's usage fields onto :class:`~balkanbench.models.api.base.APIResponse`.
 Cost is computed from the module-level ``PRICING`` table below
-(``{api_model_id: (usd_per_1m_input, usd_per_1m_output)}``); it is
-intentionally empty for now (filled in as part of Task 15's model-roster
-step) - unknown ids resolve to ``cost_usd = 0.0`` with a ``logger.warning``.
+(``{api_model_id: (usd_per_1m_input, usd_per_1m_output)}``); it is filled in
+with the Task 15 SLE launch roster's per-1M-token prices - unknown ids
+resolve to ``cost_usd = 0.0`` with a ``logger.warning``.
 
 SDK call shapes verified against (see task report for detail):
   - anthropic: the ``claude-api`` skill's Python reference
@@ -38,9 +38,29 @@ from balkanbench.models.api.base import APIResponse
 logger = logging.getLogger(__name__)
 
 # {api_model_id: (usd_per_1m_input_tokens, usd_per_1m_output_tokens)}.
-# Left empty deliberately - Task 15's model-roster step fills this in.
+# Filled in as part of Task 15's model-roster step. Sources (verified
+# 2026-07-22; see task-15-report.md for full citations):
+#   - anthropic: the `claude-api` skill's cached "Current Models" pricing
+#     table (claude-sonnet-5, claude-haiku-4-5).
+#   - openai: https://developers.openai.com/api/docs/models/gpt-4.1 and
+#     .../gpt-4.1-mini (non-reasoning "chat completions" models, deliberately
+#     NOT the gpt-5.x/o-series reasoning family, which fixes temperature=1
+#     and rejects a caller-supplied temperature).
+#   - gemini: https://ai.google.dev/gemini-api/docs/pricing (GA tier).
 # Unknown/missing ids fall back to cost_usd = 0.0 with a logged warning.
-PRICING: dict[str, tuple[float, float]] = {}
+PRICING: dict[str, tuple[float, float]] = {
+    # Anthropic
+    "claude-sonnet-5": (3.00, 15.00),
+    "claude-haiku-4-5": (1.00, 5.00),
+    # OpenAI (non-reasoning chat models; gpt-5.x/o-series intentionally
+    # excluded - they reject temperature != 1 and are unsuitable for this
+    # benchmark's temperature=0.0 greedy-decoding requirement)
+    "gpt-4.1": (2.00, 8.00),
+    "gpt-4.1-mini": (0.40, 1.60),
+    # Google Gemini
+    "gemini-3.5-flash": (1.50, 9.00),
+    "gemini-3.1-flash-lite": (0.25, 1.50),
+}
 
 _API_EXTRA_HINT = 'pip install "balkanbench[api]"'
 

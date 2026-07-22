@@ -13,12 +13,17 @@ from __future__ import annotations
 
 import logging
 import sys
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+import yaml
 
 from balkanbench.models.api import make_api_model
-from balkanbench.models.api.providers import AnthropicClient, GeminiClient, OpenAIClient
+from balkanbench.models.api.providers import PRICING, AnthropicClient, GeminiClient, OpenAIClient
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
+MODELS_DIR = REPO_ROOT / "eval" / "configs" / "models" / "official"
 
 # -- Anthropic ---------------------------------------------------------------
 
@@ -327,3 +332,22 @@ def test_make_api_model_dispatches_gemini(monkeypatch, tmp_path):
 def test_make_api_model_unknown_provider_raises_value_error(tmp_path):
     with pytest.raises(ValueError, match="unicorn"):
         make_api_model({"provider": "unicorn", "api_model_id": "x"}, tmp_path)
+
+
+# -- PRICING / roster drift guard ------------------------------------------------
+
+
+def _api_model_ids_from_configs() -> list[str]:
+    ids = []
+    for path in sorted(MODELS_DIR.glob("*.yaml")):
+        spec = yaml.safe_load(path.read_text())
+        if spec.get("access") == "api":
+            ids.append(spec["api_model_id"])
+    return ids
+
+
+def test_every_api_access_model_yaml_has_a_pricing_entry():
+    api_model_ids = _api_model_ids_from_configs()
+    assert api_model_ids, "expected at least one access: api model YAML in configs/models/official"
+    missing = [model_id for model_id in api_model_ids if model_id not in PRICING]
+    assert not missing, f"PRICING is missing entries for: {missing}"

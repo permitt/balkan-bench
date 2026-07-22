@@ -1,0 +1,9 @@
+name: sle-qwen3-5-9b
+access: open_weights
+hf_repo: Qwen/Qwen3.5-9B
+family: qwen3.5
+params_hint: 9.7B
+tier: official
+generation:
+  batch_size: 8
+  dtype: bfloat16

@@ -1,0 +1,9 @@
+name: sle-ministral-3-8b
+access: open_weights
+hf_repo: mistralai/Ministral-3-8B-Instruct-2512
+family: mistral3
+params_hint: 8.9B
+tier: official
+generation:
+  batch_size: 8
+  dtype: bfloat16

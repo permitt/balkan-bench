@@ -1,0 +1,9 @@
+name: sle-granite-4-1-8b
+access: open_weights
+hf_repo: ibm-granite/granite-4.1-8b
+family: granite
+params_hint: 8.8B
+tier: official
+generation:
+  batch_size: 8
+  dtype: bfloat16

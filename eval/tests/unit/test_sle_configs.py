@@ -13,9 +13,11 @@ CONFIGS = REPO_ROOT / "eval" / "configs"
 SCHEMAS_DIR = REPO_ROOT / "eval" / "schemas"
 
 SLE_DIR = CONFIGS / "benchmarks" / "sle"
+MODELS_DIR = CONFIGS / "models" / "official"
 
 BENCHMARK_SPEC_SCHEMA = SCHEMAS_DIR / "benchmark_spec.json"
 TASK_SPEC_SCHEMA = SCHEMAS_DIR / "task_spec.json"
+MODEL_SPEC_SCHEMA = SCHEMAS_DIR / "model_spec.json"
 
 TASK_NAMES = [
     "arc_challenge",
@@ -27,6 +29,24 @@ TASK_NAMES = [
     "piqa",
     "triviaqa",
     "winogrande",
+]
+
+# SLE launch roster (Task 15): open-weights SLMs + closed API models.
+SLE_OPEN_MODEL_NAMES = [
+    "sle-qwen3-5-4b",
+    "sle-qwen3-5-9b",
+    "sle-gemma-4-e2b-it",
+    "sle-granite-4-1-8b",
+    "sle-ministral-3-8b",
+]
+
+SLE_API_MODEL_NAMES = [
+    "sle-claude-sonnet-5",
+    "sle-claude-haiku-4-5",
+    "sle-gpt-4-1",
+    "sle-gpt-4-1-mini",
+    "sle-gemini-3-5-flash",
+    "sle-gemini-3-1-flash-lite",
 ]
 
 
@@ -64,3 +84,27 @@ def test_winogrande_has_partial_variant() -> None:
 def test_boolq_has_da_ne_variant() -> None:
     spec = load_yaml_with_schema(SLE_DIR / "tasks" / "boolq.yaml", TASK_SPEC_SCHEMA)
     assert spec["variant"] == "boolq_da_ne"
+
+
+@pytest.mark.parametrize("name", SLE_OPEN_MODEL_NAMES)
+def test_sle_open_model_yaml_validates(name: str) -> None:
+    spec = load_yaml_with_schema(MODELS_DIR / f"{name}.yaml", MODEL_SPEC_SCHEMA)
+    assert spec["name"] == name
+    assert spec["access"] == "open_weights"
+    assert spec["hf_repo"]
+    assert spec["tier"] == "official"
+    assert spec["generation"]["batch_size"] == 8
+    assert spec["generation"]["dtype"] == "bfloat16"
+
+
+@pytest.mark.parametrize("name", SLE_API_MODEL_NAMES)
+def test_sle_api_model_yaml_validates(name: str) -> None:
+    spec = load_yaml_with_schema(MODELS_DIR / f"{name}.yaml", MODEL_SPEC_SCHEMA)
+    assert spec["name"] == name
+    assert spec["access"] == "api"
+    assert spec["provider"] in ("anthropic", "openai", "gemini")
+    assert spec["api_model_id"]
+    assert spec["tier"] == "official"
+    assert spec["generation"]["temperature"] == 0.0
+    assert spec["generation"]["max_tokens"] == 64
+    assert spec["generation"]["concurrency"] == 8

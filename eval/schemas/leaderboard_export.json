@@ -9,7 +9,6 @@
     "benchmark_version",
     "generated_at",
     "sponsor",
-    "seeds",
     "ranked_tasks",
     "task_primary_metrics",
     "rows"
@@ -22,6 +21,8 @@
     "generated_at":      { "type": "string", "format": "date-time" },
     "sponsor":           { "type": "string", "minLength": 1 },
     "seeds":             { "type": "integer", "minimum": 1 },
+    "protocol":          { "type": "string", "enum": ["loglikelihood", "generative"] },
+    "access":            { "type": "string", "enum": ["open_weights", "api"] },
     "ranked_tasks":      { "type": "array", "items": { "type": "string" }, "minItems": 1 },
     "task_primary_metrics": {
       "type": "object",
@@ -59,7 +60,7 @@
           "model":           { "type": "string", "minLength": 1 },
           "model_id":        { "type": "string", "minLength": 1 },
           "model_revision":  { "type": "string" },
-          "params":          { "type": "integer", "minimum": 0 },
+          "params":          { "type": ["integer", "null"], "minimum": 0 },
           "params_display":  { "type": "string" },
           "results": {
             "type": "object",

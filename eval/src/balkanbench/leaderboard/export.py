@@ -42,18 +42,37 @@ def assemble_leaderboard(
     seeds: int = 5,
     sponsor: str = "Recrewty",
     throughput_meta: dict[str, Any] | None = None,
+    access: str | None = None,
 ) -> dict[str, Any]:
-    """Build the leaderboard payload; validates against the JSON Schema."""
+    """Build the leaderboard payload; validates against the JSON Schema.
+
+    ``access`` (``"open_weights"`` | ``"api"`` | ``None``) splits a shared
+    results tree into the two SLE boards. When set, only artifacts whose
+    ``run_config.access`` matches are included (artifacts without a
+    ``run_config`` count as ``open_weights`` for backward compat); the export
+    is stamped with ``access`` and, when the included artifacts carry it,
+    ``protocol`` (all included artifacts must agree - a mismatch is a data
+    error). ``seeds`` is dropped from the export when the included artifacts
+    carry none (generative runs are single-pass); mixed presence is a data
+    error. When ``access`` is ``None`` behavior is unchanged from before this
+    parameter existed (no filtering, no ``protocol``/``access`` stamped,
+    ``seeds`` always present) so existing exports stay byte-identical.
+    """
     if not results_root.is_dir():
         raise ExportError(f"results_root does not exist: {results_root}")
 
     rows: list[dict[str, Any]] = []
+    included_protocols: set[str] = set()
+    included_has_seeds: set[bool] = set()
     for model_dir in sorted(p for p in results_root.iterdir() if p.is_dir()):
-        row = _build_row(
+        row, protocols, has_seeds_flags = _build_row(
             model_dir=model_dir,
             ranked_tasks=ranked_tasks,
             task_primary_metrics=task_primary_metrics,
+            access=access,
         )
+        included_protocols.update(protocols)
+        included_has_seeds.update(has_seeds_flags)
         if row:
             rows.append(row)
 
@@ -73,6 +92,23 @@ def assemble_leaderboard(
     if throughput_meta is not None:
         export["throughput"] = throughput_meta
 
+    if access is not None:
+        export["access"] = access
+        if len(included_protocols) > 1:
+            raise ExportError(
+                "leaderboard export: included artifacts disagree on run_config.protocol: "
+                f"{sorted(included_protocols)}"
+            )
+        if included_protocols:
+            export["protocol"] = next(iter(included_protocols))
+        if len(included_has_seeds) > 1:
+            raise ExportError(
+                "leaderboard export: included artifacts disagree on presence of 'seeds' "
+                "(mix of seeded and single-pass generative runs)"
+            )
+        if included_has_seeds == {False}:
+            del export["seeds"]
+
     _validate(export)
     return export
 
@@ -89,6 +125,7 @@ def write_leaderboard_export(
     seeds: int = 5,
     sponsor: str = "Recrewty",
     throughput_meta: dict[str, Any] | None = None,
+    access: str | None = None,
 ) -> Path:
     """Assemble and write the export to ``out_path``; returns the path."""
     export = assemble_leaderboard(
@@ -101,6 +138,7 @@ def write_leaderboard_export(
         seeds=seeds,
         sponsor=sponsor,
         throughput_meta=throughput_meta,
+        access=access,
     )
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(export, indent=2))
@@ -117,8 +155,18 @@ def _build_row(
     model_dir: Path,
     ranked_tasks: list[str],
     task_primary_metrics: dict[str, str],
-) -> dict[str, Any] | None:
-    """Build one leaderboard row from a model's per-task result artifacts."""
+    access: str | None,
+) -> tuple[dict[str, Any] | None, set[str], set[bool]]:
+    """Build one leaderboard row from a model's per-task result artifacts.
+
+    Returns ``(row, protocols, has_seeds_flags)``. ``row`` is ``None`` when no
+    matching artifact is found for any ranked task (the model is skipped
+    entirely). ``protocols``/``has_seeds_flags`` summarize the artifacts that
+    were actually included (post ``access`` filtering) so the caller can
+    stamp/validate the export-level ``protocol`` and ``seeds`` fields; they
+    are collected unconditionally but only enforced by the caller when
+    ``access`` is not ``None``.
+    """
     model_slug = model_dir.name
     results: dict[str, dict[str, float] | None] = {t: None for t in ranked_tasks}
     model_id: str | None = None
@@ -127,12 +175,22 @@ def _build_row(
     display_name: str | None = None
     any_non_rankable = False
     tasks_present = 0
+    protocols: set[str] = set()
+    has_seeds_flags: set[bool] = set()
 
     for task in ranked_tasks:
         artifact_path = model_dir / task / "result.json"
         if not artifact_path.is_file():
             continue
         artifact = json.loads(artifact_path.read_text())
+        run_config = artifact.get("run_config") or {}
+        artifact_access = run_config.get("access", "open_weights")
+        if access is not None and artifact_access != access:
+            # Not part of this board; treat as if the artifact didn't exist.
+            continue
+        if "protocol" in run_config:
+            protocols.add(run_config["protocol"])
+        has_seeds_flags.add("seeds" in artifact)
         if not artifact.get("rankable", False):
             any_non_rankable = True
         metric_name = task_primary_metrics[task]
@@ -149,7 +207,7 @@ def _build_row(
 
     if tasks_present == 0:
         # No result file found for any ranked task; skip this model entirely.
-        return None
+        return None, protocols, has_seeds_flags
 
     complete = (tasks_present == len(ranked_tasks)) and not any_non_rankable
     present_scores = [r["mean"] for r in results.values() if r is not None]
@@ -167,11 +225,15 @@ def _build_row(
         "tasks_completed": tasks_present,
         "tasks_total": len(ranked_tasks),
     }
+    if access == "api":
+        # API rows carry no open-weight parameter count.
+        row["params"] = None
+        row["params_display"] = "API"
     if model_revision:
         row["model_revision"] = model_revision
     if not complete:
         row["partial_flag"] = f"({tasks_present}/{len(ranked_tasks)}) partial"
-    return row
+    return row, protocols, has_seeds_flags
 
 
 def _assign_ranks(rows: list[dict[str, Any]]) -> None:

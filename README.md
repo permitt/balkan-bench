@@ -47,9 +47,10 @@ BalkanBench is intended to become the central open-source benchmark hub for the
 BCMS AI ecosystem: one place to publish datasets, compare models, reproduce
 results, and collaborate on new evaluation tracks.
 
-The roadmap extends beyond SuperGLUE. Planned next steps include:
+The roadmap extends beyond SuperGLUE. Serbian-LLM-Eval (SLE) has shipped
+as a second track - see [below](#serbian-llm-eval-sle-track). Planned next
+steps include:
 
-- Serbian-LLM-Eval, with permission and guidance from Aleksa Gordić
 - retrieval and embedding evaluation tracks
 - Bosnian localization
 - community-submitted benchmarks such as sentiment, NER, and domain-specific
@@ -79,6 +80,41 @@ WSC is Serbian-only in v1.0 (no published HR/MNE adaptation yet), so
 the Croatian and Montenegrin previews expose 5 ranked tasks each;
 Serbian is the full 6-task SuperGLUE track. Diagnostics (AX-b, AX-g)
 are Serbian-only and don't enter the ranked average.
+
+## Serbian LLM Eval (SLE) track
+
+BalkanBench ships a second Serbian track, adapted from
+[Aleksa Gordić](https://www.linkedin.com/in/aleksagordic)'s
+**Serbian LLM Eval** project (Apache 2.0), with permission and guidance
+from Aleksa. It is **9 generative tasks** - arc_challenge, arc_easy, boolq,
+hellaswag, openbookqa, piqa, winogrande, nq_open, triviaqa - translated and
+adapted from English QA / commonsense-reasoning benchmarks. Upstream data:
+[gordicaleksa/serbian-llm-eval-v1](https://huggingface.co/datasets/gordicaleksa/serbian-llm-eval-v1).
+Our re-hosted parquet copy (full attribution, labels public):
+[permitt/serbian-llm-eval](https://huggingface.co/datasets/permitt/serbian-llm-eval).
+If you use this data, please cite the upstream dataset card.
+
+SLE runs a **dual scoring protocol**, because open-weights and closed API
+models can't be scored the same way:
+
+- **Open-weights models** are scored via **loglikelihood** - a faithful
+  port of EleutherAI's `lm-evaluation-harness` v0.3.0 as vendored in
+  Gordić's fork, including its acc_norm character-length normalization,
+  BoolQ/WinoGrande prompt construction, and context/continuation
+  tokenization quirks.
+- **Closed API models** (Claude, GPT, Gemini) don't expose the
+  loglikelihood-over-continuation primitive that protocol needs, so they
+  are scored via a **generative** protocol instead: multiple-choice tasks
+  are reformulated as letter-choice prompts and the model's free-text
+  answer is parsed.
+
+These two protocols produce **two separate leaderboard tables that are
+never comparable to each other**, even where a column shares a name (an
+open-weights `acc_norm` and an API `acc` measure fundamentally different
+things).
+
+The public SLE leaderboard ships with placeholder empty boards until the
+official open-weights and API runs complete.
 
 ## Why it exists
 
@@ -164,6 +200,8 @@ scratch.
 - Serbian SuperGLUE dataset: <https://huggingface.co/datasets/permitt/superglue-sr>
 - Montenegrin SuperGLUE dataset: <https://huggingface.co/datasets/permitt/superglue-mne>
 - Croatian SuperGLUE dataset: <https://huggingface.co/datasets/permitt/superglue-hr>
+- Serbian LLM Eval dataset (re-host): <https://huggingface.co/datasets/permitt/serbian-llm-eval>
+- Serbian LLM Eval dataset (upstream, Aleksa Gordić): <https://huggingface.co/datasets/gordicaleksa/serbian-llm-eval-v1>
 - GitHub repository: <https://github.com/permitt/balkan-bench>
 
 ## License

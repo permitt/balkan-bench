@@ -7,7 +7,11 @@ from typing import Any
 
 import typer
 
-from balkanbench.cli._generative import GENERATIVE_TASK_TYPES, run_generative_dispatch
+from balkanbench.cli._generative import (
+    GENERATIVE_TASK_TYPES,
+    GenerativeModelConstructionError,
+    run_generative_dispatch,
+)
 from balkanbench.cli._paths import resolve_model_config, resolve_task_config, schemas_root
 from balkanbench.config import load_yaml_with_schema
 from balkanbench.data.repo import DatasetRepoError, resolve_dataset_repo, resolve_hf_token
@@ -118,7 +122,7 @@ def eval_cmd(
                 load_dataset=_self.load_dataset,
                 token=resolve_hf_token(),
             )
-        except DatasetRepoError as exc:
+        except (DatasetRepoError, GenerativeModelConstructionError) as exc:
             typer.echo(_red(str(exc)))
             raise typer.Exit(code=1) from exc
         typer.echo(_green(f"Artifact: {artifact_path}"))

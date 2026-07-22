@@ -25,7 +25,11 @@ from typing import Any
 import typer
 import yaml
 
-from balkanbench.cli._generative import GENERATIVE_TASK_TYPES, run_generative_dispatch
+from balkanbench.cli._generative import (
+    GENERATIVE_TASK_TYPES,
+    GenerativeModelConstructionError,
+    run_generative_dispatch,
+)
 from balkanbench.cli._paths import (
     configs_root,
     resolve_model_config,
@@ -195,7 +199,7 @@ def run_cmd(
                     load_dataset=_self.load_dataset,
                     token=token,
                 )
-            except DatasetRepoError as exc:
+            except (DatasetRepoError, GenerativeModelConstructionError) as exc:
                 typer.echo(_red(str(exc)))
                 raise typer.Exit(code=1) from exc
             typer.echo(_green(f"[{task}] artifact: {generative_artifact}"))

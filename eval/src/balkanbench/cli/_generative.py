@@ -36,6 +36,19 @@ from balkanbench.scoring.artifact import write_generative_result_artifact
 GENERATIVE_TASK_TYPES = frozenset({"multiple_choice_loglikelihood", "generative_qa"})
 
 
+class GenerativeModelConstructionError(Exception):
+    """Raised when building the model for a generative dispatch fails.
+
+    Wraps the ``RuntimeError`` (e.g. a missing ``ANTHROPIC_API_KEY``/
+    ``OPENAI_API_KEY``/``GEMINI_API_KEY``) or ``ImportError`` (missing
+    provider SDK) that :func:`~balkanbench.models.api.make_api_model` raises,
+    so ``balkanbench.cli.eval``/``balkanbench.cli.run`` can catch one
+    exception type here - alongside ``DatasetRepoError`` - and render it with
+    the same styled-echo + ``typer.Exit(1)`` convention instead of letting a
+    raw traceback reach the user.
+    """
+
+
 def run_generative_dispatch(
     *,
     task_cfg: dict[str, Any],
@@ -62,7 +75,10 @@ def run_generative_dispatch(
     access = model_cfg.get("access", "open_weights")
     model: Any
     if access == "api":
-        model = make_api_model(model_cfg, cache_dir=api_cache_dir)
+        try:
+            model = make_api_model(model_cfg, cache_dir=api_cache_dir)
+        except (RuntimeError, ImportError) as exc:
+            raise GenerativeModelConstructionError(str(exc)) from exc
     else:
         model = CausalLM(model_cfg)
 
@@ -123,4 +139,8 @@ def run_generative_dispatch(
     )
 
 
-__all__ = ["GENERATIVE_TASK_TYPES", "run_generative_dispatch"]
+__all__ = [
+    "GENERATIVE_TASK_TYPES",
+    "GenerativeModelConstructionError",
+    "run_generative_dispatch",
+]

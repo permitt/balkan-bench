@@ -209,10 +209,10 @@ def test_run_result_metadata_fields() -> None:
     assert result.api_cost_usd == 0.0
 
 
-def test_generative_qa_task_type_not_implemented() -> None:
-    spec = _mc_task_spec(["em"])
-    spec["task_type"] = "generative_qa"
-    with pytest.raises(NotImplementedError, match="generative_qa"):
+def test_unsupported_task_type_not_implemented() -> None:
+    spec = _mc_task_spec(["acc"])
+    spec["task_type"] = "some_future_task_type"
+    with pytest.raises(NotImplementedError, match="some_future_task_type"):
         run_generative_eval(
             task_spec=spec,
             model=FakeLLModel({}),
@@ -221,10 +221,10 @@ def test_generative_qa_task_type_not_implemented() -> None:
         )
 
 
-def test_api_access_not_implemented() -> None:
+def test_unsupported_api_reformulation_not_implemented() -> None:
     spec = _mc_task_spec(["acc"])
-    spec["api_protocol"] = {"reformulation": "multiple_choice_generative"}
-    with pytest.raises(NotImplementedError, match="multiple_choice_generative"):
+    spec["api_protocol"] = {"reformulation": "some_future_reformulation", "metrics": {}}
+    with pytest.raises(NotImplementedError, match="some_future_reformulation"):
         run_generative_eval(
             task_spec=spec,
             model=FakeLLModel({}),
@@ -347,3 +347,297 @@ def test_fewshot_prefix_requires_dataset_when_shots_requested() -> None:
     task = _qa_task()
     with pytest.raises(ValueError):
         build_fewshot_prefix(task=task, fewshot_dataset=None, num_fewshot=1, example_id="x")
+
+
+# ----------------------------------------------------------------------
+# generative_qa (native EM generation, open + API models share this path)
+# ----------------------------------------------------------------------
+
+
+class FakeGenModel:
+    """Returns canned ``generate()`` outputs; records every call it receives."""
+
+    def __init__(self, texts: list[str], *, total_cost_usd: float | None = None):
+        self.texts = texts
+        self.calls: list[dict[str, object]] = []
+        if total_cost_usd is not None:
+            self.total_cost_usd = total_cost_usd
+
+    def loglikelihood(self, requests: list[tuple[str, str]]) -> list[float]:
+        raise AssertionError("must not call loglikelihood in a generative-only protocol")
+
+    def generate(
+        self, prompts: list[str], *, stop_sequences: list[str], max_gen_tokens: int
+    ) -> list[str]:
+        self.calls.append(
+            {
+                "prompts": list(prompts),
+                "stop_sequences": stop_sequences,
+                "max_gen_tokens": max_gen_tokens,
+            }
+        )
+        return list(self.texts)
+
+
+def _qa_task_spec(
+    *,
+    num_fewshot: int = 0,
+    stop_sequences: list[str] | None = None,
+    max_gen_tokens: int = 64,
+    report: list[str] | None = None,
+    task_score: str = "em",
+    task: str = "nq_open_fake",
+) -> dict:
+    return {
+        "benchmark": "sle",
+        "task": task,
+        "task_type": "generative_qa",
+        "languages": {"available": ["sr"]},
+        "inputs": {"fields": ["question"], "id_field": "example_id"},
+        "metrics": {
+            "primary": report or ["em"],
+            "report": report or ["em"],
+            "task_score": task_score,
+        },
+        "evaluation": {
+            "num_fewshot": num_fewshot,
+            "fewshot_split": "train",
+            "stop_sequences": stop_sequences if stop_sequences is not None else ["\n", "."],
+            "max_gen_tokens": max_gen_tokens,
+        },
+    }
+
+
+_QA_EX1 = {"example_id": "q1", "question": "Koji je glavni grad Srbije?", "answer": ["Beograd"]}
+_QA_EX2 = {"example_id": "q2", "question": "Koja je najveca reka?", "answer": ["Dunav", "Sava"]}
+
+
+def test_generative_qa_computes_em_via_registry() -> None:
+    model = FakeGenModel([" Beograd", " neka pogresna reka"])
+    result = run_generative_eval(
+        task_spec=_qa_task_spec(),
+        model=model,
+        model_cfg={},
+        dataset=[_QA_EX1, _QA_EX2],
+    )
+    assert result.metrics == {"em": 0.5}
+    assert result.protocol == "generative"
+
+
+def test_generative_qa_prompts_are_prefix_plus_qa_prompt() -> None:
+    fewshot_dataset = [
+        {"question": "Q0", "answer": ["A0"]},
+        {"question": "Q1", "answer": ["A1"]},
+        {"question": "Q2", "answer": ["A2"]},
+        {"question": "Q3", "answer": ["A3"]},
+    ]
+    spec = _qa_task_spec(num_fewshot=2)
+    model = FakeGenModel([" Beograd", " Dunav"])
+    task = get_task_class("generative_qa")(spec, "sr")
+
+    expected_prefix_1 = build_fewshot_prefix(
+        task=task, fewshot_dataset=fewshot_dataset, num_fewshot=2, example_id="q1"
+    )
+    expected_prefix_2 = build_fewshot_prefix(
+        task=task, fewshot_dataset=fewshot_dataset, num_fewshot=2, example_id="q2"
+    )
+
+    run_generative_eval(
+        task_spec=spec,
+        model=model,
+        model_cfg={},
+        dataset=[_QA_EX1, _QA_EX2],
+        fewshot_dataset=fewshot_dataset,
+    )
+
+    assert model.calls[0]["prompts"] == [
+        expected_prefix_1 + task.qa_prompt(_QA_EX1),
+        expected_prefix_2 + task.qa_prompt(_QA_EX2),
+    ]
+
+
+def test_generative_qa_forwards_stop_sequences_and_max_gen_tokens() -> None:
+    spec = _qa_task_spec(stop_sequences=["\n", ",", "."], max_gen_tokens=64)
+    model = FakeGenModel([" Beograd"])
+    run_generative_eval(
+        task_spec=spec,
+        model=model,
+        model_cfg={},
+        dataset=[_QA_EX1],
+    )
+    assert model.calls[0]["stop_sequences"] == ["\n", ",", "."]
+    assert model.calls[0]["max_gen_tokens"] == 64
+
+
+def test_generative_qa_per_example_prediction_and_correctness() -> None:
+    model = FakeGenModel([" Beograd", " neka pogresna reka"])
+    result = run_generative_eval(
+        task_spec=_qa_task_spec(),
+        model=model,
+        model_cfg={},
+        dataset=[_QA_EX1, _QA_EX2],
+    )
+    assert result.per_example == [
+        {"example_id": "q1", "prediction": " Beograd", "correct": True},
+        {"example_id": "q2", "prediction": " neka pogresna reka", "correct": False},
+    ]
+
+
+def test_triviaqa_spec_uses_em_triviaqa_metric() -> None:
+    spec = _qa_task_spec(report=["em_triviaqa"], task_score="em_triviaqa", task="triviaqa_fake")
+    ex = {"example_id": "t1", "question": "Q", "answer_value": "Answer", "answer_aliases": ["Alt"]}
+    model = FakeGenModel([" Answer"])
+    result = run_generative_eval(
+        task_spec=spec,
+        model=model,
+        model_cfg={},
+        dataset=[ex],
+    )
+    assert "em_triviaqa" in result.metrics
+    assert result.metrics["em_triviaqa"] == 1.0
+
+
+def test_generative_qa_run_result_metadata() -> None:
+    model = FakeGenModel([" Beograd"])
+    result = run_generative_eval(
+        task_spec=_qa_task_spec(num_fewshot=0),
+        model=model,
+        model_cfg={},
+        dataset=[_QA_EX1],
+    )
+    assert result.num_fewshot == 0
+    assert result.unparsed_responses == 0
+    assert result.api_cost_usd == 0.0
+
+
+# ----------------------------------------------------------------------
+# API multiple_choice_generative reformulation
+# ----------------------------------------------------------------------
+
+
+def _mc_api_task_spec() -> dict:
+    spec = _mc_task_spec(["acc"], task_score="acc")
+    spec["evaluation"] = {"num_fewshot": 0, "stop_sequences": [], "max_gen_tokens": 16}
+    spec["api_protocol"] = {
+        "reformulation": "multiple_choice_generative",
+        "metrics": {"primary": ["acc"], "report": ["acc"], "task_score": "acc"},
+    }
+    return spec
+
+
+def test_api_multiple_choice_scores_and_counts_unparsed() -> None:
+    spec = _mc_api_task_spec()
+    model = FakeGenModel(["A", "B", "xyz nema slovo"])
+    ex3 = {"example_id": "e3", "query": "Q3", "choices": ["da", "ne"], "gold": 0}
+    result = run_generative_eval(
+        task_spec=spec,
+        model=model,
+        model_cfg={"access": "api"},
+        dataset=[_EX1, _EX2, ex3],
+    )
+    assert result.unparsed_responses == 1
+    assert result.protocol == "generative"
+    assert result.per_example[2]["prediction"] == -1
+    assert result.per_example[2]["correct"] is False
+    # ex1: gold 0, parsed "A" -> 0 (correct); ex2: gold 1, parsed "B" -> 1
+    # (correct); ex3: unparsed -> -1 vs gold 0 (incorrect).
+    assert result.metrics["acc"] == pytest.approx(2 / 3)
+
+
+def test_api_multiple_choice_prompts_are_api_prompt_with_no_fewshot() -> None:
+    spec = _mc_api_task_spec()
+    task = get_task_class("multiple_choice_loglikelihood")(spec, "sr")
+    model = FakeGenModel(["A", "B"])
+    run_generative_eval(
+        task_spec=spec,
+        model=model,
+        model_cfg={"access": "api"},
+        dataset=[_EX1, _EX2],
+    )
+    assert model.calls[0]["prompts"] == [task.api_prompt(_EX1), task.api_prompt(_EX2)]
+
+
+def test_api_multiple_choice_forwards_stop_sequences_and_max_gen_tokens() -> None:
+    spec = _mc_api_task_spec()
+    model = FakeGenModel(["A"])
+    run_generative_eval(
+        task_spec=spec,
+        model=model,
+        model_cfg={"access": "api"},
+        dataset=[_EX1],
+    )
+    assert model.calls[0]["stop_sequences"] == []
+    assert model.calls[0]["max_gen_tokens"] == 16
+
+
+# ----------------------------------------------------------------------
+# API access must use api_protocol.metrics, not the native metrics block
+# ----------------------------------------------------------------------
+
+
+def test_api_generative_qa_uses_api_protocol_metrics_not_native_metrics() -> None:
+    """api_protocol.metrics is deliberately DIFFERENT from the native metrics
+    block here (real task YAMLs keep them identical) so a regression that
+    reads task_spec["metrics"] for API access is caught rather than passing
+    by coincidence."""
+    spec = _qa_task_spec(report=["em"], task_score="em")
+    spec["api_protocol"] = {
+        "reformulation": "generative_qa",
+        "metrics": {
+            "primary": ["em_triviaqa"],
+            "report": ["em_triviaqa"],
+            "task_score": "em_triviaqa",
+        },
+    }
+    model = FakeGenModel([" Beograd"])
+    result = run_generative_eval(
+        task_spec=spec,
+        model=model,
+        model_cfg={"access": "api"},
+        dataset=[_QA_EX1],
+    )
+    assert set(result.metrics) == {"em_triviaqa"}
+
+
+def test_api_multiple_choice_uses_api_protocol_metrics() -> None:
+    """Same guard as above for the MC reformulation: api_protocol.metrics
+    reports "acc" while the (unused, absent-on-purpose) native metrics block
+    is not consulted at all for API access."""
+    spec = _mc_api_task_spec()
+    del spec["metrics"]  # prove the native block is never read for API access
+    model = FakeGenModel(["A", "B"])
+    result = run_generative_eval(
+        task_spec=spec,
+        model=model,
+        model_cfg={"access": "api"},
+        dataset=[_EX1, _EX2],
+    )
+    assert set(result.metrics) == {"acc"}
+
+
+# ----------------------------------------------------------------------
+# API cost propagation
+# ----------------------------------------------------------------------
+
+
+def test_api_cost_propagates_from_model_total_cost_usd() -> None:
+    spec = _mc_api_task_spec()
+    model = FakeGenModel(["A", "B"], total_cost_usd=0.1234)
+    result = run_generative_eval(
+        task_spec=spec,
+        model=model,
+        model_cfg={"access": "api"},
+        dataset=[_EX1, _EX2],
+    )
+    assert result.api_cost_usd == 0.1234
+
+
+def test_open_model_without_total_cost_usd_defaults_to_zero() -> None:
+    model = FakeGenModel([" Beograd"])
+    result = run_generative_eval(
+        task_spec=_qa_task_spec(),
+        model=model,
+        model_cfg={},
+        dataset=[_QA_EX1],
+    )
+    assert result.api_cost_usd == 0.0

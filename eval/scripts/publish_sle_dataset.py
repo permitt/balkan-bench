@@ -88,6 +88,9 @@ def map_source_filenames(filenames: list[str]) -> dict[tuple[str, str], str]:
 
     Files that don't match the naming convention or reference a task outside
     ``TASKS`` are ignored (e.g. ``README.md``, the loading script).
+
+    Raises:
+        ValueError: if two files map to the same ``(task, split)`` key.
     """
     mapping: dict[tuple[str, str], str] = {}
     for name in filenames:
@@ -98,7 +101,13 @@ def map_source_filenames(filenames: list[str]) -> dict[tuple[str, str], str]:
         split = m.group("split")
         if task not in TASKS:
             continue
-        mapping[(task, split)] = name
+        key = (task, split)
+        if key in mapping:
+            raise ValueError(
+                f"duplicate source filenames for (task, split)={key!r}: "
+                f"{mapping[key]!r} and {name!r}"
+            )
+        mapping[key] = name
     return mapping
 
 

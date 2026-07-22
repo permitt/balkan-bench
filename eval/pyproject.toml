@@ -53,6 +53,11 @@ ml = [
     "numpy>=1.26",
     "optuna>=3.6",
 ]
+api = [
+    "anthropic>=0.40",
+    "openai>=1.50",
+    "google-genai>=1.0",
+]
 
 [project.scripts]
 balkanbench = "balkanbench.cli.main:app"
@@ -100,6 +105,13 @@ module = [
     "transformers.*",
     "sklearn",
     "sklearn.*",
+    "anthropic",
+    "anthropic.*",
+    "openai",
+    "openai.*",
+    "google",
+    "google.genai",
+    "google.genai.*",
 ]
 ignore_missing_imports = true
 

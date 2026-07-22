@@ -3,9 +3,14 @@
 ``APIModel`` implements :class:`~balkanbench.models.generative_base.GenerativeModel`
 against any provider reachable through a :class:`ProviderClient` - a thin
 ``complete(prompt, ...) -> APIResponse`` transport. This module is provider-
-agnostic and imports no provider SDK: the anthropic/openai/gemini clients are
-wired up in a later task and injected here via the ``client`` constructor
+agnostic and imports no provider SDK: the anthropic/openai/gemini clients live
+in ``providers.py`` and are injected here via the ``client`` constructor
 argument.
+
+``generate()`` also applies a defensive client-side stop-sequence truncation
+to whatever the provider returns, reusing
+:func:`balkanbench.models.causal_lm._truncate_at_stop` - belt-and-braces
+against providers (notably Gemini) that only partially honor stop configs.
 """
 
 from __future__ import annotations
@@ -22,6 +27,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Protocol, runtime_checkable
 
+from balkanbench.models.causal_lm import _truncate_at_stop
 from balkanbench.models.generative_base import UnsupportedProtocolError
 
 # Retry policy: up to 5 attempts total, exponential backoff between attempts
@@ -115,7 +121,13 @@ class APIModel:
 
         def call_one(prompt: str) -> str:
             response = self._complete_cached(prompt, max_tokens=max_tokens, stop=stop_sequences)
-            return response.text
+            # Defensive client-side truncation: providers are asked to honor
+            # stop_sequences server-side (Task 9's providers.py passes them
+            # through), but some (e.g. Gemini) only partially respect stop
+            # configs, and belt-and-braces costs nothing here. Delegates to
+            # causal_lm._truncate_at_stop, which implements the identical
+            # earliest-match semantics for the local runner.
+            return _truncate_at_stop(response.text, stop_sequences)
 
         with ThreadPoolExecutor(max_workers=self.concurrency) as executor:
             return list(executor.map(call_one, prompts))

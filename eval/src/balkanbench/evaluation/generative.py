@@ -147,6 +147,7 @@ def _run_loglikelihood_protocol(
     id_field = task_spec["inputs"]["id_field"]
     num_fewshot = int(task_spec["evaluation"]["num_fewshot"])
     report_names = list(task_spec["metrics"]["report"])
+    task_score_metric = task_spec["metrics"]["task_score"]
 
     examples = list(dataset)
     if limit is not None:
@@ -180,11 +181,20 @@ def _run_loglikelihood_protocol(
         predictions_raw.append(pred_raw)
         predictions_norm.append(pred_norm)
         golds.append(gold)
+        # per_example "prediction"/"correct" must reflect the task's scoring
+        # metric (task_spec["metrics"]["task_score"]): acc_norm -> the
+        # length-normalized argmax, anything else -> the raw argmax. This
+        # keeps per-example diagnostics consistent with the aggregate score
+        # actually used to rank the task (e.g. arc/hellaswag/openbookqa/piqa
+        # score on acc_norm, winogrande on acc).
+        pred = pred_norm if task_score_metric == "acc_norm" else pred_raw
         per_example.append(
             {
                 "example_id": example_id,
-                "prediction": pred_raw,
-                "correct": pred_raw == gold,
+                "prediction_raw": pred_raw,
+                "prediction_norm": pred_norm,
+                "prediction": pred,
+                "correct": pred == gold,
             }
         )
 

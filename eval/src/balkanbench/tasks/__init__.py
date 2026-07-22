@@ -74,6 +74,7 @@ def _autoregister_builtin_tasks() -> None:
     # Keep this list sorted and in sync with new builtin task modules.
     from balkanbench.tasks import classification as _classification  # noqa: F401
     from balkanbench.tasks import diagnostic as _diagnostic  # noqa: F401
+    from balkanbench.tasks import generative as _generative  # noqa: F401
     from balkanbench.tasks import multiple_choice as _multiple_choice  # noqa: F401
     from balkanbench.tasks import multirc as _multirc  # noqa: F401
     from balkanbench.tasks import wsc as _wsc  # noqa: F401

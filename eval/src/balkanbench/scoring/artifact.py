@@ -15,6 +15,7 @@ from typing import Any
 from jsonschema import Draft202012Validator
 
 from balkanbench.evaluation import Aggregate, SeedResult
+from balkanbench.evaluation.generative import GenerativeRunResult
 
 
 def compute_predictions_hash(
@@ -118,6 +119,105 @@ def write_result_artifact(
     # The trailing /{task}/ subdir is what the leaderboard reader walks
     # (see leaderboard.export._build_row); without it, multi-task runs for
     # the same (model, language) overwrite each other.
+    target_dir = Path(out_dir) / f"{benchmark}-{language}" / model / task
+    target_dir.mkdir(parents=True, exist_ok=True)
+    target_path: Path = target_dir / "result.json"
+    target_path.write_text(json.dumps(artifact, indent=2))
+    return target_path
+
+
+def write_generative_result_artifact(
+    *,
+    task_cfg: dict[str, Any],
+    model_cfg: dict[str, Any],
+    language: str,
+    run_result: GenerativeRunResult,
+    task_score_metric: str,
+    provenance: dict[str, Any],
+    dataset_revision: str,
+    benchmark_version: str,
+    out_dir: Path,
+    run_type: str = "official",
+    sponsor: str = "Recrewty",
+) -> Path:
+    """Assemble + validate + write a ``result.json`` artifact for a generative run.
+
+    Sibling of :func:`write_result_artifact` for the SLE generative evaluator
+    (:func:`balkanbench.evaluation.generative.run_generative_eval`): no seeds,
+    no hp_search, since generative runs are single-pass and unsearched.
+    Instead a ``run_config`` block records the protocol, few-shot count,
+    access mode, and (for API runs) provider/generation/cost/parse-failure
+    bookkeeping.
+
+    ``task_score_metric`` is the metric name to pull out of ``run_result.metrics``
+    as ``task_score`` / ``selection_metric``. It is passed explicitly rather than
+    read off ``task_cfg["metrics"]["task_score"]`` because which metrics block
+    applies depends on ``model_cfg["access"]``: native task metrics for open
+    models, ``task_cfg["api_protocol"]["metrics"]`` for API-reformulated runs -
+    the caller already resolved that when it built ``run_result``, so it passes
+    the resolved name straight through instead of this function re-deriving it.
+
+    Returns the absolute path of the written file. Raises ``ValueError`` when
+    the assembled artifact fails schema validation (so upstream drift is
+    caught before the artifact lands on disk).
+    """
+    benchmark = task_cfg["benchmark"]
+    task = task_cfg["task"]
+    model = model_cfg["name"]
+    model_id = model_cfg["hf_repo"]
+    task_id = f"{benchmark}.{task}.{language}"
+
+    sorted_examples = sorted(run_result.per_example, key=lambda ex: ex["example_id"])
+    predictions = [ex["prediction"] for ex in sorted_examples]
+    predictions_hash = compute_predictions_hash(predictions)
+
+    config_hash = compute_config_hash(
+        {"task": task_cfg, "model": model_cfg, "dataset_revision": dataset_revision}
+    )
+
+    access = model_cfg.get("access", "open_weights")
+    run_config: dict[str, Any] = {
+        "protocol": run_result.protocol,
+        "num_fewshot": run_result.num_fewshot,
+        "access": access,
+        "api_cost_usd": run_result.api_cost_usd,
+        "unparsed_responses": run_result.unparsed_responses,
+    }
+    provider = model_cfg.get("provider")
+    if provider is not None:
+        run_config["provider"] = provider
+    generation = model_cfg.get("generation")
+    if generation is not None:
+        run_config["generation"] = dict(generation)
+
+    artifact: dict[str, Any] = {
+        "benchmark_name": "balkanbench",
+        "benchmark_version": benchmark_version,
+        "run_type": run_type,
+        "task_id": task_id,
+        "language": language,
+        "model": model,
+        "model_id": model_id,
+        "model_revision": model_cfg.get("hf_revision", "unknown"),
+        "code_revision": provenance["code_revision"],
+        "dataset_revision": dataset_revision,
+        "image_digest": provenance["image_digest"],
+        "config_hash": config_hash,
+        "selection_metric": task_score_metric,
+        "run_config": run_config,
+        "aggregate": {
+            "mean": dict(run_result.metrics),
+            "stdev": {k: 0.0 for k in run_result.metrics},
+        },
+        "task_score": float(run_result.metrics[task_score_metric]),
+        "rankable": run_type == "official",
+        "test_predictions_hash": predictions_hash,
+        "sponsor": sponsor,
+    }
+
+    _validate_against_schema(artifact)
+
+    # Same layout convention as write_result_artifact - see its comment.
     target_dir = Path(out_dir) / f"{benchmark}-{language}" / model / task
     target_dir.mkdir(parents=True, exist_ok=True)
     target_path: Path = target_dir / "result.json"

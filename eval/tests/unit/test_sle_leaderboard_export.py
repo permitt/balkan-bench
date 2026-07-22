@@ -215,6 +215,79 @@ def test_conflicting_protocol_across_included_artifacts_raises(tmp_path) -> None
         _assemble(root, access="api")
 
 
+def test_mixed_seeds_presence_across_included_artifacts_raises(tmp_path) -> None:
+    root = _seed_tree(tmp_path)
+    _write_artifact(
+        tmp_path,
+        task="arc_easy",
+        model="mixed-seeds-model",
+        access="api",
+        metric="acc",
+        value=0.4,
+    )
+    artifact_path = root / "mixed-seeds-model" / "arc_easy" / "result.json"
+    data = json.loads(artifact_path.read_text())
+    data["seeds"] = [42]
+    artifact_path.write_text(json.dumps(data))
+
+    with pytest.raises(ExportError, match="disagree on presence of 'seeds'"):
+        _assemble(root, access="api")
+
+
+def test_run_config_absent_artifact_excluded_from_api_board(tmp_path) -> None:
+    """An artifact with no run_config block defaults to open_weights (back
+    compat) and is excluded from the access="api" board - only the api
+    artifact's model row is included."""
+    root = tmp_path / "sle-sr"
+    root.mkdir()
+
+    legacy_dir = root / "legacy-model" / "arc_easy"
+    legacy_dir.mkdir(parents=True)
+    legacy_artifact = {
+        "benchmark_name": "balkanbench",
+        "benchmark_version": "0.1.0",
+        "run_type": "official",
+        "task_id": "sle.arc_easy.sr",
+        "language": "sr",
+        "model": "legacy-model",
+        "model_id": "hf/legacy-model",
+        "model_revision": "a" * 40,
+        "code_revision": "b" * 40,
+        "dataset_revision": "v0.1.0-data",
+        "image_digest": "sha256:" + "0" * 64,
+        "config_hash": "sha256:" + "1" * 64,
+        "selection_metric": "acc",
+        "hp_search": {
+            "tool": "optuna",
+            "sampler": "TPESampler",
+            "sampler_seed": 42,
+            "num_trials": 0,
+            "search_space_id": "none",
+        },
+        "seeds": [42],
+        "seed_results": [{"seed": 42, "primary": {"acc": 0.8}, "secondary": {}}],
+        "aggregate": {"mean": {"acc": 0.8}, "stdev": {"acc": 0.0}},
+        "task_score": 0.8,
+        "rankable": True,
+        "test_predictions_hash": "sha256:" + "2" * 64,
+        "sponsor": "Recrewty",
+        "params": 110_000_000,
+    }
+    (legacy_dir / "result.json").write_text(json.dumps(legacy_artifact))
+
+    _write_artifact(
+        tmp_path,
+        task="arc_easy",
+        model="claude-x",
+        access="api",
+        metric="acc",
+        value=0.7,
+    )
+
+    export = _assemble(root, access="api")
+    assert {r["model"] for r in export["rows"]} == {"claude-x"}
+
+
 def test_access_none_is_legacy_unfiltered_export(tmp_path) -> None:
     """Regression: access=None keeps the pre-Task-14 behavior byte-for-byte -
     no filtering, no protocol/access stamped, seeds always present. Covers the

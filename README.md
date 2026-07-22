@@ -128,12 +128,17 @@ benchmarks and public leaderboards, the BCMS ecosystem should have the same.
 
 ## Hidden test labels
 
-Each language track declares a public HuggingFace dataset for train/validation
-and public test inputs, plus a gated private sibling repo that carries the
-hidden test labels used for official scoring. Public users can tune and evaluate
-on labeled public train/validation data, generate public test predictions with
-`balkanbench predict`, and submit those predictions for trusted scoring.
-`balkanbench score` is the only path that needs the private test labels.
+Each SuperGLUE language track declares a public HuggingFace dataset for
+train/validation and public test inputs, plus a gated private sibling repo that
+carries the hidden test labels used for official scoring. Public users can tune
+and evaluate on labeled public train/validation data, generate public test
+predictions with `balkanbench predict`, and submit those predictions for
+trusted scoring. `balkanbench score` is the only path that needs the private
+test labels.
+
+The SLE track is the exception: its test labels were already public in the
+upstream dataset, so the re-hosted copy keeps them public and `balkanbench
+predict` is not supported for SLE tasks - `balkanbench eval` scores directly.
 
 ## Quickstart
 

@@ -1,12 +1,12 @@
 benchmark: sle
 version: 1.0.0
 description: "Serbian LLM Evaluation (SLE): generative-model benchmark of translated/adapted English QA and commonsense-reasoning tasks for sr."
-license: CC-BY-4.0
+license: Apache-2.0
 maintainers:
   - name: Mitar Perović, Teodora Mihajlov
     github: permitt
     email: perovicmitar@gmail.com
-citation: "BalkanBench SLE adaptation 2026."
+citation: "BalkanBench SLE track 2026, adapted from serbian-llm-eval by Aleksa Gordić (Apache-2.0)."
 homepage: https://balkanbench.com
 tasks:
   ranked: [arc_challenge, arc_easy, boolq, hellaswag, nq_open, openbookqa, piqa, triviaqa, winogrande]

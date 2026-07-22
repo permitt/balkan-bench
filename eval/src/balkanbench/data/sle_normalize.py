@@ -26,6 +26,8 @@ Row schemas after normalization:
 
 from __future__ import annotations
 
+from typing import Any
+
 # Raw fields required on every row for a given task. Used purely for
 # validation (missing fields -> ValueError); this is not the output schema.
 TASK_FIELDS: dict[str, tuple[str, ...]] = {
@@ -52,7 +54,7 @@ _MC_PRIMARY_FIELD: dict[str, str] = {
 }
 
 
-def _example_id(task: str, split: str, row: dict, index: int) -> str:
+def _example_id(task: str, split: str, row: dict[str, Any], index: int) -> str:
     if "id" in row:
         return str(row["id"])
     if task == "boolq":
@@ -60,13 +62,13 @@ def _example_id(task: str, split: str, row: dict, index: int) -> str:
     return f"{task}-{split}-{index}"
 
 
-def _require_fields(task: str, row: dict) -> None:
+def _require_fields(task: str, row: dict[str, Any]) -> None:
     missing = [f for f in TASK_FIELDS[task] if f not in row]
     if missing:
         raise ValueError(f"row missing required field(s) {missing} for task {task!r}: {row!r}")
 
 
-def _normalize_mc(task: str, split: str, rows: list[dict]) -> list[dict]:
+def _normalize_mc(task: str, split: str, rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     field = _MC_PRIMARY_FIELD[task]
     out = []
     for i, row in enumerate(rows):
@@ -82,7 +84,7 @@ def _normalize_mc(task: str, split: str, rows: list[dict]) -> list[dict]:
     return out
 
 
-def _normalize_boolq(task: str, split: str, rows: list[dict]) -> list[dict]:
+def _normalize_boolq(task: str, split: str, rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     out = []
     for i, row in enumerate(rows):
         _require_fields(task, row)
@@ -97,7 +99,9 @@ def _normalize_boolq(task: str, split: str, rows: list[dict]) -> list[dict]:
     return out
 
 
-def _normalize_winogrande(task: str, split: str, rows: list[dict]) -> list[dict]:
+def _normalize_winogrande(
+    task: str, split: str, rows: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
     out = []
     for i, row in enumerate(rows):
         _require_fields(task, row)
@@ -113,7 +117,7 @@ def _normalize_winogrande(task: str, split: str, rows: list[dict]) -> list[dict]
     return out
 
 
-def _normalize_nq_open(task: str, split: str, rows: list[dict]) -> list[dict]:
+def _normalize_nq_open(task: str, split: str, rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     out = []
     for i, row in enumerate(rows):
         _require_fields(task, row)
@@ -127,7 +131,7 @@ def _normalize_nq_open(task: str, split: str, rows: list[dict]) -> list[dict]:
     return out
 
 
-def _normalize_triviaqa(task: str, split: str, rows: list[dict]) -> list[dict]:
+def _normalize_triviaqa(task: str, split: str, rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     out = []
     for i, row in enumerate(rows):
         _require_fields(task, row)
@@ -158,7 +162,7 @@ _DISPATCH = {
 }
 
 
-def normalize_rows(task: str, split: str, rows: list[dict]) -> list[dict]:
+def normalize_rows(task: str, split: str, rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Normalize raw upstream ``rows`` for ``task``/``split`` to the published schema.
 
     Raises ``ValueError`` if ``task`` is not one of the 9 known SLE tasks, or

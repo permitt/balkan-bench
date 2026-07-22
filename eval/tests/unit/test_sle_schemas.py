@@ -43,7 +43,9 @@ evaluation:
   num_fewshot: 0
   stop_sequences: []
   max_gen_tokens: 16
-api_protocol: {reformulation: multiple_choice_generative, metrics: {primary: [acc], report: [acc], task_score: acc}}
+api_protocol:
+  reformulation: multiple_choice_generative
+  metrics: {primary: [acc], report: [acc], task_score: acc}
 """
 
 
@@ -52,7 +54,8 @@ def test_generative_task_without_training_block_validates(tmp_path: Path) -> Non
 
 
 def test_generative_task_requires_evaluation_block(tmp_path: Path) -> None:
-    bad = GENERATIVE_TASK.replace("evaluation:\n  num_fewshot: 0\n  stop_sequences: []\n  max_gen_tokens: 16\n", "")
+    evaluation_block = "evaluation:\n  num_fewshot: 0\n  stop_sequences: []\n  max_gen_tokens: 16\n"
+    bad = GENERATIVE_TASK.replace(evaluation_block, "")
     with pytest.raises(ConfigError):
         load_yaml_with_schema(_write(tmp_path, bad), TASK_SPEC_SCHEMA)
 

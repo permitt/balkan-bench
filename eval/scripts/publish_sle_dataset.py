@@ -154,9 +154,7 @@ def assert_expected_counts(counts: dict[str, dict[str, int]]) -> None:
             if actual != expected:
                 problems.append(f"{task}/{split}: expected {expected}, got {actual}")
     if problems:
-        raise PublishError(
-            "row count mismatch vs. expected counts:\n  " + "\n  ".join(problems)
-        )
+        raise PublishError("row count mismatch vs. expected counts:\n  " + "\n  ".join(problems))
 
 
 def print_count_table(counts: dict[str, dict[str, int]]) -> None:

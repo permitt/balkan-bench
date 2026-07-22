@@ -53,8 +53,10 @@ from balkanbench.tasks import register_task
 from balkanbench.tasks.base import Task
 
 _LETTERS = "abcdefghij"  # A-J / a-j, per the brief's parsing regex.
-_LETTER_RE = re.compile(r"^[\s\(\[]*([A-Ja-j])\b")
-_DA_NE_RE = re.compile(r"^[\s\"']*(da|ne)\b", re.IGNORECASE)
+# Leading strip set includes straight quotes ("/') and Serbian typographic
+# quotes („/"/") - API responses often wrap the answer in quotes.
+_LETTER_RE = re.compile(r"^[\s\(\[\"\'„“”]*([A-Ja-j])\b")
+_DA_NE_RE = re.compile(r"^[\s\"\'„“”]*(da|ne)\b", re.IGNORECASE)
 
 _WINOGRANDE_VARIANT = "winogrande_partial"
 _BOOLQ_VARIANT = "boolq_da_ne"

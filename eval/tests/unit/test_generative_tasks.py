@@ -126,6 +126,7 @@ def test_parse_api_response() -> None:
     assert t.parse_api_response("b.", ex) == 1
     assert t.parse_api_response("nemam pojma", ex) is None
     assert t.parse_api_response("D", ex) is None  # out of range for 3 choices
+    assert t.parse_api_response('„B"', ex) == 1  # Serbian typographic quotes
 
 
 def test_api_prompt_boolq_and_parse() -> None:
@@ -137,6 +138,7 @@ def test_api_prompt_boolq_and_parse() -> None:
     assert t.parse_api_response("Da", ex) == 1
     assert t.parse_api_response("ne.", ex) == 0
     assert t.parse_api_response("možda", ex) is None
+    assert t.parse_api_response('„da"', ex) == 1  # Serbian typographic quotes
 
 
 def test_api_prompt_winogrande() -> None:

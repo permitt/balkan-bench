@@ -70,6 +70,22 @@ def test_anthropic_client_payload_shape_and_response_mapping(monkeypatch):
     assert result.output_tokens == 3
 
 
+def test_anthropic_client_empty_stop_sequences_omits_param(monkeypatch):
+    """Mirrors OpenAIClient's empty->None guard: the anthropic SDK's
+    Messages API is stricter than accepting an empty list, so an empty
+    ``stop_sequences`` must be omitted from the payload entirely rather than
+    passed through as ``[]``."""
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-anthropic-key")
+    module, client_instance = _fake_anthropic_module()
+
+    with patch.dict(sys.modules, {"anthropic": module}):
+        client = AnthropicClient("claude-opus-4-8")
+        client.complete("prompt", max_tokens=10, stop_sequences=[])
+
+    kwargs = client_instance.messages.create.call_args.kwargs
+    assert "stop_sequences" not in kwargs
+
+
 def test_anthropic_client_unknown_model_id_costs_zero_and_warns(monkeypatch, caplog):
     monkeypatch.setenv("ANTHROPIC_API_KEY", "test-anthropic-key")
     module, _ = _fake_anthropic_module()

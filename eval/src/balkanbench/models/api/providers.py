@@ -91,12 +91,15 @@ class AnthropicClient:
         self._client = anthropic.Anthropic(api_key=api_key)
 
     def complete(self, prompt: str, *, max_tokens: int, stop_sequences: list[str]) -> APIResponse:
+        kwargs: dict[str, object] = {}
+        if stop_sequences:
+            kwargs["stop_sequences"] = stop_sequences
         response = self._client.messages.create(
             model=self.api_model_id,
             max_tokens=max_tokens,
             temperature=0,
-            stop_sequences=stop_sequences,
             messages=[{"role": "user", "content": prompt}],
+            **kwargs,
         )
         text = "".join(block.text for block in response.content if block.type == "text")
         input_tokens = response.usage.input_tokens

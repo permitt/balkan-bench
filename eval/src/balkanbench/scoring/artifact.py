@@ -164,7 +164,7 @@ def write_generative_result_artifact(
     benchmark = task_cfg["benchmark"]
     task = task_cfg["task"]
     model = model_cfg["name"]
-    model_id = model_cfg["hf_repo"]
+    model_id = model_cfg.get("hf_repo") or model_cfg["api_model_id"]
     task_id = f"{benchmark}.{task}.{language}"
 
     sorted_examples = sorted(run_result.per_example, key=lambda ex: ex["example_id"])

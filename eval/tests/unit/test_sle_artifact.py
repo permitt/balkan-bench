@@ -8,6 +8,8 @@ from pathlib import Path
 import pytest
 from jsonschema import Draft202012Validator
 
+from balkanbench.cli._paths import resolve_model_config, schemas_root
+from balkanbench.config import load_yaml_with_schema
 from balkanbench.evaluation.generative import GenerativeRunResult
 from balkanbench.scoring.artifact import (
     write_generative_result_artifact,
@@ -201,6 +203,60 @@ def test_generative_qa_string_predictions_hash_deterministic(tmp_path) -> None:
     assert data_1["test_predictions_hash"] == data_2["test_predictions_hash"]
     assert data_1["test_predictions_hash"] != data_3["test_predictions_hash"]
     assert data_1["test_predictions_hash"].startswith("sha256:")
+
+
+def test_api_artifact_uses_api_model_id_when_hf_repo_absent(tmp_path) -> None:
+    """Real API roster YAMLs (e.g. configs/models/official/sle-claude-sonnet-5.yaml)
+    have no ``hf_repo`` - the artifact writer must fall back to ``api_model_id``
+    instead of crashing with a KeyError."""
+    model_cfg = {
+        "name": "claude-x",
+        "access": "api",
+        "provider": "anthropic",
+        "api_model_id": "claude-sonnet-5",
+        "family": "claude",
+        "params_hint": "API",
+    }
+    out_path = write_generative_result_artifact(
+        task_cfg=_fake_task_cfg(),
+        model_cfg=model_cfg,
+        language="sr",
+        run_result=_mc_run_result(api_cost_usd=0.05),
+        task_score_metric="acc",
+        provenance=_fake_provenance(),
+        dataset_revision="v0.1.0-data",
+        benchmark_version="0.1.0",
+        out_dir=tmp_path,
+    )
+    data = json.loads(out_path.read_text())
+    Draft202012Validator(_schema()).validate(data)
+    assert data["model_id"] == "claude-sonnet-5"
+
+
+def test_api_roster_yaml_writes_artifact_without_crash(tmp_path) -> None:
+    """Regression for the CRITICAL API artifact crash: load a real API roster
+    YAML through the actual config loader (no synthetic hf_repo) and confirm
+    write_generative_result_artifact doesn't crash and model_id matches
+    api_model_id."""
+    model_cfg = load_yaml_with_schema(
+        resolve_model_config("sle-claude-sonnet-5"), schemas_root() / "model_spec.json"
+    )
+    assert "hf_repo" not in model_cfg
+
+    out_path = write_generative_result_artifact(
+        task_cfg=_fake_task_cfg(),
+        model_cfg=model_cfg,
+        language="sr",
+        run_result=_mc_run_result(api_cost_usd=0.05),
+        task_score_metric="acc",
+        provenance=_fake_provenance(),
+        dataset_revision="v0.1.0-data",
+        benchmark_version="0.1.0",
+        out_dir=tmp_path,
+    )
+    data = json.loads(out_path.read_text())
+    Draft202012Validator(_schema()).validate(data)
+    assert data["model_id"] == model_cfg["api_model_id"]
 
 
 def test_encoder_artifact_writer_still_validates_superglue_fixture() -> None:

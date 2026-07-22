@@ -90,7 +90,6 @@ provider: anthropic
 api_model_id: claude-fake-model
 family: claude
 params_hint: API
-hf_repo: anthropic/claude-fake
 generation:
   max_tokens: 16
 """

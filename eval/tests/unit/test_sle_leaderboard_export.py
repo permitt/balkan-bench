@@ -63,9 +63,12 @@ def _task_cfg(task: str) -> dict:
 
 
 def _model_cfg(name: str, *, access: str) -> dict:
-    cfg: dict = {"name": name, "hf_repo": f"permitt/{name}", "access": access}
+    cfg: dict = {"name": name, "access": access}
     if access == "api":
         cfg["provider"] = "anthropic"
+        cfg["api_model_id"] = f"{name}-api-id"
+    else:
+        cfg["hf_repo"] = f"permitt/{name}"
     return cfg
 
 

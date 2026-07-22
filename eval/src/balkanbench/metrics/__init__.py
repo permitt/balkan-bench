@@ -11,7 +11,7 @@ from collections.abc import Callable
 from typing import Any
 
 from balkanbench.metrics.accuracy import accuracy
-from balkanbench.metrics.em import em
+from balkanbench.metrics.em import em, em_triviaqa
 from balkanbench.metrics.f1 import f1_a, f1_macro
 from balkanbench.metrics.gender_parity import gender_parity
 from balkanbench.metrics.matthews import matthews_correlation
@@ -30,6 +30,7 @@ _REGISTRY: dict[str, MetricFn] = {
     "matthews_correlation": matthews_correlation,
     "gender_parity": gender_parity,
     "em": em,
+    "em_triviaqa": em_triviaqa,
     # "acc"/"acc_norm" are aliases of "accuracy": the evaluator computes the
     # differently-normalized argmax upstream and passes prediction indices.
     "acc": accuracy,
@@ -72,6 +73,7 @@ __all__ = [
     "matthews_correlation",
     "gender_parity",
     "em",
+    "em_triviaqa",
 ]
 
 

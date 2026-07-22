@@ -13,7 +13,7 @@ from __future__ import annotations
 import pytest
 
 from balkanbench.metrics import get_metric
-from balkanbench.metrics.em import em, normalize_answer
+from balkanbench.metrics.em import em, em_triviaqa, normalize_answer
 
 # ---------- normalize_answer ----------
 
@@ -78,6 +78,28 @@ def test_em_matches_serbian_diacritic_reference() -> None:
 def test_em_empty_predictions_raises() -> None:
     with pytest.raises(ValueError):
         em(predictions=[], references=[])
+
+
+# ---------- em_triviaqa ----------
+
+
+def test_em_triviaqa_does_not_strip_article() -> None:
+    # Unlike `em`, the triviaqa normalization has no article removal, so
+    # "The Beatles" stays "the beatles" and does not match "beatles".
+    assert em_triviaqa(predictions=["The Beatles"], references=[["Beatles"]]) == 0.0
+
+
+def test_em_triviaqa_does_not_collapse_whitespace() -> None:
+    # Unlike `em`, the triviaqa normalization does not collapse whitespace.
+    assert em_triviaqa(predictions=["New  York"], references=[["New York"]]) == 0.0
+
+
+def test_em_triviaqa_still_normalizes_case_and_punct() -> None:
+    assert em_triviaqa(predictions=["Tesla!"], references=[["tesla"]]) == 1.0
+
+
+def test_em_triviaqa_matches_any_alias() -> None:
+    assert em_triviaqa(predictions=["Tesla"], references=[["Nikola Tesla", "tesla"]]) == 1.0
 
 
 # ---------- registry ----------

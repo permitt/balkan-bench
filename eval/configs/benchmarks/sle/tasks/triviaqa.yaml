@@ -17,9 +17,9 @@ inputs:
   fields: [question]
   id_field: example_id
 metrics:
-  primary: [em]
-  report: [em]
-  task_score: em
+  primary: [em_triviaqa]
+  report: [em_triviaqa]
+  task_score: em_triviaqa
 prompts:
   sr: { template_id: sle_qa_v1 }
 evaluation:
@@ -30,6 +30,6 @@ evaluation:
 api_protocol:
   reformulation: generative_qa
   metrics:
-    primary: [em]
-    report: [em]
-    task_score: em
+    primary: [em_triviaqa]
+    report: [em_triviaqa]
+    task_score: em_triviaqa

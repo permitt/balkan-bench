@@ -77,4 +77,42 @@ def em(
     return matches / len(preds)
 
 
-__all__ = ["em", "normalize_answer"]
+def em_triviaqa(
+    predictions: Sequence[str] | None = None,
+    references: Sequence[Sequence[str]] | None = None,
+    **_: Any,
+) -> float:
+    """Fraction of predictions whose normalization matches any reference's.
+
+    Ported from ``TriviaQA.process_results`` in
+    https://raw.githubusercontent.com/gordicaleksa/serbian-llm-eval/serb_eval_run/lm_eval/tasks/triviaqa.py::
+
+        def process_results(self, doc, results):
+            pred = results[0].strip().lower().translate(str.maketrans("", "", string.punctuation))
+            aliases = [
+                alias.lower().translate(str.maketrans("", "", string.punctuation))
+                for alias in doc["answer"]["aliases"]
+            ]
+            return {"em": float(pred in aliases)}
+
+    Unlike ``em`` (ported from ``nq_open``), this normalization only lowercases
+    and strips ASCII punctuation - no article removal, no whitespace
+    collapsing.
+
+    Note the asymmetry, kept faithful to the fork: the prediction is
+    ``.strip()``-ped before lowercasing/punctuation-stripping, but each
+    reference alias is not - it is only lowercased and punctuation-stripped.
+    """
+    preds, refs = validate_pair(predictions, references)
+    matches = 0
+    for pred, alternatives in zip(preds, refs, strict=True):
+        normalized_pred = pred.strip().lower().translate(_PUNCTUATION_TABLE)
+        normalized_alternatives = {
+            alt.lower().translate(_PUNCTUATION_TABLE) for alt in alternatives
+        }
+        if normalized_pred in normalized_alternatives:
+            matches += 1
+    return matches / len(preds)
+
+
+__all__ = ["em", "em_triviaqa", "normalize_answer"]

@@ -54,7 +54,7 @@ done
 # Pin the sle-track dataset/benchmark defaults before default_env fills in
 # the generic (superglue-era) fallbacks - default_env only assigns a var if
 # it is still unset, so anything set here wins.
-: "${DATASET_REVISION:=main}"
+: "${DATASET_REVISION:=v1.0.0-sle-data}"
 : "${BENCHMARK_VERSION:=1.0.0}"
 : "${RUN_TYPE:=official}"
 

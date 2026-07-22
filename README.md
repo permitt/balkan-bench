@@ -116,6 +116,9 @@ things).
 The public SLE leaderboard ships with placeholder empty boards until the
 official open-weights and API runs complete.
 
+Official SLE runs pin the dataset to the `v1.0.0-sle-data` tag rather than
+`main` - pass `--dataset-revision v1.0.0-sle-data` to `balkanbench eval`.
+
 ## Why it exists
 
 BalkanBench started from a practical problem: we needed a reliable way to rank

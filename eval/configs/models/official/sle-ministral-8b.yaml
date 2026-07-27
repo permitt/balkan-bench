@@ -1,0 +1,12 @@
+name: sle-ministral-8b
+access: open_weights
+hf_repo: mistralai/Ministral-8B-Instruct-2410
+family: ministral
+# Ministral-3-8B-Instruct-2512 (the newer release) is a Mistral3
+# vision-language architecture that AutoModelForCausalLM cannot load;
+# 2410 is the newest text-only causal Ministral.
+params_hint: 8.0B
+tier: official
+generation:
+  batch_size: 8
+  dtype: bfloat16

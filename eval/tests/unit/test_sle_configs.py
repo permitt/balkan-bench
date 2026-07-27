@@ -31,13 +31,17 @@ TASK_NAMES = [
     "winogrande",
 ]
 
-# SLE launch roster (Task 15): open-weights SLMs + closed API models.
+# SLE launch roster: open-weights SLMs + closed API models.
 SLE_OPEN_MODEL_NAMES = [
     "sle-qwen3-5-4b",
     "sle-qwen3-5-9b",
     "sle-gemma-4-e2b-it",
+    "sle-gemma-4-e4b-it",
     "sle-granite-4-1-8b",
-    "sle-ministral-3-8b",
+    "sle-ministral-8b",
+    "sle-olmo3-7b",
+    "sle-smollm3-3b",
+    "sle-phi4-mini",
 ]
 
 SLE_API_MODEL_NAMES = [
@@ -93,7 +97,9 @@ def test_sle_open_model_yaml_validates(name: str) -> None:
     assert spec["access"] == "open_weights"
     assert spec["hf_repo"]
     assert spec["tier"] == "official"
-    assert spec["generation"]["batch_size"] == 8
+    # batch_size is per-model GPU-memory tuning (large models need smaller
+    # batches on the 24GB L4), so assert presence and sanity, not a value.
+    assert spec["generation"]["batch_size"] >= 1
     assert spec["generation"]["dtype"] == "bfloat16"
 
 

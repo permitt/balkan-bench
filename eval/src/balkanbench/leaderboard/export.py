@@ -43,6 +43,7 @@ def assemble_leaderboard(
     sponsor: str = "Recrewty",
     throughput_meta: dict[str, Any] | None = None,
     access: str | None = None,
+    task_types: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     """Build the leaderboard payload; validates against the JSON Schema.
 
@@ -50,28 +51,40 @@ def assemble_leaderboard(
     results tree into the two SLE boards. When set, only artifacts whose
     ``run_config.access`` matches are included (artifacts without a
     ``run_config`` count as ``open_weights`` for backward compat); the export
-    is stamped with ``access`` and, when the included artifacts carry it,
-    ``protocol`` (all included artifacts must agree - a mismatch is a data
-    error). ``seeds`` is dropped from the export when the included artifacts
-    carry none (generative runs are single-pass); mixed presence is a data
-    error. When ``access`` is ``None`` behavior is unchanged from before this
-    parameter existed (no filtering, no ``protocol``/``access`` stamped,
-    ``seeds`` always present) so existing exports stay byte-identical.
+    is stamped with ``access`` and with the access-implied board ``protocol``
+    (``"loglikelihood"`` for ``open_weights``, ``"generative"`` for ``api``).
+
+    A board legitimately mixes per-artifact protocols: ``generative_qa``
+    tasks (e.g. ``nq_open``/``triviaqa``) are always scored via the
+    ``"generative"`` protocol for every model, while
+    ``multiple_choice_loglikelihood`` tasks are scored per the board's
+    access-implied protocol. ``task_types`` (task -> declared
+    ``task_type``, from each task's YAML) drives this per-artifact check;
+    a mismatch is a data error. ``seeds`` is dropped from the export when
+    the included artifacts carry none (generative runs are single-pass);
+    mixed presence is a data error. When ``access`` is ``None`` behavior is
+    unchanged from before this parameter existed (no filtering, no
+    ``protocol``/``access`` stamped, ``seeds`` always present, no protocol
+    checks - encoder artifacts have no ``run_config``) so existing exports
+    stay byte-identical.
     """
     if not results_root.is_dir():
         raise ExportError(f"results_root does not exist: {results_root}")
 
+    task_types = task_types or {}
+    expected_protocol = "loglikelihood" if access == "open_weights" else "generative"
+
     rows: list[dict[str, Any]] = []
-    included_protocols: set[str] = set()
     included_has_seeds: set[bool] = set()
     for model_dir in sorted(p for p in results_root.iterdir() if p.is_dir()):
-        row, protocols, has_seeds_flags = _build_row(
+        row, has_seeds_flags = _build_row(
             model_dir=model_dir,
             ranked_tasks=ranked_tasks,
             task_primary_metrics=task_primary_metrics,
             access=access,
+            task_types=task_types,
+            expected_protocol=expected_protocol,
         )
-        included_protocols.update(protocols)
         included_has_seeds.update(has_seeds_flags)
         if row:
             rows.append(row)
@@ -94,13 +107,7 @@ def assemble_leaderboard(
 
     if access is not None:
         export["access"] = access
-        if len(included_protocols) > 1:
-            raise ExportError(
-                "leaderboard export: included artifacts disagree on run_config.protocol: "
-                f"{sorted(included_protocols)}"
-            )
-        if included_protocols:
-            export["protocol"] = next(iter(included_protocols))
+        export["protocol"] = expected_protocol
         if len(included_has_seeds) > 1:
             raise ExportError(
                 "leaderboard export: included artifacts disagree on presence of 'seeds' "
@@ -126,6 +133,7 @@ def write_leaderboard_export(
     sponsor: str = "Recrewty",
     throughput_meta: dict[str, Any] | None = None,
     access: str | None = None,
+    task_types: dict[str, str] | None = None,
 ) -> Path:
     """Assemble and write the export to ``out_path``; returns the path."""
     export = assemble_leaderboard(
@@ -139,6 +147,7 @@ def write_leaderboard_export(
         sponsor=sponsor,
         throughput_meta=throughput_meta,
         access=access,
+        task_types=task_types,
     )
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(export, indent=2))
@@ -156,16 +165,24 @@ def _build_row(
     ranked_tasks: list[str],
     task_primary_metrics: dict[str, str],
     access: str | None,
-) -> tuple[dict[str, Any] | None, set[str], set[bool]]:
+    task_types: dict[str, str],
+    expected_protocol: str,
+) -> tuple[dict[str, Any] | None, set[bool]]:
     """Build one leaderboard row from a model's per-task result artifacts.
 
-    Returns ``(row, protocols, has_seeds_flags)``. ``row`` is ``None`` when no
-    matching artifact is found for any ranked task (the model is skipped
-    entirely). ``protocols``/``has_seeds_flags`` summarize the artifacts that
-    were actually included (post ``access`` filtering) so the caller can
-    stamp/validate the export-level ``protocol`` and ``seeds`` fields; they
-    are collected unconditionally but only enforced by the caller when
-    ``access`` is not ``None``.
+    Returns ``(row, has_seeds_flags)``. ``row`` is ``None`` when no matching
+    artifact is found for any ranked task (the model is skipped entirely).
+    ``has_seeds_flags`` summarizes the artifacts that were actually included
+    (post ``access`` filtering) so the caller can validate the export-level
+    ``seeds`` field; it is collected unconditionally but only enforced by the
+    caller when ``access`` is not ``None``.
+
+    When ``access`` is not ``None``, each included artifact's
+    ``run_config.protocol`` is validated against its task's declared
+    ``task_type`` (looked up in ``task_types``): ``generative_qa`` tasks must
+    always use protocol ``"generative"``; every other task must use
+    ``expected_protocol`` (the access-implied board protocol). A violation
+    raises :class:`ExportError` naming the task and both protocols.
     """
     model_slug = model_dir.name
     results: dict[str, dict[str, float] | None] = {t: None for t in ranked_tasks}
@@ -175,7 +192,6 @@ def _build_row(
     display_name: str | None = None
     any_non_rankable = False
     tasks_present = 0
-    protocols: set[str] = set()
     has_seeds_flags: set[bool] = set()
 
     for task in ranked_tasks:
@@ -188,8 +204,16 @@ def _build_row(
         if access is not None and artifact_access != access:
             # Not part of this board; treat as if the artifact didn't exist.
             continue
-        if "protocol" in run_config:
-            protocols.add(run_config["protocol"])
+        if access is not None and "protocol" in run_config:
+            artifact_protocol = run_config["protocol"]
+            task_type = task_types.get(task)
+            required_protocol = "generative" if task_type == "generative_qa" else expected_protocol
+            if artifact_protocol != required_protocol:
+                raise ExportError(
+                    f"leaderboard export: task '{task}' artifact run_config.protocol="
+                    f"{artifact_protocol!r} but expected {required_protocol!r} "
+                    f"(model {model_slug}, access={access!r}, task_type={task_type!r})"
+                )
         has_seeds_flags.add("seeds" in artifact)
         if not artifact.get("rankable", False):
             any_non_rankable = True
@@ -207,7 +231,7 @@ def _build_row(
 
     if tasks_present == 0:
         # No result file found for any ranked task; skip this model entirely.
-        return None, protocols, has_seeds_flags
+        return None, has_seeds_flags
 
     complete = (tasks_present == len(ranked_tasks)) and not any_non_rankable
     present_scores = [r["mean"] for r in results.values() if r is not None]
@@ -233,7 +257,7 @@ def _build_row(
         row["model_revision"] = model_revision
     if not complete:
         row["partial_flag"] = f"({tasks_present}/{len(ranked_tasks)}) partial"
-    return row, protocols, has_seeds_flags
+    return row, has_seeds_flags
 
 
 def _assign_ranks(rows: list[dict[str, Any]]) -> None:

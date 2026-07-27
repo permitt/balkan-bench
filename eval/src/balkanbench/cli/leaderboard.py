@@ -62,7 +62,9 @@ def export_cmd(
         raise typer.Exit(code=1)
 
     try:
-        ranked_tasks, primary_metrics = _collect_ranked_tasks(benchmark, language, access=access)
+        ranked_tasks, primary_metrics, task_types = _collect_ranked_tasks(
+            benchmark, language, access=access
+        )
         resolved_version = benchmark_version or _default_benchmark_version(benchmark)
     except FileNotFoundError as exc:
         typer.echo(_red(str(exc)))
@@ -84,6 +86,7 @@ def export_cmd(
             out_path=out,
             seeds=_DEFAULT_SEEDS,
             access=access,
+            task_types=task_types,
         )
     except ExportError as exc:
         typer.echo(_red(str(exc)))
@@ -108,8 +111,9 @@ def _default_benchmark_version(benchmark: str) -> str:
 
 def _collect_ranked_tasks(
     benchmark: str, language: str, *, access: str | None = None
-) -> tuple[list[str], dict[str, str]]:
-    """Walk the benchmark's task YAMLs, return (ranked_tasks, primary_metric map).
+) -> tuple[list[str], dict[str, str], dict[str, str]]:
+    """Walk the benchmark's task YAMLs, return (ranked_tasks, primary_metric
+    map, task_type map).
 
     The primary-metric column differs per board: an ``access="api"`` export
     reads ``api_protocol.metrics.task_score`` (the metric produced by the
@@ -118,6 +122,12 @@ def _collect_ranked_tasks(
     loglikelihood metric, e.g. ``acc_norm``). Benchmarks without an
     ``api_protocol`` block (e.g. superglue) fall back to ``metrics.task_score``
     regardless of ``access``.
+
+    The task_type map (task -> declared ``task_type``, e.g.
+    ``"generative_qa"`` or ``"multiple_choice_loglikelihood"``) is collected
+    from the same YAML walk so ``assemble_leaderboard`` can validate each
+    included artifact's ``run_config.protocol`` per-task without re-reading
+    the config files.
     """
     import os
 
@@ -130,6 +140,7 @@ def _collect_ranked_tasks(
 
     ranked: list[str] = []
     primary_map: dict[str, str] = {}
+    task_types: dict[str, str] = {}
     for task_yaml in sorted(tasks_dir.glob("*.yaml")):
         cfg = load_yaml_with_schema(task_yaml, schemas_root() / "task_spec.json")
         if cfg.get("status") != "ranked":
@@ -138,6 +149,7 @@ def _collect_ranked_tasks(
             continue
         task = cfg["task"]
         ranked.append(task)
+        task_types[task] = cfg["task_type"]
         api_metrics = cfg.get("api_protocol", {}).get("metrics") if access == "api" else None
         primary_map[task] = (
             api_metrics["task_score"] if api_metrics else cfg["metrics"]["task_score"]
@@ -145,4 +157,4 @@ def _collect_ranked_tasks(
 
     if not ranked:
         raise FileNotFoundError(f"no ranked tasks for {benchmark}/{language} under {tasks_dir}")
-    return ranked, primary_map
+    return ranked, primary_map, task_types

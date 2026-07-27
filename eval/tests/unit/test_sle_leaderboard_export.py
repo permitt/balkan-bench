@@ -39,27 +39,32 @@ def _fake_provenance() -> dict:
     }
 
 
-def _task_cfg(task: str) -> dict:
-    open_primary = _OPEN_PRIMARY[task]
-    api_primary = _API_PRIMARY[task]
-    return {
+def _task_cfg(task: str, *, task_type: str = "multiple_choice_loglikelihood") -> dict:
+    open_primary = _OPEN_PRIMARY.get(task, "acc")
+    api_primary = _API_PRIMARY.get(task, "acc")
+    cfg: dict = {
         "benchmark": "sle",
         "task": task,
-        "task_type": "multiple_choice_loglikelihood",
+        "task_type": task_type,
         "metrics": {
             "primary": [open_primary],
             "report": [open_primary],
             "task_score": open_primary,
         },
-        "api_protocol": {
+    }
+    if task_type != "generative_qa":
+        cfg["api_protocol"] = {
             "reformulation": "multiple_choice_generative",
             "metrics": {
                 "primary": [api_primary],
                 "report": [api_primary],
                 "task_score": api_primary,
             },
-        },
-    }
+        }
+    return cfg
+
+
+_TASK_TYPES = {t: "multiple_choice_loglikelihood" for t in _RANKED_TASKS}
 
 
 def _model_cfg(name: str, *, access: str) -> dict:
@@ -73,16 +78,32 @@ def _model_cfg(name: str, *, access: str) -> dict:
 
 
 def _write_artifact(
-    root: Path, *, task: str, model: str, access: str, metric: str, value: float
+    root: Path,
+    *,
+    task: str,
+    model: str,
+    access: str,
+    metric: str,
+    value: float,
+    protocol: str | None = None,
+    task_type: str = "multiple_choice_loglikelihood",
 ) -> None:
+    """Write one artifact. ``protocol`` defaults to the real-world convention:
+    open_weights models score multiple-choice tasks via loglikelihood, api
+    models via a generative reformulation (``api_protocol.reformulation`` in
+    ``_task_cfg``) - i.e. ``"loglikelihood"`` for ``open_weights``,
+    ``"generative"`` for ``api``. Pass ``protocol`` explicitly to construct a
+    violation."""
+    if protocol is None:
+        protocol = "loglikelihood" if access == "open_weights" else "generative"
     write_generative_result_artifact(
-        task_cfg=_task_cfg(task),
+        task_cfg=_task_cfg(task, task_type=task_type),
         model_cfg=_model_cfg(model, access=access),
         language="sr",
         run_result=GenerativeRunResult(
             metrics={metric: value},
             per_example=[{"example_id": "e1", "prediction": 0, "correct": True}],
-            protocol="loglikelihood",
+            protocol=protocol,
             num_fewshot=0,
             unparsed_responses=0,
             api_cost_usd=0.0 if access == "open_weights" else 0.05,
@@ -132,6 +153,7 @@ def _assemble(root: Path, *, access: str) -> dict:
         task_primary_metrics=primary,
         benchmark_version="0.1.0",
         access=access,
+        task_types=_TASK_TYPES,
     )
 
 
@@ -157,7 +179,7 @@ def test_access_and_protocol_are_stamped(tmp_path) -> None:
     assert open_export["access"] == "open_weights"
     assert api_export["access"] == "api"
     assert open_export["protocol"] == "loglikelihood"
-    assert api_export["protocol"] == "loglikelihood"
+    assert api_export["protocol"] == "generative"
 
 
 def test_generative_boards_omit_seeds(tmp_path) -> None:
@@ -200,6 +222,10 @@ def test_ranks_assigned_independently_per_board(tmp_path) -> None:
 
 
 def test_conflicting_protocol_across_included_artifacts_raises(tmp_path) -> None:
+    """A multiple-choice-task artifact whose protocol doesn't match the
+    access-implied board protocol is a genuine violation (unlike the old
+    "all artifacts must agree" check, which false-positived on legitimate
+    generative_qa/multiple_choice mixes - see the two tests below)."""
     root = _seed_tree(tmp_path)
     _write_artifact(
         tmp_path,
@@ -208,14 +234,138 @@ def test_conflicting_protocol_across_included_artifacts_raises(tmp_path) -> None
         access="api",
         metric="acc",
         value=0.4,
+        protocol="loglikelihood",  # wrong: api board's MC tasks expect "generative"
     )
-    artifact_path = root / "mixed-model" / "arc_easy" / "result.json"
-    data = json.loads(artifact_path.read_text())
-    data["run_config"]["protocol"] = "generative"
-    artifact_path.write_text(json.dumps(data))
 
-    with pytest.raises(ExportError):
+    with pytest.raises(ExportError, match="arc_easy"):
         _assemble(root, access="api")
+
+
+def test_generative_qa_task_uses_generative_protocol_on_open_weights_board(tmp_path) -> None:
+    """Real-world scenario (the reported bug): an open_weights board
+    legitimately mixes protocols - the multiple_choice_loglikelihood tasks
+    are scored via loglikelihood, but generative_qa tasks (nq_open/triviaqa)
+    are ALWAYS scored via the generative protocol, for every model. This must
+    succeed, stamp the board protocol as "loglikelihood", and rank normally."""
+    root = tmp_path / "sle-sr"
+    ranked_tasks = ["arc_easy", "nq_open"]
+    task_types = {"arc_easy": "multiple_choice_loglikelihood", "nq_open": "generative_qa"}
+    primary = {"arc_easy": "acc", "nq_open": "acc"}
+
+    _write_artifact(
+        tmp_path,
+        task="arc_easy",
+        model="galton-open-a",
+        access="open_weights",
+        metric="acc",
+        value=0.8,
+        protocol="loglikelihood",
+    )
+    _write_artifact(
+        tmp_path,
+        task="nq_open",
+        model="galton-open-a",
+        access="open_weights",
+        metric="acc",
+        value=0.5,
+        protocol="generative",
+        task_type="generative_qa",
+    )
+
+    export = assemble_leaderboard(
+        benchmark="sle",
+        language="sr",
+        results_root=root,
+        ranked_tasks=ranked_tasks,
+        task_primary_metrics=primary,
+        benchmark_version="0.1.0",
+        access="open_weights",
+        task_types=task_types,
+    )
+
+    Draft202012Validator(_schema()).validate(export)
+    assert export["protocol"] == "loglikelihood"
+    assert len(export["rows"]) == 1
+    row = export["rows"][0]
+    assert row["complete"] is True
+    assert row["rank"] == 1
+
+
+def test_mc_task_wrong_protocol_on_open_weights_board_raises(tmp_path) -> None:
+    """An MC-task artifact scored via 'generative' protocol on the
+    open_weights board (which expects 'loglikelihood' for MC tasks) is a
+    genuine violation and must raise, naming the offending task."""
+    root = tmp_path / "sle-sr"
+    ranked_tasks = ["arc_easy"]
+    task_types = {"arc_easy": "multiple_choice_loglikelihood"}
+    primary = {"arc_easy": "acc"}
+
+    _write_artifact(
+        tmp_path,
+        task="arc_easy",
+        model="galton-open-a",
+        access="open_weights",
+        metric="acc",
+        value=0.8,
+        protocol="generative",  # wrong: open_weights board expects loglikelihood
+    )
+
+    with pytest.raises(ExportError, match="arc_easy"):
+        assemble_leaderboard(
+            benchmark="sle",
+            language="sr",
+            results_root=root,
+            ranked_tasks=ranked_tasks,
+            task_primary_metrics=primary,
+            benchmark_version="0.1.0",
+            access="open_weights",
+            task_types=task_types,
+        )
+
+
+def test_api_board_generative_qa_and_mc_all_generative_protocol_succeeds(tmp_path) -> None:
+    """The api board's MC tasks are scored via a generative reformulation, so
+    generative_qa + MC artifacts sharing protocol 'generative' is the normal,
+    expected case and must succeed with the board stamped 'generative'."""
+    root = tmp_path / "sle-sr"
+    ranked_tasks = ["arc_easy", "nq_open"]
+    task_types = {"arc_easy": "multiple_choice_loglikelihood", "nq_open": "generative_qa"}
+    primary = {"arc_easy": "acc", "nq_open": "acc"}
+
+    _write_artifact(
+        tmp_path,
+        task="arc_easy",
+        model="claude-x",
+        access="api",
+        metric="acc",
+        value=0.7,
+        protocol="generative",
+    )
+    _write_artifact(
+        tmp_path,
+        task="nq_open",
+        model="claude-x",
+        access="api",
+        metric="acc",
+        value=0.4,
+        protocol="generative",
+        task_type="generative_qa",
+    )
+
+    export = assemble_leaderboard(
+        benchmark="sle",
+        language="sr",
+        results_root=root,
+        ranked_tasks=ranked_tasks,
+        task_primary_metrics=primary,
+        benchmark_version="0.1.0",
+        access="api",
+        task_types=task_types,
+    )
+
+    Draft202012Validator(_schema()).validate(export)
+    assert export["protocol"] == "generative"
+    assert export["rows"][0]["complete"] is True
 
 
 def test_mixed_seeds_presence_across_included_artifacts_raises(tmp_path) -> None:
@@ -351,8 +501,8 @@ def test_access_none_is_legacy_unfiltered_export(tmp_path) -> None:
 def test_collect_ranked_tasks_primary_metric_differs_per_access() -> None:
     """arc_easy is acc_norm on the open board (loglikelihood scoring) but acc
     on the api board (the api_protocol reformulation's task_score)."""
-    _, open_primary = _collect_ranked_tasks("sle", "sr")
-    _, api_primary = _collect_ranked_tasks("sle", "sr", access="api")
+    _, open_primary, _ = _collect_ranked_tasks("sle", "sr")
+    _, api_primary, _ = _collect_ranked_tasks("sle", "sr", access="api")
 
     assert open_primary["arc_easy"] == "acc_norm"
     assert api_primary["arc_easy"] == "acc"

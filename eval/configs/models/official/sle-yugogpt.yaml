@@ -1,0 +1,13 @@
+name: sle-yugogpt
+access: open_weights
+hf_repo: gordicaleksa/YugoGPT
+family: mistral
+# The original Serbian LLM Eval flagship (Mistral-7B continued pretraining
+# on BCMS data by Aleksa Gordic, 2024) - a base model, evaluated under the
+# same raw-completion loglikelihood protocol as the instruct roster
+# (validated instruct ~= base on this protocol).
+params_hint: 7.2B
+tier: official
+generation:
+  batch_size: 8
+  dtype: bfloat16

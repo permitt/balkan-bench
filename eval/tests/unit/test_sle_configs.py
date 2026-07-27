@@ -42,6 +42,7 @@ SLE_OPEN_MODEL_NAMES = [
     "sle-olmo3-7b",
     "sle-smollm3-3b",
     "sle-phi4-mini",
+    "sle-yugogpt",
 ]
 
 SLE_API_MODEL_NAMES = [

@@ -46,6 +46,23 @@ def test_batching_matches_single(model):
     assert batched == pytest.approx(singles, abs=1e-3)
 
 
+def test_batching_matches_single_mixed_continuation_lengths(model):
+    # Continuations of very different token lengths in the same batch exercise the
+    # per-row offset arithmetic (max_len - n_cont + j) when logits are sliced to only
+    # the last (max_ncont_in_batch + 1) positions instead of the full sequence.
+    reqs = [
+        ("A b c", " d"),
+        (
+            "The quick brown fox jumps over the lazy dog near the old stone bridge",
+            " and then runs away quickly into the deep dark forest",
+        ),
+        ("Hi", " a"),
+    ]
+    batched = model.loglikelihood(reqs)
+    singles = [model.loglikelihood([r])[0] for r in reqs]
+    assert batched == pytest.approx(singles, abs=1e-3)
+
+
 def _tok_encode(model, text: str) -> list[int]:
     return model.tokenizer(text, add_special_tokens=False)["input_ids"]
 

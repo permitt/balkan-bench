@@ -134,16 +134,15 @@ class CausalLM:
             enc_ctx = [bos_id, *enc_ctx]
             enc_full = [bos_id, *enc_full]
 
-        if enc_full[: len(enc_ctx)] == enc_ctx:
-            continuation_ids = enc_full[len(enc_ctx) :]
-        else:
-            continuation_ids = []
+        continuation_ids = (
+            enc_full[len(enc_ctx) :] if enc_full[: len(enc_ctx)] == enc_ctx else []
+        )
 
         if len(continuation_ids) == 0:
             # Naive suffix slice is unusable (boundary re-merge, or genuinely
             # empty): fall back to the longest common prefix of enc_ctx/enc_full.
             common_prefix_len = 0
-            for ctx_tok, full_tok in zip(enc_ctx, enc_full):
+            for ctx_tok, full_tok in zip(enc_ctx, enc_full, strict=False):
                 if ctx_tok != full_tok:
                     break
                 common_prefix_len += 1
@@ -183,13 +182,28 @@ class CausalLM:
         position_ids_t = attention_mask_t.cumsum(-1) - 1
         position_ids_t = position_ids_t.masked_fill(attention_mask_t == 0, 0)
 
+        # Only the last (max_ncont_in_batch + 1) positions are ever read below
+        # (continuations sit at the right edge of the left-padded rows; the
+        # gather uses pos - 1 with pos >= max_len - n_cont). Casting the FULL
+        # [batch, max_len, vocab] logits to fp32 and log_softmax-ing every
+        # position is wasteful and, with a large vocab and long contexts, can
+        # OOM (e.g. 150k-vocab model + ~1500-token passages on a 24GB GPU
+        # already holding a ~20GB checkpoint). Slice to the needed window
+        # before the fp32 cast/log_softmax; this is mathematically identical
+        # since log_softmax is per-position over vocab and the discarded
+        # positions are never read.
+        max_ncont = max(len(cont_ids) for _full, cont_ids in encoded)
+        window = max_ncont + 1
+        slice_start = max(0, max_len - window)
+
         with torch.no_grad():
             outputs = self.model(
                 input_ids=input_ids_t,
                 attention_mask=attention_mask_t,
                 position_ids=position_ids_t,
             )
-            log_probs = torch.log_softmax(outputs.logits.float(), dim=-1)
+            windowed_logits = outputs.logits[:, slice_start:, :]
+            log_probs = torch.log_softmax(windowed_logits.float(), dim=-1)
 
         scores: list[float] = []
         for i, (_full, cont_ids) in enumerate(encoded):
@@ -197,7 +211,8 @@ class CausalLM:
             total = 0.0
             for j, token_id in enumerate(cont_ids):
                 pos = max_len - n_cont + j
-                total += log_probs[i, pos - 1, token_id].item()
+                windowed_pos = pos - slice_start
+                total += log_probs[i, windowed_pos - 1, token_id].item()
             scores.append(total)
         return scores
 

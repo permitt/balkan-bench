@@ -96,10 +96,50 @@ def test_encode_pair_whitespace_heuristic_matches_fork(model):
     assert actual == pytest.approx(expected, abs=1e-4)
 
 
-def test_empty_continuation_raises(model):
-    # "Hello wor" + "ld" merges into a single joint-encoded token ("world") that
-    # is already fully covered by the context's own encoding ("Hello", " wor"),
-    # so the continuation slice is empty even after the whitespace heuristic
-    # (no trailing space on this context, so it's a no-op here).
+def test_merged_continuation_falls_back_to_common_prefix(model):
+    # "Hello wor" + "ld" merges under joint encoding into "Hello" + " world" (2 tokens),
+    # while the context alone tokenizes as "Hello" + " wor" (also 2 tokens) - the naive
+    # suffix slice enc_full[len(enc_ctx):] is empty AND the joint encoding's tokens don't
+    # even match the context's own tokens past position 0 ("wor" 476 vs "world" 995).
+    # This previously raised ValueError (a case the reference fork silently mis-scores
+    # as ll=0.0, which we must not replicate either). The fix falls back to the longest
+    # common prefix of enc_ctx/enc_full: p=1 (only "Hello" matches), so the continuation
+    # is scored as the single joint token " world" (995) at the context/continuation
+    # boundary, and a finite ll must be returned rather than raising.
+    context, continuation = "Hello wor", "ld"
+
+    import torch
+
+    enc_ctx = _tok_encode(model, context)
+    enc_full = _tok_encode(model, context + continuation)
+    assert enc_full[: len(enc_ctx)] != enc_ctx  # merge corrupts the naive prefix check
+    assert enc_full[len(enc_ctx) :] == []  # naive slice is empty
+
+    p = 0
+    for a, b in zip(enc_ctx, enc_full):
+        if a != b:
+            break
+        p += 1
+    continuation_enc = enc_full[p:]
+    assert continuation_enc == [995]  # the merged " world" token
+
+    input_ids = torch.tensor([enc_full], dtype=torch.long)
+    with torch.no_grad():
+        logits = model.model(input_ids=input_ids).logits
+    log_probs = torch.log_softmax(logits.float(), dim=-1)
+    expected = 0.0
+    for j, token_id in enumerate(continuation_enc):
+        pos = p + j
+        expected += log_probs[0, pos - 1, token_id].item()
+
+    actual = model.loglikelihood([(context, continuation)])[0]
+    assert math.isfinite(actual)
+    assert actual == pytest.approx(expected, abs=1e-4)
+
+
+def test_truly_empty_continuation_still_raises(model):
+    # "Hello world" + "" (empty continuation string): enc_ctx == enc_full identically,
+    # so even the common-prefix fallback yields an empty continuation slice - a genuine
+    # degenerate case that must still raise rather than silently score ll=0.0.
     with pytest.raises(ValueError):
-        model.loglikelihood([("Hello wor", "ld")])
+        model.loglikelihood([("Hello world", "")])

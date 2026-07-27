@@ -103,6 +103,22 @@ class CausalLM:
         without it, the joint encoding can swallow the boundary into a
         single token that is already fully covered by the context's own
         encoding, silently emptying the continuation.
+
+        Deliberate robustness deviation from harness v0.3.0: with some
+        tokenizers (e.g. Ministral/tekken), the joint encoding of
+        ``context + continuation`` doesn't just append tokens past the
+        context's own encoding - it can re-merge across the boundary
+        entirely, so ``enc_full[:len(enc_ctx)] != enc_ctx`` and the naive
+        suffix slice ``enc_full[len(enc_ctx):]`` is empty even though the
+        continuation clearly contributes to ``enc_full``. The reference fork
+        does not handle this: its ``_encode_pair`` silently returns an empty
+        continuation, and its ``loglikelihood`` scores that as ``0.0`` - a
+        bug we intentionally do not replicate. Instead, when the naive slice
+        is unusable, we fall back to slicing at the longest common prefix of
+        ``enc_ctx`` and ``enc_full``: everything past that prefix is treated
+        as the continuation. This is only a deviation from the fork's exact
+        (mis-)behavior in this unrepresentable-boundary case; normal pairs,
+        where the naive slice matches, are scored identically to the fork.
         """
         n_spaces = len(context) - len(context.rstrip())
         if n_spaces > 0:
@@ -117,12 +133,28 @@ class CausalLM:
                 bos_id = self.tokenizer.eos_token_id
             enc_ctx = [bos_id, *enc_ctx]
             enc_full = [bos_id, *enc_full]
-        continuation_ids = enc_full[len(enc_ctx) :]
+
+        if enc_full[: len(enc_ctx)] == enc_ctx:
+            continuation_ids = enc_full[len(enc_ctx) :]
+        else:
+            continuation_ids = []
+
+        if len(continuation_ids) == 0:
+            # Naive suffix slice is unusable (boundary re-merge, or genuinely
+            # empty): fall back to the longest common prefix of enc_ctx/enc_full.
+            common_prefix_len = 0
+            for ctx_tok, full_tok in zip(enc_ctx, enc_full):
+                if ctx_tok != full_tok:
+                    break
+                common_prefix_len += 1
+            continuation_ids = enc_full[common_prefix_len:]
+
         if len(continuation_ids) == 0:
             raise ValueError(
                 f"empty continuation token ids for context={context!r} "
                 f"continuation={continuation!r}: the continuation contributes no "
-                "tokens beyond the context under joint encoding"
+                "tokens beyond the context under joint encoding, even after the "
+                "common-prefix fallback"
             )
         return enc_full, continuation_ids
 

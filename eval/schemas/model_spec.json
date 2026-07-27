@@ -9,6 +9,11 @@
     "name":         { "type": "string", "minLength": 1 },
     "hf_repo":      { "type": "string", "minLength": 1 },
     "hf_revision":  { "type": "string" },
+    "tokenizer_repo": {
+      "type": "string",
+      "minLength": 1,
+      "description": "HF repo to load the tokenizer from when it differs from hf_repo (e.g. base-model tokenizer for repos shipping only slow sentencepiece files transformers 5.x cannot load)."
+    },
     "family":       { "type": "string", "minLength": 1 },
     "params_hint":  { "type": "string", "minLength": 1 },
     "tier":         { "type": "string", "enum": ["official", "experimental"] },

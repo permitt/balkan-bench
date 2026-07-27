@@ -123,3 +123,13 @@ def test_open_weights_sle_model_without_training_validates(tmp_path: Path) -> No
 def test_existing_encoder_model_still_validates() -> None:
     bertic_yaml = REPO_ROOT / "eval" / "configs" / "models" / "official" / "bertic.yaml"
     load_yaml_with_schema(bertic_yaml, MODEL_SPEC_SCHEMA)
+
+
+def test_model_with_tokenizer_repo_override_validates(tmp_path: Path) -> None:
+    with_override = OPEN_MODEL_SLE + "tokenizer_repo: mistralai/Mistral-7B-v0.1\n"
+    load_yaml_with_schema(_write(tmp_path, with_override), MODEL_SPEC_SCHEMA)
+
+
+def test_yugogpt_model_with_tokenizer_repo_validates() -> None:
+    yugogpt_yaml = REPO_ROOT / "eval" / "configs" / "models" / "official" / "sle-yugogpt.yaml"
+    load_yaml_with_schema(yugogpt_yaml, MODEL_SPEC_SCHEMA)

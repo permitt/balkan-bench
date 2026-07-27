@@ -8,6 +8,16 @@ family: mistral
 # (validated instruct ~= base on this protocol).
 params_hint: 7.2B
 tier: official
+# gordicaleksa/YugoGPT ships only a slow sentencepiece tokenizer.model;
+# transformers 5.x dropped raw sentencepiece support (its converter tries to
+# parse the file as tiktoken and fails), so tokenizer load crashes. YugoGPT's
+# tokenizer is byte-identical to mistralai/Mistral-7B-v0.1's on all joint
+# context+continuation encodings used by our scoring path (verified
+# empirically: full-string and joint encodes match; only standalone
+# leading-space fragments differ, a path our runner never uses). Load the
+# tokenizer from the base model instead; model weights still come from
+# hf_repo above.
+tokenizer_repo: mistralai/Mistral-7B-v0.1
 generation:
   batch_size: 8
   dtype: bfloat16

@@ -39,6 +39,68 @@ def test_generate_greedy_and_stop(model):
     assert len(outs) == 1 and isinstance(outs[0], str) and "\n" not in outs[0]
 
 
+def test_tokenizer_repo_override_constructs_successfully():
+    # Same repo passed as both hf_repo and tokenizer_repo: proves the override
+    # path is exercised (not just falling back to hf_repo silently) while still
+    # only needing a single tiny checkpoint download.
+    m = CausalLM(
+        {"name": "x", "hf_repo": "sshleifer/tiny-gpt2", "tokenizer_repo": "sshleifer/tiny-gpt2"},
+        device="cpu",
+    )
+    lls = m.loglikelihood([("Hello", " world")])
+    assert len(lls) == 1 and math.isfinite(lls[0])
+
+
+def test_tokenizer_repo_override_passed_to_from_pretrained(monkeypatch):
+    calls: list[tuple[str, str | None]] = []
+
+    import balkanbench.models.causal_lm as causal_lm_module
+
+    class _FakeTokenizer:
+        pad_token = "<pad>"
+        eos_token = "<pad>"
+        padding_side = "right"
+
+    def _fake_from_pretrained(repo, revision=None):
+        calls.append((repo, revision))
+        return _FakeTokenizer()
+
+    monkeypatch.setattr(
+        causal_lm_module,
+        "AutoTokenizer",
+        type("_FakeAutoTokenizer", (), {"from_pretrained": staticmethod(_fake_from_pretrained)}),
+    )
+
+    class _FakeModel:
+        def to(self, device):
+            return self
+
+        def eval(self):
+            return self
+
+    monkeypatch.setattr(
+        causal_lm_module,
+        "AutoModelForCausalLM",
+        type(
+            "_FakeAutoModelForCausalLM",
+            (),
+            {"from_pretrained": staticmethod(lambda *a, **k: _FakeModel())},
+        ),
+    )
+
+    CausalLM(
+        {
+            "name": "x",
+            "hf_repo": "org/weights-repo",
+            "hf_revision": "abc123",
+            "tokenizer_repo": "org/tokenizer-repo",
+        },
+        device="cpu",
+    )
+
+    assert calls == [("org/tokenizer-repo", None)]
+
+
 def test_batching_matches_single(model):
     reqs = [("A b c", " d"), ("Completely different much longer context here", " tail")]
     batched = model.loglikelihood(reqs)

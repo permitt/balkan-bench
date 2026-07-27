@@ -34,8 +34,18 @@ class CausalLM:
     """Batched loglikelihood scoring + greedy generation over an HF causal LM.
 
     Constructor reads from ``model_cfg``:
-      - ``hf_repo`` (required): HF hub repo id.
-      - ``hf_revision`` (optional): pinned revision/commit.
+      - ``hf_repo`` (required): HF hub repo id for the model weights.
+      - ``hf_revision`` (optional): pinned revision/commit, applied only to
+        the model weights (``hf_repo``).
+      - ``tokenizer_repo`` (optional): HF hub repo id to load the tokenizer
+        from, when it differs from ``hf_repo``. Needed for repos that ship
+        only a slow sentencepiece ``tokenizer.model`` file, which transformers
+        5.x's converter cannot load (it tries to parse the file as tiktoken
+        and fails). Model weights are always loaded from ``hf_repo``
+        regardless of this override; only the tokenizer load is affected.
+        ``hf_revision`` is intentionally *not* applied to ``tokenizer_repo`` -
+        the tokenizer repo is pinned via its own default branch, keeping this
+        simple since it's a distinct repo from the weights.
       - ``generation.batch_size`` (default 8).
       - ``generation.dtype`` (default "bfloat16"; forced to "float32" when
         running on CPU, since bfloat16 kernels are slow/unsupported there).
@@ -49,6 +59,7 @@ class CausalLM:
         self.model_cfg = model_cfg
         repo = model_cfg["hf_repo"]
         revision = model_cfg.get("hf_revision")
+        tokenizer_repo = model_cfg.get("tokenizer_repo") or repo
         gen_cfg = model_cfg.get("generation", {})
         self.batch_size = int(gen_cfg.get("batch_size", 8))
 
@@ -59,7 +70,7 @@ class CausalLM:
             dtype_name = "float32"
         dtype = getattr(torch, dtype_name)
 
-        self.tokenizer = _self.AutoTokenizer.from_pretrained(repo, revision=revision)
+        self.tokenizer = _self.AutoTokenizer.from_pretrained(tokenizer_repo)
         if self.tokenizer.pad_token is None:
             self.tokenizer.pad_token = self.tokenizer.eos_token
         # Left-padding keeps every sequence's continuation/new tokens aligned

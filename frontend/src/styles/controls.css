@@ -1,0 +1,24 @@
+.seg {
+  display: inline-flex; gap: 2px; padding: 3px;
+  background: var(--surface-3); border-radius: var(--radius-m);
+}
+.seg-item {
+  position: relative; display: inline-flex; align-items: baseline; gap: 6px;
+  padding: 6px 14px; border-radius: calc(var(--radius-m) - 3px);
+  font-size: 0.85rem; font-weight: 500; color: var(--text-3);
+  transition: color 120ms ease-out, transform 100ms ease-out;
+}
+.seg-item:active:not(:disabled) { transform: scale(0.97); }
+.seg-item.active { color: var(--text-1); }
+.seg-item:disabled { opacity: 0.45; cursor: default; }
+.seg-ind {
+  position: absolute; inset: 0; z-index: 0;
+  background: var(--surface-2); border-radius: inherit;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+.seg-label, .seg-sub, .seg-badge { position: relative; z-index: 1; }
+.seg-sub { font-size: 0.72rem; color: var(--text-4); }
+.seg-badge {
+  font-size: 0.65rem; font-weight: 600; color: var(--text-4);
+  border: 1px solid var(--line); border-radius: 999px; padding: 1px 6px;
+}

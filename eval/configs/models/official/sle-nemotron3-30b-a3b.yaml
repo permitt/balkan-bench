@@ -1,0 +1,9 @@
+name: sle-nemotron3-30b-a3b
+access: open_weights
+hf_repo: nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-BF16
+family: nemotron3
+params_hint: 31.6B
+tier: official
+generation:
+  batch_size: 4
+  dtype: bfloat16

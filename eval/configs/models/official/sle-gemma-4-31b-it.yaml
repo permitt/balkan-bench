@@ -1,0 +1,9 @@
+name: sle-gemma-4-31b-it
+access: open_weights
+hf_repo: google/gemma-4-31B-it
+family: gemma4
+params_hint: 32.7B
+tier: official
+generation:
+  batch_size: 4
+  dtype: bfloat16

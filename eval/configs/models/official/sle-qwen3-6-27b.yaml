@@ -1,0 +1,9 @@
+name: sle-qwen3-6-27b
+access: open_weights
+hf_repo: Qwen/Qwen3.6-27B
+family: qwen3.6
+params_hint: 27.8B
+tier: official
+generation:
+  batch_size: 4
+  dtype: bfloat16

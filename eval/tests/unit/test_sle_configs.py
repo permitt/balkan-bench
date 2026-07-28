@@ -43,6 +43,13 @@ SLE_OPEN_MODEL_NAMES = [
     "sle-smollm3-3b",
     "sle-phi4-mini",
     "sle-yugogpt",
+    "sle-gemma-4-12b-it",
+    "sle-gemma-4-31b-it",
+    "sle-qwen3-6-27b",
+    "sle-qwen3-6-35b-a3b",
+    "sle-nemotron3-30b-a3b",
+    "sle-granite-4-1-30b",
+    "sle-slava-qwen3-14b-sr",
 ]
 
 SLE_API_MODEL_NAMES = [

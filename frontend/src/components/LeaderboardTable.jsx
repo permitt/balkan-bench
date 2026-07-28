@@ -25,8 +25,17 @@ export default function LeaderboardTable({ data, rankBy, onRankBy, onSelectModel
               <th
                 key={t}
                 scope="col"
-                className={`lb-num ${rankBy === t ? 'lb-col-active' : ''}`}
+                className={`lb-num lb-sortable ${rankBy === t ? 'lb-col-active' : ''}`}
+                tabIndex={0}
+                role="button"
+                aria-sort={rankBy === t ? 'descending' : undefined}
                 onClick={() => onRankBy(t)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    onRankBy(t)
+                  }
+                }}
               >
                 {TASK_LABELS[t] || t}
                 <span className="lb-metric num">{data.task_primary_metrics[t]}</span>
@@ -34,8 +43,17 @@ export default function LeaderboardTable({ data, rankBy, onRankBy, onSelectModel
             ))}
             <th
               scope="col"
-              className={`lb-num lb-avg ${rankBy === 'avg' ? 'lb-col-active' : ''}`}
+              className={`lb-num lb-avg lb-sortable ${rankBy === 'avg' ? 'lb-col-active' : ''}`}
+              tabIndex={0}
+              role="button"
+              aria-sort={rankBy === 'avg' ? 'descending' : undefined}
               onClick={() => onRankBy('avg')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  onRankBy('avg')
+                }
+              }}
             >
               Avg
             </th>

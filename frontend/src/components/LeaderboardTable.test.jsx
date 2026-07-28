@@ -34,8 +34,27 @@ test('sorting by task reorders and header click fires onRankBy', async () => {
   const { onRankBy } = setup({ rankBy: 'copa' })
   const rows = screen.getAllByRole('row').slice(1)
   expect(within(rows[0]).getByText('model-a')).toBeInTheDocument() // 0.88 copa
-  await user.click(screen.getByRole('columnheader', { name: /BoolQ/ }))
+  await user.click(screen.getByRole('button', { name: /BoolQ/ }))
   expect(onRankBy).toHaveBeenCalledWith('boolq')
+})
+
+test('keyboard Enter/Space on a sortable header fires onRankBy', async () => {
+  const user = userEvent.setup()
+  const { onRankBy } = setup({ rankBy: 'copa' })
+  const boolqHeader = screen.getByRole('button', { name: /BoolQ/ })
+  boolqHeader.focus()
+  await user.keyboard('{Enter}')
+  expect(onRankBy).toHaveBeenCalledWith('boolq')
+  onRankBy.mockClear()
+  await user.keyboard(' ')
+  expect(onRankBy).toHaveBeenCalledWith('boolq')
+})
+
+test('aria-sort marks only the currently ranked column', () => {
+  setup({ rankBy: 'copa' })
+  expect(screen.getByRole('button', { name: /COPA/ })).toHaveAttribute('aria-sort', 'descending')
+  expect(screen.getByRole('button', { name: /BoolQ/ })).not.toHaveAttribute('aria-sort')
+  expect(screen.getByRole('button', { name: /Avg/ })).not.toHaveAttribute('aria-sort')
 })
 
 test('row click and Enter select the model', async () => {

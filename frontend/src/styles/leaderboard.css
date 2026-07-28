@@ -11,10 +11,11 @@
 .lb-table th {
   text-align: right; padding: 12px 14px; font-size: 0.72rem; font-weight: 600;
   text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-3);
-  border-bottom: 1px solid var(--line); cursor: pointer; white-space: nowrap;
+  border-bottom: 1px solid var(--line); white-space: nowrap;
   user-select: none;
 }
-.lb-table th.lb-rank, .lb-table th.lb-model { text-align: left; cursor: default; }
+.lb-table th.lb-rank, .lb-table th.lb-model { text-align: left; }
+.lb-table th.lb-sortable { cursor: pointer; }
 .lb-table th.lb-col-active { color: var(--accent); }
 .lb-metric { display: block; font-size: 0.6rem; font-weight: 400; color: var(--text-4); text-transform: none; }
 .lb-row { cursor: pointer; }

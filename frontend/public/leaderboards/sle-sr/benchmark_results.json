@@ -2,7 +2,7 @@
   "benchmark": "sle",
   "language": "sr",
   "benchmark_version": "1.0.0",
-  "generated_at": "2026-07-27T15:46:30Z",
+  "generated_at": "2026-07-28T01:16:57Z",
   "sponsor": "Recrewty",
   "ranked_tasks": [
     "arc_challenge",
@@ -28,7 +28,7 @@
   },
   "rows": [
     {
-      "rank": 9,
+      "rank": 10,
       "model": "sle-gemma-4-e2b-it",
       "model_id": "google/gemma-4-E2B-it",
       "params": 5100000000,
@@ -78,7 +78,7 @@
       "model_revision": "unknown"
     },
     {
-      "rank": 7,
+      "rank": 8,
       "model": "sle-gemma-4-e4b-it",
       "model_id": "google/gemma-4-E4B-it",
       "params": 8000000000,
@@ -128,7 +128,7 @@
       "model_revision": "unknown"
     },
     {
-      "rank": 3,
+      "rank": 4,
       "model": "sle-granite-4-1-8b",
       "model_id": "ibm-granite/granite-4.1-8b",
       "params": 8800000000,
@@ -178,7 +178,7 @@
       "model_revision": "unknown"
     },
     {
-      "rank": 8,
+      "rank": 9,
       "model": "sle-ministral-8b",
       "model_id": "mistralai/Ministral-8B-Instruct-2410",
       "params": 8000000000,
@@ -228,7 +228,7 @@
       "model_revision": "unknown"
     },
     {
-      "rank": 6,
+      "rank": 7,
       "model": "sle-olmo3-7b",
       "model_id": "allenai/Olmo-3-7B-Instruct",
       "params": 7300000000,
@@ -278,7 +278,7 @@
       "model_revision": "unknown"
     },
     {
-      "rank": 4,
+      "rank": 5,
       "model": "sle-phi4-mini",
       "model_id": "microsoft/Phi-4-mini-instruct",
       "params": 3800000000,
@@ -328,7 +328,7 @@
       "model_revision": "unknown"
     },
     {
-      "rank": 2,
+      "rank": 3,
       "model": "sle-qwen3-5-4b",
       "model_id": "Qwen/Qwen3.5-4B",
       "params": 4700000000,
@@ -378,7 +378,7 @@
       "model_revision": "unknown"
     },
     {
-      "rank": 1,
+      "rank": 2,
       "model": "sle-qwen3-5-9b",
       "model_id": "Qwen/Qwen3.5-9B",
       "params": 9700000000,
@@ -428,7 +428,7 @@
       "model_revision": "unknown"
     },
     {
-      "rank": 5,
+      "rank": 6,
       "model": "sle-smollm3-3b",
       "model_id": "HuggingFaceTB/SmolLM3-3B",
       "params": 3100000000,
@@ -472,6 +472,56 @@
         }
       },
       "avg": 0.3576,
+      "complete": true,
+      "tasks_completed": 9,
+      "tasks_total": 9,
+      "model_revision": "unknown"
+    },
+    {
+      "rank": 1,
+      "model": "sle-yugogpt",
+      "model_id": "gordicaleksa/YugoGPT",
+      "params": 7200000000,
+      "params_display": "7.2B",
+      "results": {
+        "arc_challenge": {
+          "mean": 0.3873720136518771,
+          "stdev": 0.0
+        },
+        "arc_easy": {
+          "mean": 0.5290404040404041,
+          "stdev": 0.0
+        },
+        "boolq": {
+          "mean": 0.7036697247706422,
+          "stdev": 0.0
+        },
+        "hellaswag": {
+          "mean": 0.686018721370245,
+          "stdev": 0.0
+        },
+        "nq_open": {
+          "mean": 0.15373961218836565,
+          "stdev": 0.0
+        },
+        "openbookqa": {
+          "mean": 0.436,
+          "stdev": 0.0
+        },
+        "piqa": {
+          "mean": 0.7377584330794341,
+          "stdev": 0.0
+        },
+        "triviaqa": {
+          "mean": 0.3630740080249666,
+          "stdev": 0.0
+        },
+        "winogrande": {
+          "mean": 0.6440410418310971,
+          "stdev": 0.0
+        }
+      },
+      "avg": 0.5156,
       "complete": true,
       "tasks_completed": 9,
       "tasks_total": 9,

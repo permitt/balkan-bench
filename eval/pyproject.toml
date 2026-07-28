@@ -35,7 +35,7 @@ dev = [
     "huggingface_hub>=0.24",
     # ml extras: in dev so CI runs the eval pipeline tests end to end
     "torch>=2.1",
-    "transformers>=4.40",
+    "transformers>=5.14",
     "scikit-learn>=1.4",
     "numpy>=1.26",
     "optuna>=3.6",
@@ -48,7 +48,7 @@ publish = [
 ]
 ml = [
     "torch>=2.1",
-    "transformers>=4.40",
+    "transformers>=5.14",
     "scikit-learn>=1.4",
     "numpy>=1.26",
     "optuna>=3.6",

@@ -22,3 +22,28 @@
   font-size: 0.65rem; font-weight: 600; color: var(--text-4);
   border: 1px solid var(--line); border-radius: 999px; padding: 1px 6px;
 }
+.rankmenu { position: relative; }
+.rankmenu-pill {
+  padding: 8px 14px; border-radius: 999px;
+  background: var(--surface-3); font-size: 0.85rem; color: var(--text-2);
+  transition: transform 100ms ease-out;
+}
+.rankmenu-pill:active { transform: scale(0.97); }
+.rankmenu-pill b { color: var(--text-1); }
+.rankmenu-pop {
+  position: absolute; top: calc(100% + 6px); left: 0; z-index: 40;
+  min-width: 300px; max-height: 60vh; overflow-y: auto;
+  background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: var(--radius-m); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.16);
+  padding: var(--space-2); display: flex; flex-direction: column;
+  transform-origin: top left;
+}
+.rankmenu-item {
+  display: flex; flex-direction: column; gap: 2px; text-align: left;
+  padding: 8px 10px; border-radius: var(--radius-s);
+}
+.rankmenu-item:hover { background: var(--surface-3); }
+.rankmenu-item.active { background: var(--accent-soft); }
+.rankmenu-item-head { font-size: 0.9rem; font-weight: 600; display: flex; gap: 8px; align-items: baseline; }
+.rankmenu-metric { font-size: 0.7rem; color: var(--text-4); }
+.rankmenu-desc { font-size: 0.78rem; color: var(--text-3); }

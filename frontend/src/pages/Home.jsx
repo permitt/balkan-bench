@@ -1,116 +1,80 @@
-import { useState } from 'react'
-import Topbar from '../components/Topbar.jsx'
-import Nav from '../components/Nav.jsx'
-import Marquee from '../components/Marquee.jsx'
-import Footer from '../components/Footer.jsx'
+import { Link } from 'react-router-dom'
+import { motion } from 'motion/react' // eslint-disable-line no-unused-vars
+import { resolveBoard, sortRows, FACTS, BENCHMARKS } from '../lib/leaderboards.js'
+import { useBoard } from '../lib/useBoard.js'
+import ScoreCell from '../components/ScoreCell.jsx'
+import '../styles/home.css'
+
+const RISE = (i) => ({
+  initial: { opacity: 0, y: 8 },
+  animate: { opacity: 1, y: 0 },
+  transition: { type: 'spring', bounce: 0, duration: 0.4, delay: i * 0.05 },
+})
 
 export default function Home() {
-  const [email, setEmail] = useState('')
-  const [note, setNote] = useState('~ occasional updates on new benchmarks, models, and leaderboard releases')
-  const [sent, setSent] = useState(false)
-
-  const onSubmit = (e) => {
-    e.preventDefault()
-    if (!email.includes('@')) return
-    setNote(`✓ ADDED · WE'LL EMAIL ${email.toUpperCase()} AT LAUNCH`)
-    setSent(true)
-    setEmail('')
-  }
+  const target = resolveBoard('superglue', 'sr')
+  const { data } = useBoard(target)
+  const top5 = data ? sortRows(data.rows, 'avg').slice(0, 5) : []
 
   return (
-    <>
-      <Topbar />
-      <Nav />
-
-      <section className="wrap">
-        <div className="left">
-          <div>
-            <div className="eyebrow">
-              <span className="chip">● LIVE NOW</span>
-              <span>V1.0 · RELEASED 2026-04-28</span>
-            </div>
-            <h1>
-              Every model,<br />
-              <span className="stroke">measured</span><span className="slash">.</span>
-            </h1>
-            <p className="sub">
-              An open, reproducible benchmark and leaderboard for language models across <b>Serbian, Montenegrin, Croatian</b> and <b>Bosnian</b>. Follow the release for new datasets, model evaluations, and benchmark expansions across the BCMS ecosystem.
-            </p>
-          </div>
-
-          <div>
-            <form className="signup" onSubmit={onSubmit}>
-              <div className="signup-k">§ NOTIFY ME</div>
-              <div className="signup-h">Get updates.</div>
-              <div className="signup-p">Early access to the leaderboard, eval harness, and submission pipeline. No spam, one email at launch.</div>
-              <div className="signup-row">
-                <input
-                  type="email"
-                  required
-                  placeholder="your@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-                <button type="submit">
-                  Notify me
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                    <path d="M5 12h14M13 5l7 7-7 7" />
-                  </svg>
-                </button>
-              </div>
-              <div className="signup-note" style={sent ? { color: 'var(--signal)' } : undefined}>{note}</div>
-            </form>
-          </div>
-        </div>
-
-        <div className="right">
-          <div className="status-card">
-            <div className="status-head">
-              <span>BUILD / <b>v1.0</b></span>
-              <span>RELEASED · PROD</span>
-            </div>
-
-            <div className="status-body">
-              <div className="sb-row">
-                <div className="sb-n">01</div>
-                <div className="sb-label">SuperGLUE · BCMS<span className="sub">Encoder NLU · 6 tasks</span></div>
-                <div className="sb-status live">READY</div>
-              </div>
-              <div className="sb-row">
-                <div className="sb-n">02</div>
-                <div className="sb-label">Serbian-LLM-Eval<span className="sub">Generative · 7 tasks · OZ-Eval</span></div>
-                <div className="sb-status prog">BETA</div>
-              </div>
-              <div className="sb-row">
-                <div className="sb-n">03</div>
-                <div className="sb-label">MTEB-BCMS<span className="sub">Embeddings · 4 tasks</span></div>
-                <div className="sb-status planned">PLANNED</div>
-              </div>
-              <div className="sb-row">
-                <div className="sb-n">04</div>
-                <div className="sb-label">LLM Arena<span className="sub">Human-judged Elo</span></div>
-                <div className="sb-status planned">PLANNED</div>
-              </div>
-            </div>
-
-            <div className="progress">
-              <div className="progress-top"><span>LAUNCH READINESS</span><b>v1.0</b></div>
-              <div className="progress-bar"></div>
-            </div>
-
-            <div className="term">
-              <div><span className="g">$</span> <span className="w">balkanbench</span> <span className="y">--version</span></div>
-              <div><span className="c">› v1.0 - 67,313 items across 3 released languages</span></div>
-              <div><span className="c">› 9 models · 5 seeds · held-out test split</span></div>
-              <div><span className="c">› results live at balkanbench.com/leaderboard</span></div>
-              <div><span className="g">›</span> <span className="w">released</span> <span className="y">2026-04-28</span><span className="cursor"></span></div>
-            </div>
-          </div>
+    <div className="home container">
+      <section className="home-hero">
+        <h1 className="display home-title">Every model, measured.</h1>
+        <p className="home-sub">
+          An open, reproducible benchmark and leaderboard for language models
+          across Serbian, Montenegrin, Croatian, and Bosnian.
+        </p>
+        <div className="home-ctas">
+          <Link className="btn-primary" to="/leaderboard">View leaderboard</Link>
+          <Link className="btn-quiet" to="/about">Read methodology</Link>
         </div>
       </section>
 
-      <Marquee />
-      <Footer />
-    </>
+      <section className="home-preview" aria-label="Current top models">
+        <div className="home-preview-card">
+          <div className="home-preview-head">
+            <span>SuperGLUE · Serbian · top 5</span>
+            <Link to="/leaderboard" className="home-preview-more">Full leaderboard</Link>
+          </div>
+          {top5.map((row, i) => (
+            <motion.div key={row.model} className="home-preview-row" {...RISE(i)}>
+              <span className="num home-preview-rank">{i + 1}</span>
+              <span className="home-preview-model">{row.model}</span>
+              <span className="num home-preview-params">{row.params_display}</span>
+              <ScoreCell cell={{ mean: row.avg }} active />
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      <section className="home-facts" aria-label="Key figures">
+        <div className="home-fact">
+          <span className="num home-fact-n">{FACTS.items.toLocaleString('en-US')}</span>
+          <span className="home-fact-k">benchmark items</span>
+        </div>
+        <div className="home-fact">
+          <span className="num home-fact-n">{FACTS.languageCount}</span>
+          <span className="home-fact-k">released languages</span>
+        </div>
+        <div className="home-fact">
+          <span className="num home-fact-n">{data ? data.rows.length : '-'}</span>
+          <span className="home-fact-k">models evaluated</span>
+        </div>
+      </section>
+
+      <section className="home-roster" aria-label="Benchmark tracks">
+        {Object.entries(BENCHMARKS).map(([key, meta]) => (
+          <div key={key} className="home-track">
+            <div>
+              <div className="home-track-name">{meta.label}</div>
+              <div className="home-track-tag">{meta.tagline}</div>
+            </div>
+            <span className={`home-track-status ${meta.available ? 'live' : 'planned'}`}>
+              {meta.available ? 'Live' : `Planned - ${meta.availableIn}`}
+            </span>
+          </div>
+        ))}
+      </section>
+    </div>
   )
 }

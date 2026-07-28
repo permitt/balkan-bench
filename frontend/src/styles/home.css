@@ -1,0 +1,49 @@
+.home { padding-block: var(--space-8); display: flex; flex-direction: column; gap: var(--space-8); }
+.home-hero { max-width: 720px; }
+.home-title { font-size: clamp(2.6rem, 6vw, 4.5rem); }
+.home-sub { font-size: 1.15rem; color: var(--text-2); margin-top: var(--space-4); max-width: 540px; }
+.home-ctas { display: flex; gap: var(--space-3); margin-top: var(--space-6); }
+.btn-primary {
+  padding: 12px 22px; border-radius: 999px; background: var(--accent); color: #fff;
+  font-weight: 600; transition: transform 100ms ease-out;
+}
+.btn-primary:active { transform: scale(0.97); }
+.btn-quiet {
+  padding: 12px 22px; border-radius: 999px; background: var(--surface-3); color: var(--text-1);
+  font-weight: 500; transition: transform 100ms ease-out;
+}
+.btn-quiet:active { transform: scale(0.97); }
+.home-preview-card {
+  border: 1px solid var(--line); border-radius: var(--radius-l);
+  background: var(--surface-2); padding: var(--space-4) var(--space-5);
+}
+.home-preview-head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-size: 0.8rem; color: var(--text-3); padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--line);
+}
+.home-preview-more { color: var(--accent); font-weight: 600; }
+.home-preview-row {
+  display: grid; grid-template-columns: 32px 1fr 80px 120px;
+  gap: var(--space-4); align-items: center;
+  padding: var(--space-3) 0; border-bottom: 1px solid var(--line);
+}
+.home-preview-row:last-child { border-bottom: none; }
+.home-preview-rank { color: var(--text-4); }
+.home-preview-model { font-weight: 600; }
+.home-preview-params { color: var(--text-3); font-size: 0.8rem; text-align: right; }
+.home-facts { display: flex; gap: var(--space-8); flex-wrap: wrap; }
+.home-fact { display: flex; flex-direction: column; gap: var(--space-1); }
+.home-fact-n { font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; }
+.home-fact-k { font-size: 0.85rem; color: var(--text-3); }
+.home-roster { display: flex; flex-direction: column; }
+.home-track {
+  display: flex; justify-content: space-between; align-items: center; gap: var(--space-4);
+  padding: var(--space-4) 0; border-bottom: 1px solid var(--line);
+}
+.home-track:last-child { border-bottom: none; }
+.home-track-name { font-weight: 600; }
+.home-track-tag { font-size: 0.8rem; color: var(--text-3); }
+.home-track-status { font-size: 0.8rem; font-weight: 600; }
+.home-track-status.live { color: var(--accent); }
+.home-track-status.planned { color: var(--text-4); }

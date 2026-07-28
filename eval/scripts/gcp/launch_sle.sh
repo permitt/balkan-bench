@@ -94,8 +94,8 @@ printf '[sle] %s %d Vertex AI custom jobs\n' \
   "$([[ "${DRY_RUN}" -eq 1 ]] && echo "previewing" || echo "dispatching")" "${count}"
 printf '[sle]   models: %s\n' "${MODELS}"
 printf '[sle]   tasks:  %s\n' "${SLE_TASKS}"
-printf '[sle]   gpu:    l4 (%s), revision=%s, benchmark-version=%s, run-type=%s\n' \
-  "${MACHINE_TYPE}" "${DATASET_REVISION}" "${BENCHMARK_VERSION}" "${RUN_TYPE}"
+printf '[sle]   gpu:    %s (%s), revision=%s, benchmark-version=%s, run-type=%s\n' \
+  "${ACCELERATOR_TYPE}" "${MACHINE_TYPE}" "${DATASET_REVISION}" "${BENCHMARK_VERSION}" "${RUN_TYPE}"
 
 i=0
 for model in ${MODELS}; do

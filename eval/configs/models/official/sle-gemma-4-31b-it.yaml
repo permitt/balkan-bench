@@ -7,3 +7,4 @@ tier: official
 generation:
   batch_size: 4
   dtype: bfloat16
+  device_map: auto

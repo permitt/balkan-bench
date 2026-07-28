@@ -74,6 +74,7 @@ require_env PROJECT_ID GCS_BUCKET
 #   ACCELERATOR_TYPE=NVIDIA_A100_80GB MACHINE_TYPE=a2-ultragpu-1g
 : "${MACHINE_TYPE:=g2-standard-8}"
 : "${ACCELERATOR_TYPE:=NVIDIA_L4}"
+: "${ACCELERATOR_COUNT:=1}"
 
 if [[ "${DRY_RUN}" -eq 1 ]]; then
   : "${HF_TOKEN:=dry-run-placeholder-token}"
@@ -134,7 +135,7 @@ print(json.dumps(sys.argv[1]))
     "machineSpec": {
       "machineType": "${MACHINE_TYPE}",
       "acceleratorType": "${ACCELERATOR_TYPE}",
-      "acceleratorCount": 1
+      "acceleratorCount": ${ACCELERATOR_COUNT}
     },
     "replicaCount": 1,
     "containerSpec": {

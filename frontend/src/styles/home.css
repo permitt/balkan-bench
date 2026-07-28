@@ -47,3 +47,19 @@
 .home-track-status { font-size: 0.8rem; font-weight: 600; }
 .home-track-status.live { color: var(--accent); }
 .home-track-status.planned { color: var(--text-4); }
+.home-title { text-wrap: balance; }
+.home-vision { max-width: 640px; }
+.home-vision h2, .home-roster-head h2 {
+  font-size: 1.5rem; font-weight: 700; letter-spacing: -0.015em;
+  text-wrap: balance; margin-bottom: var(--space-3);
+}
+.home-vision p { color: var(--text-2); font-size: 1.05rem; text-wrap: pretty; }
+.home-points {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-6);
+}
+.home-point h3 { font-size: 1rem; font-weight: 600; margin-bottom: var(--space-2); text-wrap: balance; }
+.home-point p { color: var(--text-3); font-size: 0.95rem; text-wrap: pretty; }
+.home-point a { color: var(--accent); font-weight: 600; }
+.home-roster-head { margin-bottom: var(--space-4); }
+.home-roster-head p { color: var(--text-3); font-size: 0.95rem; }

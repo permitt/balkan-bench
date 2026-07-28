@@ -51,8 +51,9 @@ describe('leaderboards', () => {
   })
 
   test('facts constants', () => {
-    expect(FACTS.items).toBe(67313)
+    expect(FACTS.items).toBe(109332)
     expect(FACTS.languageCount).toBe(3)
+    expect(FACTS.modelCount).toBe(19)
     expect(LEADERBOARDS.some(l => l.path === 'sle-sr' && l.available)).toBe(true)
   })
 })

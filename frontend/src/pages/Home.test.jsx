@@ -28,12 +28,27 @@ test('live preview shows top rows linking to leaderboard', async () => {
   expect(screen.getByRole('link', { name: /full leaderboard/i })).toHaveAttribute('href', '/leaderboard')
 })
 
-test('facts strip shows items, languages, model count', async () => {
+test('facts strip shows items, models, languages across both suites', async () => {
   renderHome()
   await screen.findByText('model-a')
   const facts = within(screen.getByRole('region', { name: /key figures/i }))
-  expect(facts.getByText('67,313')).toBeInTheDocument()
-  expect(facts.getByText('2')).toBeInTheDocument() // models in fixture
+  expect(facts.getByText('109,332')).toBeInTheDocument()
+  expect(facts.getByText('19')).toBeInTheDocument()
+  expect(facts.getByText('3')).toBeInTheDocument()
+})
+
+test('vision section explains the mission with traceability claim', () => {
+  renderHome()
+  expect(screen.getByRole('heading', { name: /why this exists/i })).toBeInTheDocument()
+  expect(screen.getByText(/traceable to the exact dataset, config, and seed/i)).toBeInTheDocument()
+})
+
+test('pillars cover open, reproducible, community with submit link', () => {
+  renderHome()
+  expect(screen.getByRole('heading', { name: /open by default/i })).toBeInTheDocument()
+  expect(screen.getByRole('heading', { name: /reproducible to the seed/i })).toBeInTheDocument()
+  expect(screen.getByRole('heading', { name: /built by the region/i })).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: /add your model/i })).toHaveAttribute('href', '/submit')
 })
 
 test('benchmark roster lists all four tracks with status', () => {

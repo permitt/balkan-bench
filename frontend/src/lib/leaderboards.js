@@ -82,7 +82,10 @@ const LEADERBOARDS = [
 
 export { TASK_LABELS, TASK_DESCRIPTIONS, LANGUAGES, BENCHMARKS, LEADERBOARDS }
 
-export const FACTS = { items: 67313, languageCount: 3 }
+// Maintained release constants, updated when new boards publish.
+// items = 67,313 SuperGLUE (train+val+test, SR) + 42,019 SLE test items.
+// modelCount = unique model_ids across all published boards.
+export const FACTS = { items: 109332, languageCount: 3, modelCount: 19 }
 
 export function formatCell(cell) {
   if (cell === null || cell === undefined) return { main: '-', stdev: null }

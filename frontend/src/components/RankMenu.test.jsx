@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitForElementToBeRemoved } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { vi } from 'vitest'
 import RankMenu from './RankMenu.jsx'
@@ -20,7 +20,7 @@ test('opens menu, selects a task, closes', async () => {
   const item = screen.getByRole('menuitemradio', { name: /BoolQ/ })
   await user.click(item)
   expect(onChange).toHaveBeenCalledWith('boolq')
-  expect(screen.queryByRole('menu')).not.toBeInTheDocument()
+  await waitForElementToBeRemoved(() => screen.queryByRole('menu'))
 })
 
 test('marks current selection checked and shows descriptions', async () => {
@@ -36,5 +36,5 @@ test('escape closes the menu', async () => {
   render(<RankMenu value="avg" onChange={() => {}} tasks={tasks} metrics={metrics} />)
   await user.click(screen.getByRole('button', { name: /rank by/i }))
   await user.keyboard('{Escape}')
-  expect(screen.queryByRole('menu')).not.toBeInTheDocument()
+  await waitForElementToBeRemoved(() => screen.queryByRole('menu'))
 })

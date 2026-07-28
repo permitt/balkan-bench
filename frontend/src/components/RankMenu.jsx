@@ -45,6 +45,7 @@ export default function RankMenu({ value, onChange, tasks, metrics }) {
             className="rankmenu-pop"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.97 }}
             transition={SPRING}
           >
             {items.map(item => (

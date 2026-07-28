@@ -250,7 +250,18 @@ class CausalLM:
                 attention_mask=attention_mask_t,
                 position_ids=position_ids_t,
             )
-            windowed_logits = outputs.logits[:, slice_start:, :]
+            logits = outputs.logits
+            # Wrapper architectures loaded via the conditional-generation
+            # fallback must still emit standard [batch, seq, vocab] logits
+            # for text-only input; a silently different shape would corrupt
+            # every score, so fail loudly instead.
+            expected = (input_ids_t.shape[0], input_ids_t.shape[1])
+            if logits.dim() != 3 or tuple(logits.shape[:2]) != expected:
+                raise ValueError(
+                    f"model returned logits of shape {tuple(logits.shape)} for input "
+                    f"{tuple(input_ids_t.shape)}; expected [batch, seq, vocab]"
+                )
+            windowed_logits = logits[:, slice_start:, :]
             log_probs = torch.log_softmax(windowed_logits.float(), dim=-1)
 
         scores: list[float] = []

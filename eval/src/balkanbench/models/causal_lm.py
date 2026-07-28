@@ -5,6 +5,12 @@ against any Hugging Face ``AutoModelForCausalLM`` checkpoint: batched
 loglikelihood scoring for multiple-choice / ranking tasks, and greedy
 generation with stop-sequence truncation for free-form QA tasks.
 
+Some 2026-era mid-size flagships (e.g. Gemma 4, Qwen 3.6) ship as text+vision
+conditional-generation wrappers (``*ForConditionalGeneration``) that are not
+registered in ``AutoModelForCausalLM``'s model mapping, even though we only
+ever score/generate text with them. Model loading falls back to
+``AutoModelForImageTextToText`` for exactly that case; see ``CausalLM.__init__``.
+
 No custom ``Trainer`` subclass; this is inference-only.
 """
 
@@ -17,8 +23,17 @@ from typing import Any
 # torch is imported inside methods for the same reason.
 _LAZY = {
     "AutoModelForCausalLM": "transformers",
+    "AutoModelForImageTextToText": "transformers",
     "AutoTokenizer": "transformers",
 }
+
+# Substring of the ValueError transformers raises from AutoXxx.from_pretrained
+# when a config class isn't registered in that auto-class's model mapping, e.g.
+# "Unrecognized configuration class <class '...LlavaConfig'> for this kind of
+# AutoModel: AutoModelForCausalLM." Only this specific failure triggers the
+# AutoModelForImageTextToText fallback below - any other ValueError (bad repo,
+# network error re-raised as ValueError, etc.) propagates unchanged.
+_UNRECOGNIZED_CONFIG_MARKER = "Unrecognized configuration class"
 
 
 def __getattr__(name: str) -> Any:
@@ -79,9 +94,33 @@ class CausalLM:
         # below and for decoding only the newly generated tokens.
         self.tokenizer.padding_side = "left"
 
-        self.model = _self.AutoModelForCausalLM.from_pretrained(
-            repo, revision=revision, dtype=dtype
-        )
+        try:
+            self.model = _self.AutoModelForCausalLM.from_pretrained(
+                repo, revision=revision, dtype=dtype
+            )
+        except ValueError as causal_lm_exc:
+            if _UNRECOGNIZED_CONFIG_MARKER not in str(causal_lm_exc):
+                raise
+            # Text+vision conditional-generation wrapper (e.g. Gemma4ForConditional
+            # Generation, Qwen3_5ForConditionalGeneration): not in
+            # AutoModelForCausalLM's mapping, but registered under
+            # AutoModelForImageTextToText. We only ever feed these text input
+            # (input_ids/attention_mask/position_ids, no pixel_values), and every
+            # wrapper of this shape exposes .forward()/.generate() directly at the
+            # top level returning standard [batch, seq, vocab] logits - same as a
+            # plain causal LM - so no .language_model unwrapping is needed and
+            # everything downstream (device placement, eval mode, dtype, forward,
+            # generate) goes through the exact same code paths as the primary path.
+            try:
+                self.model = _self.AutoModelForImageTextToText.from_pretrained(
+                    repo, revision=revision, dtype=dtype
+                )
+            except ValueError as image_text_to_text_exc:
+                raise ValueError(
+                    f"could not load {repo!r}: AutoModelForCausalLM raised "
+                    f"{causal_lm_exc!r}; fallback AutoModelForImageTextToText also "
+                    f"raised {image_text_to_text_exc!r}"
+                ) from image_text_to_text_exc
         self.model.to(self.device)
         self.model.eval()
 
@@ -145,9 +184,7 @@ class CausalLM:
             enc_ctx = [bos_id, *enc_ctx]
             enc_full = [bos_id, *enc_full]
 
-        continuation_ids = (
-            enc_full[len(enc_ctx) :] if enc_full[: len(enc_ctx)] == enc_ctx else []
-        )
+        continuation_ids = enc_full[len(enc_ctx) :] if enc_full[: len(enc_ctx)] == enc_ctx else []
 
         if len(continuation_ids) == 0:
             # Naive suffix slice is unusable (boundary re-merge, or genuinely

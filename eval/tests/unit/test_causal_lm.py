@@ -222,3 +222,233 @@ def test_truly_empty_continuation_still_raises(model):
     # degenerate case that must still raise rather than silently score ll=0.0.
     with pytest.raises(ValueError):
         model.loglikelihood([("Hello world", "")])
+
+
+# -- conditional-generation (text+vision wrapper) fallback -------------------
+#
+# ``IlyasMoutawwakil/tiny-random-LlavaForConditionalGeneration`` is a ~1MB public
+# fixture whose config class (LlavaConfig) is not registered in
+# AutoModelForCausalLM's mapping, so `AutoModelForCausalLM.from_pretrained` raises
+# ValueError("Unrecognized configuration class ... for this kind of AutoModel:
+# AutoModelForCausalLM"). It stands in for the 2026 mid-size flagships
+# (Gemma4UnifiedForConditionalGeneration, Gemma4ForConditionalGeneration,
+# Qwen3_5ForConditionalGeneration) that hit the same error path - all are
+# `*ForConditionalGeneration` wrappers registered only under
+# AutoModelForImageTextToText, and all support text-only forward/generate
+# producing standard [batch, seq, vocab] logits.
+_MM_REPO = "IlyasMoutawwakil/tiny-random-LlavaForConditionalGeneration"
+
+
+@pytest.fixture(scope="module")
+def mm_model():
+    return CausalLM({"name": "tiny-mm", "hf_repo": _MM_REPO}, device="cpu")
+
+
+def test_conditional_generation_model_loads_via_fallback(mm_model):
+    # This is the GREEN half of the RED/GREEN pair: before the
+    # AutoModelForImageTextToText fallback existed, constructing CausalLM on this
+    # repo raised ValueError("Unrecognized configuration class ..."). Confirmed by
+    # running this fixture against the pre-fallback code (git stash) before
+    # implementing: it raised exactly that error. Now it must construct cleanly.
+    assert mm_model.model is not None
+
+
+def test_multimodal_loglikelihood_returns_finite_floats(mm_model):
+    lls = mm_model.loglikelihood([("Hello", " world"), ("Hi", " there")])
+    assert len(lls) == 2 and all(math.isfinite(x) for x in lls)
+
+
+def test_multimodal_loglikelihood_is_deterministic(mm_model):
+    a = mm_model.loglikelihood([("Hello", " world")])
+    b = mm_model.loglikelihood([("Hello", " world")])
+    assert a == b
+
+
+def test_multimodal_batching_matches_single(mm_model):
+    reqs = [("A b c", " d"), ("Completely different much longer context here", " tail")]
+    batched = mm_model.loglikelihood(reqs)
+    singles = [mm_model.loglikelihood([r])[0] for r in reqs]
+    assert batched == pytest.approx(singles, abs=1e-3)
+
+
+def test_multimodal_generate_produces_string(mm_model):
+    outs = mm_model.generate(["Once upon a"], stop_sequences=["\n"], max_gen_tokens=5)
+    assert len(outs) == 1 and isinstance(outs[0], str)
+
+
+def test_fallback_not_triggered_by_unrelated_valueerror(monkeypatch):
+    # Only the specific "Unrecognized configuration class" ValueError should trigger
+    # the AutoModelForImageTextToText fallback; any other ValueError from
+    # AutoModelForCausalLM must propagate unchanged, not be swallowed.
+    import balkanbench.models.causal_lm as causal_lm_module
+
+    class _FakeTokenizer:
+        pad_token = "<pad>"
+        eos_token = "<pad>"
+        padding_side = "right"
+
+    monkeypatch.setattr(
+        causal_lm_module,
+        "AutoTokenizer",
+        type(
+            "_FakeAutoTokenizer",
+            (),
+            {"from_pretrained": staticmethod(lambda repo: _FakeTokenizer())},
+        ),
+    )
+
+    def _raise_unrelated(*a, **k):
+        raise ValueError("some other loading problem entirely")
+
+    monkeypatch.setattr(
+        causal_lm_module,
+        "AutoModelForCausalLM",
+        type(
+            "_FakeAutoModelForCausalLM",
+            (),
+            {"from_pretrained": staticmethod(_raise_unrelated)},
+        ),
+    )
+
+    fallback_calls = []
+    monkeypatch.setattr(
+        causal_lm_module,
+        "AutoModelForImageTextToText",
+        type(
+            "_FakeAutoModelForImageTextToText",
+            (),
+            {"from_pretrained": staticmethod(lambda *a, **k: fallback_calls.append(1) or object())},
+        ),
+    )
+
+    with pytest.raises(ValueError, match="some other loading problem entirely"):
+        CausalLM({"name": "x", "hf_repo": "org/weights-repo"}, device="cpu")
+
+    assert fallback_calls == []  # fallback must NOT have been attempted
+
+
+def test_fallback_dispatches_to_image_text_to_text_on_unrecognized_config(monkeypatch):
+    # Capture-call test for the dispatch logic itself: an "Unrecognized configuration
+    # class" ValueError from AutoModelForCausalLM must trigger exactly one fallback
+    # call to AutoModelForImageTextToText.from_pretrained with the same args.
+    import balkanbench.models.causal_lm as causal_lm_module
+
+    class _FakeTokenizer:
+        pad_token = "<pad>"
+        eos_token = "<pad>"
+        padding_side = "right"
+
+    monkeypatch.setattr(
+        causal_lm_module,
+        "AutoTokenizer",
+        type(
+            "_FakeAutoTokenizer",
+            (),
+            {"from_pretrained": staticmethod(lambda repo: _FakeTokenizer())},
+        ),
+    )
+
+    def _raise_unrecognized(*a, **k):
+        raise ValueError(
+            "Unrecognized configuration class <class 'FakeConfig'> for this kind of "
+            "AutoModel: AutoModelForCausalLM."
+        )
+
+    monkeypatch.setattr(
+        causal_lm_module,
+        "AutoModelForCausalLM",
+        type(
+            "_FakeAutoModelForCausalLM",
+            (),
+            {"from_pretrained": staticmethod(_raise_unrecognized)},
+        ),
+    )
+
+    class _FakeModel:
+        def to(self, device):
+            return self
+
+        def eval(self):
+            return self
+
+    fallback_calls = []
+
+    def _fallback_from_pretrained(repo, revision=None, dtype=None):
+        fallback_calls.append((repo, revision))
+        return _FakeModel()
+
+    monkeypatch.setattr(
+        causal_lm_module,
+        "AutoModelForImageTextToText",
+        type(
+            "_FakeAutoModelForImageTextToText",
+            (),
+            {"from_pretrained": staticmethod(_fallback_from_pretrained)},
+        ),
+    )
+
+    m = CausalLM(
+        {"name": "x", "hf_repo": "org/mm-weights-repo", "hf_revision": "deadbeef"},
+        device="cpu",
+    )
+
+    assert fallback_calls == [("org/mm-weights-repo", "deadbeef")]
+    assert isinstance(m.model, _FakeModel)
+
+
+def test_fallback_error_names_both_attempts_when_both_fail(monkeypatch):
+    import balkanbench.models.causal_lm as causal_lm_module
+
+    class _FakeTokenizer:
+        pad_token = "<pad>"
+        eos_token = "<pad>"
+        padding_side = "right"
+
+    monkeypatch.setattr(
+        causal_lm_module,
+        "AutoTokenizer",
+        type(
+            "_FakeAutoTokenizer",
+            (),
+            {"from_pretrained": staticmethod(lambda repo: _FakeTokenizer())},
+        ),
+    )
+
+    def _raise_unrecognized_causal(*a, **k):
+        raise ValueError(
+            "Unrecognized configuration class <class 'FakeConfig'> for this kind of "
+            "AutoModel: AutoModelForCausalLM."
+        )
+
+    def _raise_unrecognized_itt(*a, **k):
+        raise ValueError(
+            "Unrecognized configuration class <class 'FakeConfig'> for this kind of "
+            "AutoModel: AutoModelForImageTextToText."
+        )
+
+    monkeypatch.setattr(
+        causal_lm_module,
+        "AutoModelForCausalLM",
+        type(
+            "_FakeAutoModelForCausalLM",
+            (),
+            {"from_pretrained": staticmethod(_raise_unrecognized_causal)},
+        ),
+    )
+    monkeypatch.setattr(
+        causal_lm_module,
+        "AutoModelForImageTextToText",
+        type(
+            "_FakeAutoModelForImageTextToText",
+            (),
+            {"from_pretrained": staticmethod(_raise_unrecognized_itt)},
+        ),
+    )
+
+    with pytest.raises(ValueError) as excinfo:
+        CausalLM({"name": "x", "hf_repo": "org/neither-supports-it"}, device="cpu")
+
+    message = str(excinfo.value)
+    assert "AutoModelForCausalLM" in message
+    assert "AutoModelForImageTextToText" in message
+    assert "org/neither-supports-it" in message

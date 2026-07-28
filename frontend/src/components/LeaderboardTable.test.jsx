@@ -81,3 +81,27 @@ test('meta footer shows version, seeds, sponsor', () => {
   expect(screen.getByText(/5 seeds/)).toBeInTheDocument()
   expect(screen.getByText(/Recrewty/)).toBeInTheDocument()
 })
+
+test('avg column sits right after params', () => {
+  setup()
+  const headers = screen.getAllByRole('row')[0].cells
+  const labels = Array.from(headers).map(h => h.textContent)
+  expect(labels[2]).toBe('Params')
+  expect(labels[3]).toBe('Avg')
+})
+
+test('avg cell sits right after params cell in body rows', () => {
+  setup()
+  const row = screen.getAllByRole('row')[1]
+  expect(row.cells[2].textContent).toBe('110M')
+  expect(within(row.cells[3]).getByText('90.00')).toBeInTheDocument()
+})
+
+test('sle- display prefix is stripped from model names', () => {
+  const data = boardFixture()
+  data.rows[0] = { ...data.rows[0], model: 'sle-model-a' }
+  setup({ data })
+  expect(screen.getByText('model-a')).toBeInTheDocument()
+  expect(screen.queryByText('sle-model-a')).not.toBeInTheDocument()
+  expect(screen.getAllByRole('row')[1]).toHaveAccessibleName('model-a')
+})

@@ -97,6 +97,12 @@ export function formatAvg(row) {
   return (row.avg * 100).toFixed(2)
 }
 
+// Display-only: sle exports prefix run names with "sle-"; the raw row.model
+// stays the row key and the ?model= deep-link value.
+export function displayModelName(model) {
+  return model.startsWith('sle-') ? model.slice(4) : model
+}
+
 export function sortValue(row, rankBy) {
   if (rankBy === 'avg') return row.avg ?? null
   const cell = row.results[rankBy]

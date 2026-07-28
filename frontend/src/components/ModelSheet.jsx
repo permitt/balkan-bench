@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { AnimatePresence, motion } from 'motion/react' // eslint-disable-line no-unused-vars
-import { TASK_LABELS, TASK_DESCRIPTIONS, formatAvg } from '../lib/leaderboards.js'
+import { TASK_LABELS, TASK_DESCRIPTIONS, formatAvg, displayModelName } from '../lib/leaderboards.js'
 import ScoreCell from './ScoreCell.jsx'
 import '../styles/sheet.css'
 
@@ -65,7 +65,7 @@ export default function ModelSheet({ row, board, protocol, onClose }) {
             className="sheet-panel"
             role="dialog"
             aria-modal="true"
-            aria-label={row.model}
+            aria-label={displayModelName(row.model)}
             tabIndex={-1}
             onKeyDown={trapTab}
             initial={{ y: '100%' }}
@@ -82,7 +82,7 @@ export default function ModelSheet({ row, board, protocol, onClose }) {
             <div className="sheet-grab" aria-hidden="true" />
             <div className="sheet-head">
               <div>
-                <h2 className="sheet-title">{row.model}</h2>
+                <h2 className="sheet-title">{displayModelName(row.model)}</h2>
                 {row.model_id && row.model_id.includes('/') ? (
                   <a
                     className="sheet-hf"

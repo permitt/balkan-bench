@@ -65,3 +65,10 @@ test('inerts the page behind the sheet and traps Tab focus within the panel', ()
   fireEvent.keyDown(dialog, { key: 'Tab', shiftKey: true })
   expect(closeBtn).toHaveFocus()
 })
+
+test('sle- display prefix is stripped from sheet title', () => {
+  const sleRow = { ...row, model: 'sle-model-a' }
+  render(<ModelSheet row={sleRow} board={board} protocol={null} onClose={() => {}} />)
+  expect(screen.getByRole('dialog', { name: 'model-a' })).toBeInTheDocument()
+  expect(screen.queryByText('sle-model-a')).not.toBeInTheDocument()
+})

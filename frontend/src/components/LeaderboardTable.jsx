@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { LayoutGroup, motion } from 'motion/react' // eslint-disable-line no-unused-vars
-import { sortRows, sortValue, TASK_LABELS } from '../lib/leaderboards.js'
+import { sortRows, sortValue, displayModelName, TASK_LABELS } from '../lib/leaderboards.js'
 import ScoreCell from './ScoreCell.jsx'
 import '../styles/leaderboard.css'
 
@@ -21,6 +21,22 @@ export default function LeaderboardTable({ data, rankBy, onRankBy, onSelectModel
             <th className="lb-rank" scope="col">#</th>
             <th className="lb-model" scope="col">Model</th>
             <th scope="col">Params</th>
+            <th
+              scope="col"
+              className={`lb-num lb-avg lb-sortable ${rankBy === 'avg' ? 'lb-col-active' : ''}`}
+              tabIndex={0}
+              role="button"
+              aria-sort={rankBy === 'avg' ? 'descending' : undefined}
+              onClick={() => onRankBy('avg')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  onRankBy('avg')
+                }
+              }}
+            >
+              Avg
+            </th>
             {data.ranked_tasks.map(t => (
               <th
                 key={t}
@@ -41,22 +57,6 @@ export default function LeaderboardTable({ data, rankBy, onRankBy, onSelectModel
                 <span className="lb-metric num">{data.task_primary_metrics[t]}</span>
               </th>
             ))}
-            <th
-              scope="col"
-              className={`lb-num lb-avg lb-sortable ${rankBy === 'avg' ? 'lb-col-active' : ''}`}
-              tabIndex={0}
-              role="button"
-              aria-sort={rankBy === 'avg' ? 'descending' : undefined}
-              onClick={() => onRankBy('avg')}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault()
-                  onRankBy('avg')
-                }
-              }}
-            >
-              Avg
-            </th>
           </tr>
         </thead>
         <LayoutGroup>
@@ -73,13 +73,13 @@ export default function LeaderboardTable({ data, rankBy, onRankBy, onSelectModel
                   transition={ROW_SPRING}
                   className={`lb-row ${i === 0 ? 'lb-first' : ''} ${!row.complete ? 'lb-partial' : ''}`}
                   tabIndex={0}
-                  aria-label={row.model}
+                  aria-label={displayModelName(row.model)}
                   onClick={() => onSelectModel(row)}
                   onKeyDown={(e) => { if (e.key === 'Enter') onSelectModel(row) }}
                 >
                   <td className="lb-rank num">{displayRank}</td>
                   <td className="lb-model">
-                    <div className="lb-model-name">{row.model}</div>
+                    <div className="lb-model-name">{displayModelName(row.model)}</div>
                     <div className="lb-model-id">
                       {row.model_id && row.model_id.includes('/') ? (
                         <a
@@ -94,15 +94,15 @@ export default function LeaderboardTable({ data, rankBy, onRankBy, onSelectModel
                     </div>
                   </td>
                   <td className="num">{row.params_display}</td>
+                  <td className="lb-num lb-avg">
+                    <ScoreCell cell={{ mean: row.avg }} active={rankBy === 'avg'} />
+                    {!row.complete && <div className="lb-flag num">{row.partial_flag}</div>}
+                  </td>
                   {data.ranked_tasks.map(t => (
                     <td key={t} className="lb-num">
                       <ScoreCell cell={row.results[t] ?? null} active={rankBy === t} />
                     </td>
                   ))}
-                  <td className="lb-num lb-avg">
-                    <ScoreCell cell={{ mean: row.avg }} active={rankBy === 'avg'} />
-                    {!row.complete && <div className="lb-flag num">{row.partial_flag}</div>}
-                  </td>
                 </motion.tr>
               )
             })}

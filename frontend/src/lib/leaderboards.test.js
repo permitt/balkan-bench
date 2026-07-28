@@ -41,6 +41,10 @@ describe('leaderboards', () => {
     expect(resolveBoard('nope', 'xx').path).toBe('superglue-sr')
   })
 
+  test('resolveBoard falls back to the same benchmark in another language before the global default', () => {
+    expect(resolveBoard('sle', 'hr').path).toBe('sle-sr')
+  })
+
   test('boardEntriesFor filters by benchmark', () => {
     expect(boardEntriesFor('sle').every(e => e.benchmark === 'sle')).toBe(true)
     expect(boardEntriesFor('superglue').length).toBe(4)

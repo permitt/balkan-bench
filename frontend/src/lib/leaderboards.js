@@ -128,6 +128,7 @@ export function sortRows(rows, rankBy) {
 export function resolveBoard(bench, lang) {
   return (
     LEADERBOARDS.find(l => l.benchmark === bench && l.language === lang && l.available) ??
+    LEADERBOARDS.find(l => l.benchmark === bench && l.available) ??
     LEADERBOARDS.find(l => l.available) ??
     LEADERBOARDS[0]
   )

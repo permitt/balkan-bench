@@ -62,15 +62,18 @@ default_env
 
 require_env PROJECT_ID GCS_BUCKET
 
-: "${MODELS:=sle-qwen3-5-4b sle-qwen3-5-9b sle-gemma-4-e2b-it sle-granite-4-1-8b sle-ministral-3-8b}"
+: "${MODELS:=sle-qwen3-5-4b sle-qwen3-5-9b sle-gemma-4-e2b-it sle-gemma-4-e4b-it sle-granite-4-1-8b sle-ministral-8b sle-olmo3-7b sle-smollm3-3b sle-phi4-mini sle-yugogpt}"
 : "${SLE_TASKS:=arc_challenge arc_easy boolq hellaswag nq_open openbookqa piqa triviaqa winogrande}"
 : "${REGION:=us-central1}"
 : "${AR_HOST:=${REGION}-docker.pkg.dev}"
 : "${AR_REPO:=balkanbench}"
 : "${IMAGE_NAME:=balkanbench-gpu}"
 : "${IMAGE_TAG:=v0.1.0}"
+# Default is the L4 tier; override BOTH for bigger models, e.g. the A100
+# 80GB pairing for >10B-param models:
+#   ACCELERATOR_TYPE=NVIDIA_A100_80GB MACHINE_TYPE=a2-ultragpu-1g
 : "${MACHINE_TYPE:=g2-standard-8}"
-ACCELERATOR_TYPE="NVIDIA_L4"
+: "${ACCELERATOR_TYPE:=NVIDIA_L4}"
 
 if [[ "${DRY_RUN}" -eq 1 ]]; then
   : "${HF_TOKEN:=dry-run-placeholder-token}"

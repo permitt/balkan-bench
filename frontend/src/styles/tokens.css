@@ -52,9 +52,22 @@
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  :root { --glass: var(--surface); }
+  /* Plain :root is 0,1,0 - enough for the unthemed light default (no
+     competing rule at that specificity is active outside prefers-color-scheme
+     dark). :root[data-theme="dark"] is 0,2,0, tying the explicit dark block
+     above and winning by appearing later in the file. */
+  :root, :root[data-theme="light"], :root[data-theme="dark"] { --glass: var(--surface); }
 }
+@media (prefers-reduced-transparency: reduce) and (prefers-color-scheme: dark) {
+  /* auto theme (no data-theme attribute) tracking an OS dark preference:
+     needs its own 0,2,0 rule to beat the auto-dark block above. */
+  :root:not([data-theme="light"]) { --glass: var(--surface); }
+}
+
 @media (prefers-contrast: more) {
-  :root { --line: rgba(0, 0, 0, 0.35); --glass: var(--surface); }
-  :root[data-theme="dark"] { --line: rgba(255, 255, 255, 0.4); }
+  :root, :root[data-theme="light"] { --line: rgba(0, 0, 0, 0.35); --glass: var(--surface); }
+  :root[data-theme="dark"] { --line: rgba(255, 255, 255, 0.4); --glass: var(--surface); }
+}
+@media (prefers-contrast: more) and (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --line: rgba(255, 255, 255, 0.4); --glass: var(--surface); }
 }

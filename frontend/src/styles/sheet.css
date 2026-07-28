@@ -14,7 +14,6 @@
   padding: var(--space-4) var(--space-5) var(--space-6);
   box-shadow: 0 -12px 48px rgba(0, 0, 0, 0.2);
   outline: none;
-  touch-action: none;
 }
 @media (min-width: 900px) {
   .sheet-panel {
@@ -26,9 +25,13 @@
 .sheet-grab {
   width: 40px; height: 5px; border-radius: 3px; background: var(--text-4);
   opacity: 0.4; margin: 0 auto var(--space-4);
+  touch-action: none;
 }
 @media (min-width: 900px) { .sheet-grab { display: none; } }
-.sheet-head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-4); }
+.sheet-head {
+  display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-4);
+  touch-action: none;
+}
 .sheet-title { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.02em; }
 .sheet-hf { font-size: 0.8rem; color: var(--text-3); }
 .sheet-hf:hover { color: var(--accent); }

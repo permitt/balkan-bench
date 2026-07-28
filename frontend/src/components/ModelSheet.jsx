@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { AnimatePresence, motion } from 'motion/react' // eslint-disable-line no-unused-vars
+import { AnimatePresence, motion, useDragControls } from 'motion/react' // eslint-disable-line no-unused-vars
 import { TASK_LABELS, TASK_DESCRIPTIONS, formatAvg, displayModelName } from '../lib/leaderboards.js'
 import ScoreCell from './ScoreCell.jsx'
 import '../styles/sheet.css'
@@ -11,6 +11,7 @@ const FOCUSABLE_SELECTOR = 'a[href], button, [tabindex]:not([tabindex="-1"])'
 export default function ModelSheet({ row, board, protocol, onClose }) {
   const panelRef = useRef(null)
   const restoreRef = useRef(null)
+  const dragControls = useDragControls()
 
   useEffect(() => {
     if (!row) return
@@ -76,14 +77,20 @@ export default function ModelSheet({ row, board, protocol, onClose }) {
             exit={{ y: '110%' }}
             transition={ENTRY}
             drag="y"
+            dragListener={false}
+            dragControls={dragControls}
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={{ top: 0.2, bottom: 0.6 }}
             onDragEnd={(e, info) => {
               if (info.velocity.y > 300 || (info.velocity.y >= 0 && info.offset.y > 160)) onClose()
             }}
           >
-            <div className="sheet-grab" aria-hidden="true" />
-            <div className="sheet-head">
+            <div
+              className="sheet-grab"
+              aria-hidden="true"
+              onPointerDown={(e) => dragControls.start(e)}
+            />
+            <div className="sheet-head" onPointerDown={(e) => dragControls.start(e)}>
               <div>
                 <h2 className="sheet-title">{displayModelName(row.model)}</h2>
                 {row.model_id && row.model_id.includes('/') ? (

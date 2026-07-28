@@ -1,0 +1,56 @@
+.sheet-scrim {
+  position: fixed; inset: 0; z-index: 90;
+  background: rgba(0, 0, 0, 0.35);
+}
+.sheet-panel {
+  position: fixed; z-index: 91;
+  inset-inline: 0; bottom: 0; max-height: 82vh;
+  overflow-y: auto; overscroll-behavior: contain;
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  border-radius: var(--radius-l) var(--radius-l) 0 0;
+  border: 1px solid var(--line);
+  padding: var(--space-4) var(--space-5) var(--space-6);
+  box-shadow: 0 -12px 48px rgba(0, 0, 0, 0.2);
+  outline: none;
+  touch-action: none;
+}
+@media (min-width: 900px) {
+  .sheet-panel {
+    inset-inline: auto 0; top: 0; bottom: 0; width: 440px; max-height: none;
+    border-radius: var(--radius-l) 0 0 var(--radius-l);
+    box-shadow: -12px 0 48px rgba(0, 0, 0, 0.2);
+  }
+}
+.sheet-grab {
+  width: 40px; height: 5px; border-radius: 3px; background: var(--text-4);
+  opacity: 0.4; margin: 0 auto var(--space-4);
+}
+@media (min-width: 900px) { .sheet-grab { display: none; } }
+.sheet-head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-4); }
+.sheet-title { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.02em; }
+.sheet-hf { font-size: 0.8rem; color: var(--text-3); }
+.sheet-hf:hover { color: var(--accent); }
+.sheet-close {
+  width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+  display: grid; place-items: center; font-size: 1.1rem;
+  background: var(--surface-3); color: var(--text-2);
+  transition: transform 100ms ease-out;
+}
+.sheet-close:active { transform: scale(0.92); }
+.sheet-facts {
+  display: flex; gap: var(--space-4); flex-wrap: wrap;
+  margin: var(--space-3) 0 var(--space-5);
+  font-size: 0.8rem; color: var(--text-3);
+}
+.sheet-tasks { list-style: none; display: flex; flex-direction: column; }
+.sheet-task {
+  display: flex; justify-content: space-between; align-items: center; gap: var(--space-4);
+  padding: var(--space-3) 0; border-bottom: 1px solid var(--line);
+}
+.sheet-task:last-child { border-bottom: none; }
+.sheet-task-info { display: flex; flex-direction: column; gap: 1px; }
+.sheet-task-name { font-weight: 600; font-size: 0.9rem; }
+.sheet-task-metric { font-size: 0.65rem; color: var(--text-4); }
+.sheet-task-desc { font-size: 0.75rem; color: var(--text-3); }

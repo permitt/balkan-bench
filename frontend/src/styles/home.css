@@ -63,3 +63,7 @@
 .home-point a { color: var(--accent); font-weight: 600; }
 .home-roster-head { margin-bottom: var(--space-4); }
 .home-roster-head p { color: var(--text-3); font-size: 0.95rem; }
+.home-previews {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: var(--space-5); align-items: start;
+}

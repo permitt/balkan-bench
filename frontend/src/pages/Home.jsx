@@ -11,10 +11,31 @@ const RISE = (i) => ({
   transition: { type: 'spring', bounce: 0, duration: 0.4, delay: i * 0.05 },
 })
 
+function PreviewCard({ label, title, to, board }) {
+  const top5 = board ? sortRows(board.rows, 'avg').slice(0, 5) : []
+  return (
+    <section className="home-preview" aria-label={label}>
+      <div className="home-preview-card">
+        <div className="home-preview-head">
+          <span>{title}</span>
+          <Link to={to} className="home-preview-more">Full leaderboard</Link>
+        </div>
+        {top5.map((row, i) => (
+          <motion.div key={row.model} className="home-preview-row" {...RISE(i)}>
+            <span className="num home-preview-rank">{i + 1}</span>
+            <span className="home-preview-model">{displayModelName(row.model)}</span>
+            <span className="num home-preview-params">{row.params_display}</span>
+            <ScoreCell cell={{ mean: row.avg }} active />
+          </motion.div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 export default function Home() {
-  const target = resolveBoard('superglue', 'sr')
-  const { data } = useBoard(target)
-  const top5 = data ? sortRows(data.rows, 'avg').slice(0, 5) : []
+  const { data: sleData } = useBoard(resolveBoard('sle', 'sr'))
+  const { data: superglueData } = useBoard(resolveBoard('superglue', 'sr'))
 
   return (
     <div className="home container">
@@ -31,22 +52,20 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="home-preview" aria-label="Current top models">
-        <div className="home-preview-card">
-          <div className="home-preview-head">
-            <span>SuperGLUE · Serbian · top 5, live from the leaderboard</span>
-            <Link to="/leaderboard" className="home-preview-more">Full leaderboard</Link>
-          </div>
-          {top5.map((row, i) => (
-            <motion.div key={row.model} className="home-preview-row" {...RISE(i)}>
-              <span className="num home-preview-rank">{i + 1}</span>
-              <span className="home-preview-model">{displayModelName(row.model)}</span>
-              <span className="num home-preview-params">{row.params_display}</span>
-              <ScoreCell cell={{ mean: row.avg }} active />
-            </motion.div>
-          ))}
-        </div>
-      </section>
+      <div className="home-previews">
+        <PreviewCard
+          label="Serbian-LLM-Eval top models"
+          title="Serbian-LLM-Eval · open weights · top 5, live from the leaderboard"
+          to="/leaderboard?benchmark=sle"
+          board={sleData}
+        />
+        <PreviewCard
+          label="SuperGLUE top models"
+          title="SuperGLUE · Serbian · top 5, live from the leaderboard"
+          to="/leaderboard"
+          board={superglueData}
+        />
+      </div>
 
       <section className="home-facts" aria-label="Key figures">
         <div className="home-fact">

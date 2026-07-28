@@ -7,7 +7,20 @@ import { mockBoards, boardFixture } from '../test/helpers.js'
 afterEach(() => vi.unstubAllGlobals())
 
 function renderHome() {
-  mockBoards({ 'superglue-sr': boardFixture() })
+  mockBoards({
+    'superglue-sr': boardFixture(),
+    'sle-sr': boardFixture({
+      benchmark: 'sle',
+      seeds: undefined,
+      rows: [
+        {
+          rank: 1, model: 'sle-yugo-model', model_id: 'org/yugo-model', params: 7000000000,
+          params_display: '7B', complete: true, avg: 0.62,
+          results: { boolq: { mean: 0.7 }, copa: { mean: 0.54 } },
+        },
+      ],
+    }),
+  })
   const router = createMemoryRouter(
     [{ path: '/', element: <Home /> }],
     { initialEntries: ['/'] },
@@ -25,7 +38,19 @@ test('hero renders headline and CTAs', () => {
 test('live preview shows top rows linking to leaderboard', async () => {
   renderHome()
   expect(await screen.findByText('model-a')).toBeInTheDocument()
-  expect(screen.getByRole('link', { name: /full leaderboard/i })).toHaveAttribute('href', '/leaderboard')
+  const superglueCard = screen.getByRole('region', { name: /superglue top models/i })
+  expect(within(superglueCard).getByRole('link', { name: /full leaderboard/i }))
+    .toHaveAttribute('href', '/leaderboard')
+})
+
+test('sle preview card comes before superglue and links to the sle board', async () => {
+  renderHome()
+  const sleCard = screen.getByRole('region', { name: /serbian-llm-eval top models/i })
+  expect(within(sleCard).getByRole('link', { name: /full leaderboard/i }))
+    .toHaveAttribute('href', '/leaderboard?benchmark=sle')
+  expect(await within(sleCard).findByText('yugo-model')).toBeInTheDocument() // sle- prefix stripped
+  const superglueCard = screen.getByRole('region', { name: /superglue top models/i })
+  expect(sleCard.compareDocumentPosition(superglueCard) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
 })
 
 test('facts strip shows items, models, languages across both suites', async () => {

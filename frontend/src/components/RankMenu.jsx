@@ -8,10 +8,17 @@ const SPRING = { type: 'spring', bounce: 0, duration: 0.3 }
 export default function RankMenu({ value, onChange, tasks, metrics }) {
   const [open, setOpen] = useState(false)
   const rootRef = useRef(null)
+  const pillRef = useRef(null)
+  const popRef = useRef(null)
 
   useEffect(() => {
     if (!open) return
-    const onKey = (e) => { if (e.key === 'Escape') setOpen(false) }
+    const onKey = (e) => {
+      if (e.key === 'Escape') {
+        setOpen(false)
+        pillRef.current?.focus()
+      }
+    }
     const onDown = (e) => { if (rootRef.current && !rootRef.current.contains(e.target)) setOpen(false) }
     document.addEventListener('keydown', onKey)
     document.addEventListener('pointerdown', onDown)
@@ -19,6 +26,11 @@ export default function RankMenu({ value, onChange, tasks, metrics }) {
       document.removeEventListener('keydown', onKey)
       document.removeEventListener('pointerdown', onDown)
     }
+  }, [open])
+
+  useEffect(() => {
+    if (!open) return
+    popRef.current?.querySelector('[aria-checked="true"]')?.focus()
   }, [open])
 
   const currentLabel = value === 'avg' ? 'Avg' : (TASK_LABELS[value] || value)
@@ -30,6 +42,7 @@ export default function RankMenu({ value, onChange, tasks, metrics }) {
   return (
     <div className="rankmenu" ref={rootRef}>
       <button
+        ref={pillRef}
         type="button"
         className="rankmenu-pill"
         aria-haspopup="menu"
@@ -41,6 +54,7 @@ export default function RankMenu({ value, onChange, tasks, metrics }) {
       <AnimatePresence>
         {open && (
           <motion.div
+            ref={popRef}
             role="menu"
             className="rankmenu-pop"
             initial={{ opacity: 0, scale: 0.95 }}

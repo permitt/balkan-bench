@@ -38,3 +38,20 @@ test('escape closes the menu', async () => {
   await user.keyboard('{Escape}')
   await waitForElementToBeRemoved(() => screen.queryByRole('menu'))
 })
+
+test('opening the menu moves focus to the checked item', async () => {
+  const user = userEvent.setup()
+  render(<RankMenu value="boolq" onChange={() => {}} tasks={tasks} metrics={metrics} />)
+  await user.click(screen.getByRole('button', { name: /rank by: boolq/i }))
+  expect(screen.getByRole('menuitemradio', { name: /BoolQ/ })).toHaveFocus()
+})
+
+test('escape returns focus to the pill button', async () => {
+  const user = userEvent.setup()
+  render(<RankMenu value="avg" onChange={() => {}} tasks={tasks} metrics={metrics} />)
+  const pill = screen.getByRole('button', { name: /rank by/i })
+  await user.click(pill)
+  await user.keyboard('{Escape}')
+  await waitForElementToBeRemoved(() => screen.queryByRole('menu'))
+  expect(pill).toHaveFocus()
+})

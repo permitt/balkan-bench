@@ -6,8 +6,16 @@ import '../styles/leaderboard.css'
 
 const ROW_SPRING = { type: 'spring', bounce: 0, duration: 0.4 }
 
+// Formats an ISO-ish date string for display; returns null on anything
+// that doesn't parse so a malformed generated_at can't crash the table.
+function formatGeneratedAt(value) {
+  const d = new Date(value)
+  return Number.isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10)
+}
+
 export default function LeaderboardTable({ data, rankBy, onRankBy, onSelectModel }) {
   const sorted = useMemo(() => sortRows(data.rows, rankBy), [data, rankBy])
+  const generatedAt = formatGeneratedAt(data.generated_at)
 
   if (data.rows.length === 0) {
     return <div className="lb-empty">No results published yet.</div>
@@ -98,7 +106,7 @@ export default function LeaderboardTable({ data, rankBy, onRankBy, onSelectModel
       <div className="lb-meta">
         <span>Benchmark version <b>{data.benchmark_version}</b></span>
         {data.seeds !== undefined && <span>{data.seeds} seeds</span>}
-        <span>Generated {new Date(data.generated_at).toISOString().slice(0, 10)}</span>
+        {generatedAt && <span>Generated {generatedAt}</span>}
         <span>Compute sponsored by <b>{data.sponsor}</b></span>
       </div>
     </div>

@@ -101,6 +101,13 @@ test('avg cell sits right after params cell in body rows', () => {
   expect(within(row.cells[3]).getByText('90.00')).toBeInTheDocument()
 })
 
+test('malformed generated_at does not crash the table and omits the Generated span', () => {
+  const data = boardFixture({ generated_at: 'not-a-date' })
+  setup({ data })
+  expect(screen.getByText('model-a')).toBeInTheDocument()
+  expect(screen.queryByText(/generated/i)).not.toBeInTheDocument()
+})
+
 test('sle- display prefix is stripped from model names', () => {
   const data = boardFixture()
   data.rows[0] = { ...data.rows[0], model: 'sle-model-a' }

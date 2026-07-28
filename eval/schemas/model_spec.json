@@ -43,7 +43,12 @@
         "max_tokens":     { "type": "integer", "minimum": 1 },
         "batch_size":     { "type": "integer", "minimum": 1 },
         "dtype":          { "type": "string" },
-        "concurrency":    { "type": "integer", "minimum": 1 }
+        "concurrency":    { "type": "integer", "minimum": 1 },
+        "device_map": {
+          "type": "string",
+          "enum": ["auto"],
+          "description": "When set to 'auto', accelerate shards the model across all visible devices (e.g. 8x L4 on one Vertex machine) instead of loading onto a single device."
+        }
       }
     },
     "task_overrides": {

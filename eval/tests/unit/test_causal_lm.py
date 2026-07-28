@@ -396,6 +396,87 @@ def test_fallback_dispatches_to_image_text_to_text_on_unrecognized_config(monkey
     assert isinstance(m.model, _FakeModel)
 
 
+def test_device_map_auto_matches_non_device_map_loglikelihood(model):
+    # `model` fixture is the plain (no device_map) CPU baseline. On CPU,
+    # device_map="auto" still resolves every shard to "cpu" (accelerate's
+    # balancer has only one device to place things on), so this proves the
+    # device_map="auto" loading path is a pure loading-mechanism change, not a
+    # scoring change. Tolerance is float32-ULP tight (1e-5), not the coarser
+    # 1e-3 used by the batching-parity tests elsewhere in this file: measured
+    # empirically, accelerate's meta-device-then-materialize load path (used
+    # for device_map="auto") produces a ~9.5e-7 difference from the plain
+    # `.from_pretrained(...).to(device)` path on one of the two requests below
+    # - sub-ULP floating-point non-associativity from the different weight
+    # materialization order, not a scoring bug - so exact `==` is not
+    # achievable across the two loading mechanisms, but 1e-5 comfortably
+    # separates "same computation, different rounding" from an actual
+    # scoring regression.
+    sharded = CausalLM(
+        {
+            "name": "tiny-sharded",
+            "hf_repo": "sshleifer/tiny-gpt2",
+            "generation": {"device_map": "auto"},
+        },
+        device="cpu",
+    )
+    reqs = [("The sky is", " blue"), ("Hello", " world")]
+    assert sharded.loglikelihood(reqs) == pytest.approx(model.loglikelihood(reqs), abs=1e-5)
+
+
+def test_device_map_auto_reaches_from_pretrained_and_skips_to(monkeypatch):
+    import balkanbench.models.causal_lm as causal_lm_module
+
+    class _FakeTokenizer:
+        pad_token = "<pad>"
+        eos_token = "<pad>"
+        padding_side = "right"
+
+    monkeypatch.setattr(
+        causal_lm_module,
+        "AutoTokenizer",
+        type(
+            "_FakeAutoTokenizer",
+            (),
+            {"from_pretrained": staticmethod(lambda repo: _FakeTokenizer())},
+        ),
+    )
+
+    class _FakeModel:
+        device = "cpu"  # stand-in for PreTrainedModel.device on a sharded model
+
+        def to(self, device):
+            raise AssertionError("`.to()` must not be called when device_map='auto'")
+
+        def eval(self):
+            return self
+
+    calls = []
+
+    def _fake_from_pretrained(repo, revision=None, dtype=None, device_map=None):
+        calls.append({"repo": repo, "revision": revision, "dtype": dtype, "device_map": device_map})
+        return _FakeModel()
+
+    monkeypatch.setattr(
+        causal_lm_module,
+        "AutoModelForCausalLM",
+        type(
+            "_FakeAutoModelForCausalLM",
+            (),
+            {"from_pretrained": staticmethod(_fake_from_pretrained)},
+        ),
+    )
+
+    m = CausalLM(
+        {"name": "x", "hf_repo": "org/weights-repo", "generation": {"device_map": "auto"}},
+        device="cpu",
+    )
+
+    assert len(calls) == 1
+    assert calls[0]["repo"] == "org/weights-repo"
+    assert calls[0]["device_map"] == "auto"
+    assert isinstance(m.model, _FakeModel)
+
+
 def test_fallback_error_names_both_attempts_when_both_fail(monkeypatch):
     import balkanbench.models.causal_lm as causal_lm_module
 

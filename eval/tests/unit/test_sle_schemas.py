@@ -133,3 +133,14 @@ def test_model_with_tokenizer_repo_override_validates(tmp_path: Path) -> None:
 def test_yugogpt_model_with_tokenizer_repo_validates() -> None:
     yugogpt_yaml = REPO_ROOT / "eval" / "configs" / "models" / "official" / "sle-yugogpt.yaml"
     load_yaml_with_schema(yugogpt_yaml, MODEL_SPEC_SCHEMA)
+
+
+def test_generation_device_map_auto_validates(tmp_path: Path) -> None:
+    with_device_map = OPEN_MODEL_SLE + "generation: {device_map: auto}\n"
+    load_yaml_with_schema(_write(tmp_path, with_device_map), MODEL_SPEC_SCHEMA)
+
+
+def test_generation_device_map_rejects_non_auto_value(tmp_path: Path) -> None:
+    bad = OPEN_MODEL_SLE + "generation: {device_map: cuda:0}\n"
+    with pytest.raises(ConfigError):
+        load_yaml_with_schema(_write(tmp_path, bad), MODEL_SPEC_SCHEMA)

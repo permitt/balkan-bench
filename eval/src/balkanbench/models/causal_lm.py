@@ -64,6 +64,26 @@ class CausalLM:
       - ``generation.batch_size`` (default 8).
       - ``generation.dtype`` (default "bfloat16"; forced to "float32" when
         running on CPU, since bfloat16 kernels are slow/unsupported there).
+      - ``generation.device_map`` (optional, only ``"auto"`` is accepted):
+        passed straight through to ``from_pretrained``, letting accelerate
+        shard the model's layers across every visible device (e.g. 8x L4 on
+        one Vertex machine, for 24-72GB models that don't fit on a single
+        24GB GPU). When set, the single-device ``.to(device)`` call is
+        skipped - accelerate has already placed each shard on its target
+        device, and moving the whole module with ``.to()`` would try to copy
+        every parameter onto one device, destroying the sharding. Input
+        tensors are instead sent to ``self.model.device`` -
+        ``PreTrainedModel.device`` returns ``next(p.device for p in
+        self.parameters())``, i.e. the device of the first parameter
+        (typically the input embedding layer), which is exactly where a
+        sharded forward pass expects its inputs to land (verified by reading
+        ``transformers==5.14.1``'s ``modeling_utils.py``: this property is
+        unconditional on ``hf_device_map`` and needs no accelerate-specific
+        API). ``device_map="auto"`` requires the ``accelerate`` package
+        (transformers raises ``ImportError`` from
+        ``transformers.integrations.accelerate`` otherwise); this repo
+        already depends on ``accelerate>=1.13.0`` unconditionally (see
+        ``pyproject.toml``), so no extra install is needed.
     """
 
     def __init__(self, model_cfg: dict[str, Any], *, device: str | None = None) -> None:
@@ -77,6 +97,7 @@ class CausalLM:
         tokenizer_repo = model_cfg.get("tokenizer_repo") or repo
         gen_cfg = model_cfg.get("generation", {})
         self.batch_size = int(gen_cfg.get("batch_size", 8))
+        device_map = gen_cfg.get("device_map")
 
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -94,10 +115,12 @@ class CausalLM:
         # below and for decoding only the newly generated tokens.
         self.tokenizer.padding_side = "left"
 
+        from_pretrained_kwargs: dict[str, Any] = {"revision": revision, "dtype": dtype}
+        if device_map is not None:
+            from_pretrained_kwargs["device_map"] = device_map
+
         try:
-            self.model = _self.AutoModelForCausalLM.from_pretrained(
-                repo, revision=revision, dtype=dtype
-            )
+            self.model = _self.AutoModelForCausalLM.from_pretrained(repo, **from_pretrained_kwargs)
         except ValueError as causal_lm_exc:
             if _UNRECOGNIZED_CONFIG_MARKER not in str(causal_lm_exc):
                 raise
@@ -113,7 +136,7 @@ class CausalLM:
             # generate) goes through the exact same code paths as the primary path.
             try:
                 self.model = _self.AutoModelForImageTextToText.from_pretrained(
-                    repo, revision=revision, dtype=dtype
+                    repo, **from_pretrained_kwargs
                 )
             except ValueError as image_text_to_text_exc:
                 raise ValueError(
@@ -121,7 +144,15 @@ class CausalLM:
                     f"{causal_lm_exc!r}; fallback AutoModelForImageTextToText also "
                     f"raised {image_text_to_text_exc!r}"
                 ) from image_text_to_text_exc
-        self.model.to(self.device)
+        if device_map is None:
+            self.model.to(self.device)
+        else:
+            # accelerate has already placed each shard on its target device;
+            # .to() would try to move every parameter onto one device and
+            # destroy the sharding. Route input tensors to the device of the
+            # model's first parameter instead - see the device_map docstring
+            # above for why this is the correct target for sharded models.
+            self.device = self.model.device
         self.model.eval()
 
     # -- loglikelihood ----------------------------------------------------

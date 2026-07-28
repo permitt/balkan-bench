@@ -6,6 +6,8 @@ import '../styles/sheet.css'
 
 const ENTRY = { type: 'spring', bounce: 0.2, duration: 0.4 }
 
+const FOCUSABLE_SELECTOR = 'a[href], button, [tabindex]:not([tabindex="-1"])'
+
 export default function ModelSheet({ row, board, protocol, onClose }) {
   const panelRef = useRef(null)
   const restoreRef = useRef(null)
@@ -16,11 +18,35 @@ export default function ModelSheet({ row, board, protocol, onClose }) {
     panelRef.current?.focus()
     const onKey = (e) => { if (e.key === 'Escape') onClose() }
     document.addEventListener('keydown', onKey)
+
+    const behind = [document.querySelector('.shell-main'), document.querySelector('.shell-nav')]
+      .filter(Boolean)
+    behind.forEach(el => el.setAttribute('inert', ''))
+
     return () => {
       document.removeEventListener('keydown', onKey)
+      behind.forEach(el => el.removeAttribute('inert'))
       restoreRef.current?.focus?.()
     }
   }, [row, onClose])
+
+  const trapTab = (e) => {
+    if (e.key !== 'Tab' || !panelRef.current) return
+    const focusables = Array.from(panelRef.current.querySelectorAll(FOCUSABLE_SELECTOR))
+    if (focusables.length === 0) return
+    const first = focusables[0]
+    const last = focusables[focusables.length - 1]
+    const active = document.activeElement
+    if (e.shiftKey) {
+      if (active === first || !panelRef.current.contains(active)) {
+        e.preventDefault()
+        last.focus()
+      }
+    } else if (active === last) {
+      e.preventDefault()
+      first.focus()
+    }
+  }
 
   return (
     <AnimatePresence>
@@ -41,6 +67,7 @@ export default function ModelSheet({ row, board, protocol, onClose }) {
             aria-modal="true"
             aria-label={row.model}
             tabIndex={-1}
+            onKeyDown={trapTab}
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '110%' }}

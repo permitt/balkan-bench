@@ -39,10 +39,19 @@
   display: flex; flex-wrap: wrap; gap: var(--space-4); padding: 12px 14px;
   font-size: 0.75rem; color: var(--text-3); border-top: 1px solid var(--line);
 }
-/* sticky model column on narrow viewports */
+/* sticky rank + model columns on narrow viewports */
 @media (max-width: 800px) {
-  .lb-table .lb-model, .lb-table th.lb-model {
+  .lb-table .lb-rank, .lb-table th.lb-rank {
     position: sticky; left: 0; background: var(--surface-2); z-index: 2;
+  }
+  .lb-table .lb-model, .lb-table th.lb-model {
+    position: sticky; left: 40px; background: var(--surface-2); z-index: 2;
+  }
+  .lb-first td.lb-rank, .lb-first td.lb-model {
+    background: linear-gradient(var(--accent-soft), var(--accent-soft)), var(--surface-2);
+  }
+  .lb-row:hover td.lb-rank, .lb-row:hover td.lb-model {
+    background: var(--surface-3);
   }
 }
 .skeleton { display: flex; flex-direction: column; gap: 10px; padding: var(--space-5); }

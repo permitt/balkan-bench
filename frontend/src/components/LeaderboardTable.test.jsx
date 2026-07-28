@@ -1,0 +1,64 @@
+import { render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { vi } from 'vitest'
+import LeaderboardTable from './LeaderboardTable.jsx'
+import { boardFixture } from '../test/helpers.js'
+
+function setup(props = {}) {
+  const onRankBy = vi.fn()
+  const onSelectModel = vi.fn()
+  render(
+    <LeaderboardTable
+      data={boardFixture()}
+      rankBy="avg"
+      onRankBy={onRankBy}
+      onSelectModel={onSelectModel}
+      {...props}
+    />,
+  )
+  return { onRankBy, onSelectModel }
+}
+
+test('renders rows sorted by avg with rank, params, hf link', () => {
+  setup()
+  const rows = screen.getAllByRole('row').slice(1) // skip header
+  expect(within(rows[0]).getByText('model-a')).toBeInTheDocument()
+  expect(within(rows[1]).getByText('model-b')).toBeInTheDocument()
+  expect(within(rows[0]).getByRole('link', { name: 'org/model-a' }))
+    .toHaveAttribute('href', 'https://huggingface.co/org/model-a')
+  expect(within(rows[0]).getByText('110M')).toBeInTheDocument()
+})
+
+test('sorting by task reorders and header click fires onRankBy', async () => {
+  const user = userEvent.setup()
+  const { onRankBy } = setup({ rankBy: 'copa' })
+  const rows = screen.getAllByRole('row').slice(1)
+  expect(within(rows[0]).getByText('model-a')).toBeInTheDocument() // 0.88 copa
+  await user.click(screen.getByRole('columnheader', { name: /BoolQ/ }))
+  expect(onRankBy).toHaveBeenCalledWith('boolq')
+})
+
+test('row click and Enter select the model', async () => {
+  const user = userEvent.setup()
+  const { onSelectModel } = setup()
+  await user.click(screen.getByText('model-b'))
+  expect(onSelectModel).toHaveBeenCalledWith(expect.objectContaining({ model: 'model-b' }))
+  onSelectModel.mockClear()
+  screen.getAllByRole('row').slice(1)[0].focus()
+  await user.keyboard('{Enter}')
+  expect(onSelectModel).toHaveBeenCalledWith(expect.objectContaining({ model: 'model-a' }))
+})
+
+test('empty board shows quiet message', () => {
+  render(
+    <LeaderboardTable data={boardFixture({ rows: [] })} rankBy="avg" onRankBy={() => {}} onSelectModel={() => {}} />,
+  )
+  expect(screen.getByText(/no results published yet/i)).toBeInTheDocument()
+})
+
+test('meta footer shows version, seeds, sponsor', () => {
+  setup()
+  expect(screen.getByText(/1\.0\.0/)).toBeInTheDocument()
+  expect(screen.getByText(/5 seeds/)).toBeInTheDocument()
+  expect(screen.getByText(/Recrewty/)).toBeInTheDocument()
+})

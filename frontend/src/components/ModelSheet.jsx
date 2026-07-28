@@ -19,8 +19,11 @@ export default function ModelSheet({ row, board, protocol, onClose }) {
     const onKey = (e) => { if (e.key === 'Escape') onClose() }
     document.addEventListener('keydown', onKey)
 
-    const behind = [document.querySelector('.shell-main'), document.querySelector('.shell-nav')]
-      .filter(Boolean)
+    const behind = [
+      document.querySelector('.shell-main'),
+      document.querySelector('.shell-nav'),
+      document.querySelector('.shell-footer'),
+    ].filter(Boolean)
     behind.forEach(el => el.setAttribute('inert', ''))
 
     return () => {

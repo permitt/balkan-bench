@@ -44,12 +44,14 @@ test('inerts the page behind the sheet and traps Tab focus within the panel', ()
     <>
       <nav className="shell-nav"><a href="/x">nav link</a></nav>
       <main className="shell-main"><button type="button">page btn</button></main>
+      <footer className="shell-footer"><a href="/y">footer link</a></footer>
       <ModelSheet row={row} board={board} protocol={null} onClose={() => {}} />
     </>,
   )
 
   expect(document.querySelector('.shell-main')).toHaveAttribute('inert')
   expect(document.querySelector('.shell-nav')).toHaveAttribute('inert')
+  expect(document.querySelector('.shell-footer')).toHaveAttribute('inert')
 
   const dialog = screen.getByRole('dialog')
   const closeBtn = screen.getByRole('button', { name: /close/i })

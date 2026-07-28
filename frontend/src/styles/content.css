@@ -3,6 +3,7 @@
 .content-head h1 { font-size: clamp(2rem, 4.5vw, 3rem); }
 .content-lede { font-size: 1.1rem; color: var(--text-2); margin-top: var(--space-4); }
 .content-nav { display: flex; gap: var(--space-4); margin-top: var(--space-5); font-size: 0.9rem; }
+.content-ctarow { display: flex; gap: var(--space-3); margin: var(--space-4) 0 var(--space-5); flex-wrap: wrap; }
 .content-nav a { color: var(--accent); font-weight: 600; }
 .content section { margin-bottom: var(--space-7); scroll-margin-top: 72px; }
 .content h2 { font-size: 1.4rem; letter-spacing: -0.01em; margin-bottom: var(--space-4); }

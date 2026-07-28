@@ -15,8 +15,11 @@
   user-select: none;
 }
 .lb-table th.lb-rank, .lb-table th.lb-model { text-align: left; }
-.lb-table th.lb-sortable { cursor: pointer; }
 .lb-table th.lb-col-active { color: var(--accent); }
+.lb-sort-btn {
+  font: inherit; color: inherit; text-transform: inherit; letter-spacing: inherit;
+  padding: 0; text-align: right; width: 100%; cursor: pointer;
+}
 .lb-metric { display: block; font-size: 0.6rem; font-weight: 400; color: var(--text-4); text-transform: none; }
 .lb-row { cursor: pointer; }
 .lb-row:hover td { background: var(--surface-3); }

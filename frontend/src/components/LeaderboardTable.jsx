@@ -24,37 +24,23 @@ export default function LeaderboardTable({ data, rankBy, onRankBy, onSelectModel
             <th
               scope="col"
               className={`lb-num lb-avg lb-sortable ${rankBy === 'avg' ? 'lb-col-active' : ''}`}
-              tabIndex={0}
-              role="button"
               aria-sort={rankBy === 'avg' ? 'descending' : undefined}
-              onClick={() => onRankBy('avg')}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault()
-                  onRankBy('avg')
-                }
-              }}
             >
-              Avg
+              <button type="button" className="lb-sort-btn" onClick={() => onRankBy('avg')}>
+                Avg
+              </button>
             </th>
             {data.ranked_tasks.map(t => (
               <th
                 key={t}
                 scope="col"
                 className={`lb-num lb-sortable ${rankBy === t ? 'lb-col-active' : ''}`}
-                tabIndex={0}
-                role="button"
                 aria-sort={rankBy === t ? 'descending' : undefined}
-                onClick={() => onRankBy(t)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault()
-                    onRankBy(t)
-                  }
-                }}
               >
-                {TASK_LABELS[t] || t}
-                <span className="lb-metric num">{data.task_primary_metrics[t]}</span>
+                <button type="button" className="lb-sort-btn" onClick={() => onRankBy(t)}>
+                  {TASK_LABELS[t] || t}
+                  <span className="lb-metric num">{data.task_primary_metrics[t]}</span>
+                </button>
               </th>
             ))}
           </tr>

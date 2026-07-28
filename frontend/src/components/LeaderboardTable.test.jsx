@@ -52,9 +52,13 @@ test('keyboard Enter/Space on a sortable header fires onRankBy', async () => {
 
 test('aria-sort marks only the currently ranked column', () => {
   setup({ rankBy: 'copa' })
-  expect(screen.getByRole('button', { name: /COPA/ })).toHaveAttribute('aria-sort', 'descending')
-  expect(screen.getByRole('button', { name: /BoolQ/ })).not.toHaveAttribute('aria-sort')
-  expect(screen.getByRole('button', { name: /Avg/ })).not.toHaveAttribute('aria-sort')
+  const activeHeader = screen.getByRole('columnheader', { name: /COPA/ })
+  expect(activeHeader).toHaveAttribute('aria-sort', 'descending')
+  expect(activeHeader.tagName).toBe('TH')
+  expect(screen.getByRole('columnheader', { name: /BoolQ/ })).not.toHaveAttribute('aria-sort')
+  expect(screen.getByRole('columnheader', { name: /Avg/ })).not.toHaveAttribute('aria-sort')
+  // the nested button still supports click-to-sort
+  expect(screen.getByRole('button', { name: /COPA/ })).toBeInTheDocument()
 })
 
 test('row click and Enter select the model', async () => {

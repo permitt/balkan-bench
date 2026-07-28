@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { vi } from 'vitest'
 import Segmented from './Segmented.jsx'
@@ -33,4 +33,35 @@ test('disabled option shows badge and does not fire', async () => {
   expect(screen.getByText('v1.1')).toBeInTheDocument()
   await user.click(bs)
   expect(onChange).not.toHaveBeenCalled()
+})
+
+test('ArrowRight/ArrowDown select the next option', () => {
+  const onChange = vi.fn()
+  render(<Segmented label="Language" value="sr" onChange={onChange} options={options} />)
+  const group = screen.getByRole('radiogroup', { name: 'Language' })
+  fireEvent.keyDown(group, { key: 'ArrowRight' })
+  expect(onChange).toHaveBeenCalledWith('hr')
+  onChange.mockClear()
+  fireEvent.keyDown(group, { key: 'ArrowDown' })
+  expect(onChange).toHaveBeenCalledWith('hr')
+})
+
+test('ArrowLeft/ArrowUp select the previous option, skipping disabled and wrapping', () => {
+  const onChange = vi.fn()
+  render(<Segmented label="Language" value="sr" onChange={onChange} options={options} />)
+  const group = screen.getByRole('radiogroup', { name: 'Language' })
+  // from sr (idx 0), previous wraps past the disabled bs option to hr
+  fireEvent.keyDown(group, { key: 'ArrowLeft' })
+  expect(onChange).toHaveBeenCalledWith('hr')
+  onChange.mockClear()
+  fireEvent.keyDown(group, { key: 'ArrowUp' })
+  expect(onChange).toHaveBeenCalledWith('hr')
+})
+
+test('ArrowRight from the last enabled option wraps around disabled options to the first', () => {
+  const onChange = vi.fn()
+  render(<Segmented label="Language" value="hr" onChange={onChange} options={options} />)
+  const group = screen.getByRole('radiogroup', { name: 'Language' })
+  fireEvent.keyDown(group, { key: 'ArrowRight' })
+  expect(onChange).toHaveBeenCalledWith('sr')
 })

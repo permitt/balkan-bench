@@ -20,3 +20,8 @@
   background: var(--surface-3); border-radius: var(--radius-m);
   padding: var(--space-4); overflow-x: auto; margin-bottom: var(--space-4);
 }
+
+/* .content a's accent color must not repaint pill-button labels
+   (accent-on-accent = invisible primary CTA on /submit) */
+.content a.btn-primary { color: #fff; }
+.content a.btn-quiet { color: var(--text-1); }

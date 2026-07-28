@@ -1,4 +1,4 @@
-import { Link, NavLink, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet, ScrollRestoration } from 'react-router-dom'
 import { MotionConfig } from 'motion/react'
 import { useTheme } from '../lib/useTheme.js'
 import '../styles/shell.css'
@@ -11,6 +11,7 @@ export default function Shell() {
 
   return (
     <MotionConfig reducedMotion="user">
+      <ScrollRestoration />
       <header className="shell-nav">
         <div className="shell-nav-inner container">
           <Link to="/" className="shell-brand">BalkanBench</Link>

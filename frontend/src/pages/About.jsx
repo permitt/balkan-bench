@@ -37,12 +37,15 @@ export default function About() {
           <li>9 baseline encoder models evaluated with 5 fixed seeds each on the held-out test split.</li>
           <li>Public Hugging Face datasets with hidden test labels held in gated sibling repos.</li>
           <li>Open-source framework for local + GCP (Vertex AI) evaluation.</li>
+          <li>
+            <b>Serbian-LLM-Eval</b> (Aleksa Gordić): generative few-shot suite, 9 ranked
+            tasks, dual open-weights and closed-API boards - live on the leaderboard.
+          </li>
         </ul>
 
         <h3>What's next</h3>
         <ul>
           <li>Bosnian SuperGLUE adaptation (sibling HF repo).</li>
-          <li>Serbian-LLM-Eval (Aleksa Gordić) as a second benchmark suite.</li>
           <li>MTEB-BCMS embeddings, LLM Arena, and community-submitted tracks (sentiment, NER, domain-specific).</li>
         </ul>
       </section>
@@ -76,6 +79,7 @@ export default function About() {
 
       <section id="acknowledgements">
         <h2>Acknowledgements</h2>
+        <h3>Contributing</h3>
         <p>
           Contributors can propose an entirely new benchmark, extend an
           existing one with additional tasks, add a model configuration for

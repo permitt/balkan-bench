@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router-dom'
 import About from './About.jsx'
 
@@ -23,4 +23,20 @@ test('carries over key content', () => {
   expect(screen.getByText(/67,313 items/)).toBeInTheDocument()
   expect(screen.getByText(/Daria Milošević/)).toBeInTheDocument()
   expect(screen.getByText(/hidden test labels/i)).toBeInTheDocument()
+})
+
+test('Serbian-LLM-Eval is listed as shipped, not upcoming', () => {
+  renderAbout()
+  const shipHeading = screen.getByRole('heading', { name: /what ships in v1\.0/i })
+  const shipList = shipHeading.nextElementSibling
+  expect(within(shipList).getByText(/Serbian-LLM-Eval/)).toBeInTheDocument()
+
+  const nextHeading = screen.getByRole('heading', { name: /what's next/i })
+  const nextList = nextHeading.nextElementSibling
+  expect(within(nextList).queryByText(/Serbian-LLM-Eval/)).not.toBeInTheDocument()
+})
+
+test('contributing section has its own heading', () => {
+  renderAbout()
+  expect(screen.getByRole('heading', { name: /^contributing$/i })).toBeInTheDocument()
 })

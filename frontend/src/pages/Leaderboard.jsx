@@ -102,7 +102,7 @@ export default function Leaderboard() {
           <LeaderboardTable data={data} rankBy={rankBy} onRankBy={setRankBy} onSelectModel={selectModel} />
           <h2 className="lb-board-heading">Closed API - generative protocol</h2>
           {apiData
-            ? <LeaderboardTable data={{ ...data, ...apiData, ranked_tasks: data.ranked_tasks, task_primary_metrics: data.task_primary_metrics }} rankBy={rankBy} onRankBy={setRankBy} onSelectModel={selectModel} />
+            ? <LeaderboardTable data={apiData} rankBy={rankBy} onRankBy={setRankBy} onSelectModel={selectModel} />
             : <Skeleton rows={4} cols={9} />}
         </>
       )}

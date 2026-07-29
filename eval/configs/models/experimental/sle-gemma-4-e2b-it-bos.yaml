@@ -1,0 +1,13 @@
+name: sle-gemma-4-e2b-it-bos
+access: open_weights
+hf_repo: google/gemma-4-E2B-it
+family: gemma4
+# A/B twin of sle-gemma-4-e2b-it with BOS prepending enabled, to test whether
+# Gemma's near-chance Serbian scores are an artifact of scoring without the
+# <bos> token it is trained to always receive.
+params_hint: 5.1B
+tier: experimental
+generation:
+  batch_size: 8
+  dtype: bfloat16
+  prepend_bos: true

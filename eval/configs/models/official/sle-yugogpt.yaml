@@ -21,3 +21,6 @@ tokenizer_repo: mistralai/Mistral-7B-v0.1
 generation:
   batch_size: 8
   dtype: bfloat16
+  # Mistral-derived tokenizer declares add_bos_token=true
+  # (screening delta within noise, applied for protocol consistency).
+  prepend_bos: true

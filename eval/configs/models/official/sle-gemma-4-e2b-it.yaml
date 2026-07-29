@@ -7,3 +7,6 @@ tier: official
 generation:
   batch_size: 8
   dtype: bfloat16
+  # Gemma is trained with <bos> always present (Google documents it);
+  # screening: +10.2 openbookqa, +8.9 arc_challenge.
+  prepend_bos: true

@@ -144,3 +144,14 @@ def test_generation_device_map_rejects_non_auto_value(tmp_path: Path) -> None:
     bad = OPEN_MODEL_SLE + "generation: {device_map: cuda:0}\n"
     with pytest.raises(ConfigError):
         load_yaml_with_schema(_write(tmp_path, bad), MODEL_SPEC_SCHEMA)
+
+
+def test_generation_prepend_bos_true_validates(tmp_path: Path) -> None:
+    with_prepend_bos = OPEN_MODEL_SLE + "generation: {prepend_bos: true}\n"
+    load_yaml_with_schema(_write(tmp_path, with_prepend_bos), MODEL_SPEC_SCHEMA)
+
+
+def test_generation_prepend_bos_rejects_non_boolean(tmp_path: Path) -> None:
+    bad = OPEN_MODEL_SLE + "generation: {prepend_bos: yes-please}\n"
+    with pytest.raises(ConfigError):
+        load_yaml_with_schema(_write(tmp_path, bad), MODEL_SPEC_SCHEMA)

@@ -48,6 +48,11 @@
           "type": "string",
           "enum": ["auto"],
           "description": "When set to 'auto', accelerate shards the model across all visible devices (e.g. 8x L4 on one Vertex machine) instead of loading onto a single device."
+        },
+        "prepend_bos": {
+          "type": "boolean",
+          "default": false,
+          "description": "Opt-in only; default false leaves scoring byte-identical to today. When true, the tokenizer's bos_token_id is prepended to both the context and full (context+continuation) encodings used for loglikelihood scoring, and to generation prompts - for BOS-dependent model families (e.g. Gemma) that are trained with <bos> always present and score near-chance without it. Raises at encode time if the tokenizer has no bos_token_id."
         }
       }
     },

@@ -64,6 +64,16 @@ class CausalLM:
       - ``generation.batch_size`` (default 8).
       - ``generation.dtype`` (default "bfloat16"; forced to "float32" when
         running on CPU, since bfloat16 kernels are slow/unsupported there).
+      - ``generation.prepend_bos`` (default False): opt-in only, so the default
+        behavior is byte-identical to before this flag existed. When True, the
+        tokenizer's ``bos_token_id`` is prepended to both the context and full
+        (context+continuation) encodings used for loglikelihood scoring, and to
+        generation prompts. lm-evaluation-harness v0.3.0 (the reference harness
+        this scorer's ``add_special_tokens=False`` encoding is faithful to)
+        predates Gemma; Gemma-family models are trained with ``<bos>`` always
+        present and are known to score near-chance without it. Raises
+        ``ValueError`` at encode time if the tokenizer has no ``bos_token_id``
+        (fail loud rather than silently doing nothing).
       - ``generation.device_map`` (optional, only ``"auto"`` is accepted):
         passed straight through to ``from_pretrained``, letting accelerate
         shard the model's layers across every visible device (e.g. 8x L4 on
@@ -97,6 +107,7 @@ class CausalLM:
         tokenizer_repo = model_cfg.get("tokenizer_repo") or repo
         gen_cfg = model_cfg.get("generation", {})
         self.batch_size = int(gen_cfg.get("batch_size", 8))
+        self.prepend_bos = bool(gen_cfg.get("prepend_bos", False))
         device_map = gen_cfg.get("device_map")
 
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
@@ -155,6 +166,22 @@ class CausalLM:
             self.device = self.model.device
         self.model.eval()
 
+    def _required_bos_token_id(self) -> int:
+        """Return the tokenizer's ``bos_token_id``, for use when ``prepend_bos`` is set.
+
+        Raises ``ValueError`` naming the model repo if the tokenizer has no BOS
+        token - fail loud rather than silently skipping the prepend the caller
+        asked for. Checked at each call site (not cached at construction) so a
+        tokenizer whose ``bos_token_id`` changes after load is still caught.
+        """
+        bos_id = self.tokenizer.bos_token_id
+        if bos_id is None:
+            raise ValueError(
+                f"generation.prepend_bos is true for {self.model_cfg.get('hf_repo')!r} "
+                "but its tokenizer has no bos_token_id"
+            )
+        return int(bos_id)
+
     # -- loglikelihood ----------------------------------------------------
 
     def loglikelihood(self, requests: list[tuple[str, str]]) -> list[float]:
@@ -185,6 +212,13 @@ class CausalLM:
         single token that is already fully covered by the context's own
         encoding, silently emptying the continuation.
 
+        When ``self.prepend_bos`` is set (opt-in, default off - see
+        ``generation.prepend_bos`` in the class docstring), the tokenizer's
+        ``bos_token_id`` is unconditionally prepended to both ``enc_ctx`` and
+        ``enc_full`` before the empty-context guard runs, so the continuation
+        slice offset (``enc_full[len(enc_ctx):]``) is unaffected - both sides
+        shift by exactly one token.
+
         Deliberate robustness deviation from harness v0.3.0: with some
         tokenizers (e.g. Ministral/tekken), the joint encoding of
         ``context + continuation`` doesn't just append tokens past the
@@ -208,6 +242,12 @@ class CausalLM:
 
         enc_ctx = self.tokenizer(context, add_special_tokens=False)["input_ids"]
         enc_full = self.tokenizer(context + continuation, add_special_tokens=False)["input_ids"]
+
+        if self.prepend_bos:
+            bos_id = self._required_bos_token_id()
+            enc_ctx = [bos_id, *enc_ctx]
+            enc_full = [bos_id, *enc_full]
+
         if len(enc_ctx) == 0:
             bos_id = self.tokenizer.bos_token_id
             if bos_id is None:
@@ -335,11 +375,32 @@ class CausalLM:
     ) -> list[str]:
         import torch
 
-        encoded = self.tokenizer(
-            prompts, add_special_tokens=False, padding=True, return_tensors="pt"
-        )
-        input_ids = encoded["input_ids"].to(self.device)
-        attention_mask = encoded["attention_mask"].to(self.device)
+        # Tokenized per-prompt (rather than one batched tokenizer(prompts, ...)
+        # call) and padded manually below so prepend_bos can prepend the BOS id
+        # to each prompt's own token ids before padding - a batched call with
+        # padding=True has no hook for per-row prepending before pad. Per-prompt
+        # tokenization is equivalent to the batched call for the default
+        # (prepend_bos=False) path: each string tokenizes independently of its
+        # batch-mates, and the same left-padding (self.tokenizer.padding_side)
+        # is reproduced explicitly below with the tokenizer's own pad_token_id.
+        encoded_ids = [
+            self.tokenizer(prompt, add_special_tokens=False)["input_ids"] for prompt in prompts
+        ]
+        if self.prepend_bos:
+            bos_id = self._required_bos_token_id()
+            encoded_ids = [[bos_id, *ids] for ids in encoded_ids]
+
+        max_len = max(len(ids) for ids in encoded_ids)
+        pad_id = self.tokenizer.pad_token_id
+        input_ids_list: list[list[int]] = []
+        attention_mask_list: list[list[int]] = []
+        for ids in encoded_ids:
+            pad_len = max_len - len(ids)
+            input_ids_list.append([pad_id] * pad_len + ids)
+            attention_mask_list.append([0] * pad_len + [1] * len(ids))
+
+        input_ids = torch.tensor(input_ids_list, dtype=torch.long, device=self.device)
+        attention_mask = torch.tensor(attention_mask_list, dtype=torch.long, device=self.device)
         prompt_len = input_ids.shape[1]
 
         with torch.no_grad():

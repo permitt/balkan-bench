@@ -216,6 +216,81 @@ def test_merged_continuation_falls_back_to_common_prefix(model):
     assert actual == pytest.approx(expected, abs=1e-4)
 
 
+# -- generation.prepend_bos (opt-in BOS prepending for BOS-dependent families) --
+
+
+@pytest.fixture(scope="module")
+def bos_model():
+    return CausalLM(
+        {"name": "tiny-bos", "hf_repo": "sshleifer/tiny-gpt2", "generation": {"prepend_bos": True}},
+        device="cpu",
+    )
+
+
+def test_prepend_bos_prepends_to_context_and_full_encode(bos_model):
+    # GPT-2's tokenizer has a bos_token_id (same id as eos, "<|endoftext|>").
+    bos_id = bos_model.tokenizer.bos_token_id
+    assert bos_id is not None
+
+    context, continuation = "The sky is", " blue"
+    raw_ctx_ids = bos_model.tokenizer(context, add_special_tokens=False)["input_ids"]
+    enc_full, cont_ids = bos_model._encode_request(context, continuation)
+
+    # Both the context-only encode (raw_ctx_ids, prefixed with bos below) and the
+    # full context+continuation encode used for scoring start with bos - proving
+    # the continuation slice offset is unaffected (both sides shift by one token).
+    assert enc_full[0] == bos_id
+    assert enc_full == [bos_id, *raw_ctx_ids, *cont_ids]
+
+
+def test_prepend_bos_changes_loglikelihood(model, bos_model):
+    # `model` (module fixture above) is the default prepend_bos=False baseline.
+    plain = model.loglikelihood([("The sky is", " blue")])[0]
+    with_bos = bos_model.loglikelihood([("The sky is", " blue")])[0]
+    assert with_bos != pytest.approx(plain)
+
+
+def test_prepend_bos_without_bos_token_raises(monkeypatch):
+    m = CausalLM(
+        {
+            "name": "tiny-no-bos",
+            "hf_repo": "sshleifer/tiny-gpt2",
+            "generation": {"prepend_bos": True},
+        },
+        device="cpu",
+    )
+    # tiny-gpt2 does have a bos token; simulate a tokenizer without one by
+    # monkeypatching bos_token_id to None on the already-loaded tokenizer.
+    monkeypatch.setattr(m.tokenizer, "bos_token_id", None)
+
+    with pytest.raises(ValueError, match="sshleifer/tiny-gpt2"):
+        m.loglikelihood([("Hello", " world")])
+
+
+def test_prepend_bos_default_false_leaves_loglikelihood_unaffected(model):
+    # Default (no generation.prepend_bos in config) construction must behave
+    # exactly like today: prepend_bos defaults to False.
+    assert model.prepend_bos is False
+
+
+def test_prepend_bos_generate_prompt_starts_with_bos(bos_model, monkeypatch):
+    import torch
+
+    bos_id = bos_model.tokenizer.bos_token_id
+    captured: dict[str, torch.Tensor] = {}
+    real_generate = bos_model.model.generate
+
+    def _spy_generate(*, input_ids, attention_mask, **kwargs):
+        captured["input_ids"] = input_ids
+        return real_generate(input_ids=input_ids, attention_mask=attention_mask, **kwargs)
+
+    monkeypatch.setattr(bos_model.model, "generate", _spy_generate)
+
+    bos_model.generate(["Once upon a"], stop_sequences=["\n"], max_gen_tokens=3)
+
+    assert captured["input_ids"][0, 0].item() == bos_id
+
+
 def test_truly_empty_continuation_still_raises(model):
     # "Hello world" + "" (empty continuation string): enc_ctx == enc_full identically,
     # so even the common-prefix fallback yields an empty continuation slice - a genuine

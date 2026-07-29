@@ -1,0 +1,12 @@
+name: sle-olmo3-7b-bos
+access: open_weights
+hf_repo: allenai/Olmo-3-7B-Instruct
+family: olmo3
+# BOS-prepending A/B twin: screens whether scoring without <bos>
+# depressed this model's published score (see gemma-4-E2B: +10 points).
+params_hint: 7.3B
+tier: experimental
+generation:
+  batch_size: 8
+  dtype: bfloat16
+  prepend_bos: true

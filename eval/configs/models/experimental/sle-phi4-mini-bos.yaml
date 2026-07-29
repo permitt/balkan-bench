@@ -1,0 +1,12 @@
+name: sle-phi4-mini-bos
+access: open_weights
+hf_repo: microsoft/Phi-4-mini-instruct
+family: phi4
+# BOS-prepending A/B twin: screens whether scoring without <bos>
+# depressed this model's published score (see gemma-4-E2B: +10 points).
+params_hint: 3.8B
+tier: experimental
+generation:
+  batch_size: 8
+  dtype: bfloat16
+  prepend_bos: true

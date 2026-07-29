@@ -1,0 +1,13 @@
+name: sle-yugogpt-bos
+access: open_weights
+hf_repo: gordicaleksa/YugoGPT
+family: mistral
+# BOS-prepending A/B twin: screens whether scoring without <bos>
+# depressed this model's published score (see gemma-4-E2B: +10 points).
+params_hint: 7.2B
+tier: experimental
+tokenizer_repo: mistralai/Mistral-7B-v0.1
+generation:
+  batch_size: 8
+  dtype: bfloat16
+  prepend_bos: true

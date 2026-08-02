@@ -113,8 +113,29 @@ never comparable to each other**, even where a column shares a name (an
 open-weights `acc_norm` and an API `acc` measure fundamentally different
 things).
 
-The public SLE leaderboard ships with placeholder empty boards until the
-official open-weights and API runs complete.
+### Sequence-start tokens
+
+Loglikelihood scoring is sensitive to whether a `<bos>`-style token opens
+the sequence, and models disagree about what they expect. We therefore
+score every model with **the prefix its own publisher specifies**, set
+per model via `generation.prepend_bos`:
+
+- Gemma 4 (all sizes) is trained with `<bos>` always present, so it gets
+  one. Without it, every Gemma sits at chance on multiple choice: adding
+  it moved Gemma-4-E4B by +8.8 (OpenBookQA) and +14.8 (ARC-Challenge).
+- Mistral-derived models (Ministral, YugoGPT) declare
+  `add_bos_token: true`, so they get one too. Ministral gained +13.0 and
+  +10.8 on the same two tasks.
+- Everything else is scored without one, which is what those models
+  expect. This is not cosmetic: Granite's `bos_token` is an
+  end-of-text marker, and prepending it *costs* -12.8 and -13.9.
+
+Qwen, SmolLM3 and Slava define no BOS token at all and are unaffected
+either way. The flag never changes which items are scored or how metrics
+are computed - only the input format each model receives.
+
+The open-weights board is live with **17 models**; the closed-API board
+ships empty until those runs complete.
 
 Official SLE runs pin the dataset to the `v1.0.0-sle-data` tag rather than
 `main` - pass `--dataset-revision v1.0.0-sle-data` to `balkanbench eval`.

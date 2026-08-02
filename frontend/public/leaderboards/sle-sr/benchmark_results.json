@@ -2,7 +2,7 @@
   "benchmark": "sle",
   "language": "sr",
   "benchmark_version": "1.0.0",
-  "generated_at": "2026-07-28T01:16:57Z",
+  "generated_at": "2026-08-02T16:36:57Z",
   "sponsor": "Recrewty",
   "ranked_tasks": [
     "arc_challenge",
@@ -28,100 +28,200 @@
   },
   "rows": [
     {
-      "rank": 10,
-      "model": "sle-gemma-4-e2b-it",
-      "model_id": "google/gemma-4-E2B-it",
-      "params": 5100000000,
-      "params_display": "5.1B",
+      "rank": 16,
+      "model": "sle-gemma-4-12b-it",
+      "model_id": "google/gemma-4-12B-it",
+      "params": 12000000000,
+      "params_display": "12.0B",
       "results": {
         "arc_challenge": {
-          "mean": 0.2525597269624573,
+          "mean": 0.2431740614334471,
           "stdev": 0.0
         },
         "arc_easy": {
-          "mean": 0.2824074074074074,
+          "mean": 0.30134680134680136,
           "stdev": 0.0
         },
         "boolq": {
-          "mean": 0.581651376146789,
+          "mean": 0.6584097859327217,
           "stdev": 0.0
         },
         "hellaswag": {
-          "mean": 0.28201553475403307,
+          "mean": 0.3528181637124079,
           "stdev": 0.0
         },
         "nq_open": {
-          "mean": 0.002493074792243767,
+          "mean": 0.003878116343490305,
           "stdev": 0.0
         },
         "openbookqa": {
-          "mean": 0.26,
+          "mean": 0.302,
           "stdev": 0.0
         },
         "piqa": {
-          "mean": 0.5114254624591947,
+          "mean": 0.5217627856365615,
           "stdev": 0.0
         },
         "triviaqa": {
-          "mean": 0.007021845742309407,
+          "mean": 0.01487962550156041,
           "stdev": 0.0
         },
         "winogrande": {
-          "mean": 0.4964483030781373,
+          "mean": 0.5027624309392266,
           "stdev": 0.0
         }
       },
-      "avg": 0.2973,
+      "avg": 0.3223,
       "complete": true,
       "tasks_completed": 9,
       "tasks_total": 9,
       "model_revision": "unknown"
     },
     {
-      "rank": 8,
+      "rank": 11,
+      "model": "sle-gemma-4-31b-it",
+      "model_id": "google/gemma-4-31B-it",
+      "params": 32700000000,
+      "params_display": "32.7B",
+      "results": {
+        "arc_challenge": {
+          "mean": 0.3532423208191126,
+          "stdev": 0.0
+        },
+        "arc_easy": {
+          "mean": 0.4372895622895623,
+          "stdev": 0.0
+        },
+        "boolq": {
+          "mean": 0.8697247706422019,
+          "stdev": 0.0
+        },
+        "hellaswag": {
+          "mean": 0.5082652857996415,
+          "stdev": 0.0
+        },
+        "nq_open": {
+          "mean": 0.04986149584487535,
+          "stdev": 0.0
+        },
+        "openbookqa": {
+          "mean": 0.38,
+          "stdev": 0.0
+        },
+        "piqa": {
+          "mean": 0.6398258977149075,
+          "stdev": 0.0
+        },
+        "triviaqa": {
+          "mean": 0.10733392777530093,
+          "stdev": 0.0
+        },
+        "winogrande": {
+          "mean": 0.574585635359116,
+          "stdev": 0.0
+        }
+      },
+      "avg": 0.4356,
+      "complete": true,
+      "tasks_completed": 9,
+      "tasks_total": 9,
+      "model_revision": "unknown"
+    },
+    {
+      "rank": 13,
+      "model": "sle-gemma-4-e2b-it",
+      "model_id": "google/gemma-4-E2B-it",
+      "params": 5100000000,
+      "params_display": "5.1B",
+      "results": {
+        "arc_challenge": {
+          "mean": 0.3412969283276451,
+          "stdev": 0.0
+        },
+        "arc_easy": {
+          "mean": 0.4166666666666667,
+          "stdev": 0.0
+        },
+        "boolq": {
+          "mean": 0.7525993883792049,
+          "stdev": 0.0
+        },
+        "hellaswag": {
+          "mean": 0.43467436765584544,
+          "stdev": 0.0
+        },
+        "nq_open": {
+          "mean": 0.05346260387811634,
+          "stdev": 0.0
+        },
+        "openbookqa": {
+          "mean": 0.362,
+          "stdev": 0.0
+        },
+        "piqa": {
+          "mean": 0.6066376496191512,
+          "stdev": 0.0
+        },
+        "triviaqa": {
+          "mean": 0.1403254569772626,
+          "stdev": 0.0
+        },
+        "winogrande": {
+          "mean": 0.5303867403314917,
+          "stdev": 0.0
+        }
+      },
+      "avg": 0.4042,
+      "complete": true,
+      "tasks_completed": 9,
+      "tasks_total": 9,
+      "model_revision": "unknown"
+    },
+    {
+      "rank": 7,
       "model": "sle-gemma-4-e4b-it",
       "model_id": "google/gemma-4-E4B-it",
       "params": 8000000000,
       "params_display": "8.0B",
       "results": {
         "arc_challenge": {
-          "mean": 0.22098976109215018,
+          "mean": 0.36945392491467577,
           "stdev": 0.0
         },
         "arc_easy": {
-          "mean": 0.27904040404040403,
+          "mean": 0.48653198653198654,
           "stdev": 0.0
         },
         "boolq": {
-          "mean": 0.618960244648318,
+          "mean": 0.8201834862385321,
           "stdev": 0.0
         },
         "hellaswag": {
-          "mean": 0.3104959171479785,
+          "mean": 0.5438159729137622,
           "stdev": 0.0
         },
         "nq_open": {
-          "mean": 0.002770083102493075,
+          "mean": 0.08975069252077562,
           "stdev": 0.0
         },
         "openbookqa": {
-          "mean": 0.29,
+          "mean": 0.378,
           "stdev": 0.0
         },
         "piqa": {
-          "mean": 0.5462459194776932,
+          "mean": 0.6675734494015234,
           "stdev": 0.0
         },
         "triviaqa": {
-          "mean": 0.009473918858671422,
+          "mean": 0.23105216228265715,
           "stdev": 0.0
         },
         "winogrande": {
-          "mean": 0.510655090765588,
+          "mean": 0.5880031570639306,
           "stdev": 0.0
         }
       },
-      "avg": 0.3098,
+      "avg": 0.4638,
       "complete": true,
       "tasks_completed": 9,
       "tasks_total": 9,
@@ -129,6 +229,56 @@
     },
     {
       "rank": 4,
+      "model": "sle-granite-4-1-30b",
+      "model_id": "ibm-granite/granite-4.1-30b",
+      "params": 28900000000,
+      "params_display": "28.9B",
+      "results": {
+        "arc_challenge": {
+          "mean": 0.39761092150170646,
+          "stdev": 0.0
+        },
+        "arc_easy": {
+          "mean": 0.5345117845117845,
+          "stdev": 0.0
+        },
+        "boolq": {
+          "mean": 0.8669724770642202,
+          "stdev": 0.0
+        },
+        "hellaswag": {
+          "mean": 0.607149970125473,
+          "stdev": 0.0
+        },
+        "nq_open": {
+          "mean": 0.16620498614958448,
+          "stdev": 0.0
+        },
+        "openbookqa": {
+          "mean": 0.41,
+          "stdev": 0.0
+        },
+        "piqa": {
+          "mean": 0.6659412404787813,
+          "stdev": 0.0
+        },
+        "triviaqa": {
+          "mean": 0.3650245207311636,
+          "stdev": 0.0
+        },
+        "winogrande": {
+          "mean": 0.6250986582478295,
+          "stdev": 0.0
+        }
+      },
+      "avg": 0.5154,
+      "complete": true,
+      "tasks_completed": 9,
+      "tasks_total": 9,
+      "model_revision": "unknown"
+    },
+    {
+      "rank": 10,
       "model": "sle-granite-4-1-8b",
       "model_id": "ibm-granite/granite-4.1-8b",
       "params": 8800000000,
@@ -185,50 +335,100 @@
       "params_display": "8.0B",
       "results": {
         "arc_challenge": {
-          "mean": 0.25341296928327645,
+          "mean": 0.3609215017064846,
           "stdev": 0.0
         },
         "arc_easy": {
-          "mean": 0.2916666666666667,
+          "mean": 0.5227272727272727,
           "stdev": 0.0
         },
         "boolq": {
-          "mean": 0.5351681957186545,
+          "mean": 0.72782874617737,
           "stdev": 0.0
         },
         "hellaswag": {
-          "mean": 0.2929695279824736,
+          "mean": 0.5187213702449711,
           "stdev": 0.0
         },
         "nq_open": {
-          "mean": 0.003878116343490305,
+          "mean": 0.11274238227146814,
           "stdev": 0.0
         },
         "openbookqa": {
-          "mean": 0.26,
+          "mean": 0.39,
           "stdev": 0.0
         },
         "piqa": {
-          "mean": 0.5277475516866159,
+          "mean": 0.6175190424374319,
           "stdev": 0.0
         },
         "triviaqa": {
-          "mean": 0.002229157378510923,
+          "mean": 0.2806509139545252,
           "stdev": 0.0
         },
         "winogrande": {
-          "mean": 0.5130228887134964,
+          "mean": 0.5824782951854776,
           "stdev": 0.0
         }
       },
-      "avg": 0.2978,
+      "avg": 0.4571,
       "complete": true,
       "tasks_completed": 9,
       "tasks_total": 9,
       "model_revision": "unknown"
     },
     {
-      "rank": 7,
+      "rank": 12,
+      "model": "sle-nemotron3-30b-a3b",
+      "model_id": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-BF16",
+      "params": 31600000000,
+      "params_display": "31.6B",
+      "results": {
+        "arc_challenge": {
+          "mean": 0.3302047781569966,
+          "stdev": 0.0
+        },
+        "arc_easy": {
+          "mean": 0.3947811447811448,
+          "stdev": 0.0
+        },
+        "boolq": {
+          "mean": 0.7235474006116208,
+          "stdev": 0.0
+        },
+        "hellaswag": {
+          "mean": 0.4620593507269468,
+          "stdev": 0.0
+        },
+        "nq_open": {
+          "mean": 0.09196675900277008,
+          "stdev": 0.0
+        },
+        "openbookqa": {
+          "mean": 0.322,
+          "stdev": 0.0
+        },
+        "piqa": {
+          "mean": 0.6066376496191512,
+          "stdev": 0.0
+        },
+        "triviaqa": {
+          "mean": 0.2117142220240749,
+          "stdev": 0.0
+        },
+        "winogrande": {
+          "mean": 0.5311760063141279,
+          "stdev": 0.0
+        }
+      },
+      "avg": 0.4082,
+      "complete": true,
+      "tasks_completed": 9,
+      "tasks_total": 9,
+      "model_revision": "unknown"
+    },
+    {
+      "rank": 17,
       "model": "sle-olmo3-7b",
       "model_id": "allenai/Olmo-3-7B-Instruct",
       "params": 7300000000,
@@ -278,7 +478,7 @@
       "model_revision": "unknown"
     },
     {
-      "rank": 5,
+      "rank": 14,
       "model": "sle-phi4-mini",
       "model_id": "microsoft/Phi-4-mini-instruct",
       "params": 3800000000,
@@ -328,7 +528,7 @@
       "model_revision": "unknown"
     },
     {
-      "rank": 3,
+      "rank": 8,
       "model": "sle-qwen3-5-4b",
       "model_id": "Qwen/Qwen3.5-4B",
       "params": 4700000000,
@@ -378,7 +578,7 @@
       "model_revision": "unknown"
     },
     {
-      "rank": 2,
+      "rank": 5,
       "model": "sle-qwen3-5-9b",
       "model_id": "Qwen/Qwen3.5-9B",
       "params": 9700000000,
@@ -428,7 +628,157 @@
       "model_revision": "unknown"
     },
     {
+      "rank": 1,
+      "model": "sle-qwen3-6-27b",
+      "model_id": "Qwen/Qwen3.6-27B",
+      "params": 27800000000,
+      "params_display": "27.8B",
+      "results": {
+        "arc_challenge": {
+          "mean": 0.41723549488054607,
+          "stdev": 0.0
+        },
+        "arc_easy": {
+          "mean": 0.5412457912457912,
+          "stdev": 0.0
+        },
+        "boolq": {
+          "mean": 0.7923547400611621,
+          "stdev": 0.0
+        },
+        "hellaswag": {
+          "mean": 0.7201752638916551,
+          "stdev": 0.0
+        },
+        "nq_open": {
+          "mean": 0.15124653739612187,
+          "stdev": 0.0
+        },
+        "openbookqa": {
+          "mean": 0.46,
+          "stdev": 0.0
+        },
+        "piqa": {
+          "mean": 0.7404787812840044,
+          "stdev": 0.0
+        },
+        "triviaqa": {
+          "mean": 0.3855327686134641,
+          "stdev": 0.0
+        },
+        "winogrande": {
+          "mean": 0.6685082872928176,
+          "stdev": 0.0
+        }
+      },
+      "avg": 0.5419,
+      "complete": true,
+      "tasks_completed": 9,
+      "tasks_total": 9,
+      "model_revision": "unknown"
+    },
+    {
+      "rank": 2,
+      "model": "sle-qwen3-6-35b-a3b",
+      "model_id": "Qwen/Qwen3.6-35B-A3B",
+      "params": 36000000000,
+      "params_display": "36.0B",
+      "results": {
+        "arc_challenge": {
+          "mean": 0.4061433447098976,
+          "stdev": 0.0
+        },
+        "arc_easy": {
+          "mean": 0.5029461279461279,
+          "stdev": 0.0
+        },
+        "boolq": {
+          "mean": 0.7305810397553517,
+          "stdev": 0.0
+        },
+        "hellaswag": {
+          "mean": 0.7058354909380602,
+          "stdev": 0.0
+        },
+        "nq_open": {
+          "mean": 0.18310249307479223,
+          "stdev": 0.0
+        },
+        "openbookqa": {
+          "mean": 0.422,
+          "stdev": 0.0
+        },
+        "piqa": {
+          "mean": 0.7328618063112078,
+          "stdev": 0.0
+        },
+        "triviaqa": {
+          "mean": 0.39662282657155595,
+          "stdev": 0.0
+        },
+        "winogrande": {
+          "mean": 0.6582478295185478,
+          "stdev": 0.0
+        }
+      },
+      "avg": 0.5265,
+      "complete": true,
+      "tasks_completed": 9,
+      "tasks_total": 9,
+      "model_revision": "unknown"
+    },
+    {
       "rank": 6,
+      "model": "sle-slava-qwen3-14b-sr",
+      "model_id": "IvanCvetanovic/Slava-Qwen3-14B-Serbian",
+      "params": 14800000000,
+      "params_display": "14.8B",
+      "results": {
+        "arc_challenge": {
+          "mean": 0.36860068259385664,
+          "stdev": 0.0
+        },
+        "arc_easy": {
+          "mean": 0.49915824915824913,
+          "stdev": 0.0
+        },
+        "boolq": {
+          "mean": 0.7951070336391437,
+          "stdev": 0.0
+        },
+        "hellaswag": {
+          "mean": 0.5823541127265485,
+          "stdev": 0.0
+        },
+        "nq_open": {
+          "mean": 0.10941828254847645,
+          "stdev": 0.0
+        },
+        "openbookqa": {
+          "mean": 0.39,
+          "stdev": 0.0
+        },
+        "piqa": {
+          "mean": 0.6588683351468988,
+          "stdev": 0.0
+        },
+        "triviaqa": {
+          "mean": 0.24944271065537227,
+          "stdev": 0.0
+        },
+        "winogrande": {
+          "mean": 0.6243093922651933,
+          "stdev": 0.0
+        }
+      },
+      "avg": 0.4753,
+      "complete": true,
+      "tasks_completed": 9,
+      "tasks_total": 9,
+      "model_revision": "unknown"
+    },
+    {
+      "rank": 15,
       "model": "sle-smollm3-3b",
       "model_id": "HuggingFaceTB/SmolLM3-3B",
       "params": 3100000000,
@@ -478,50 +828,50 @@
       "model_revision": "unknown"
     },
     {
-      "rank": 1,
+      "rank": 3,
       "model": "sle-yugogpt",
       "model_id": "gordicaleksa/YugoGPT",
       "params": 7200000000,
       "params_display": "7.2B",
       "results": {
         "arc_challenge": {
-          "mean": 0.3873720136518771,
+          "mean": 0.3796928327645051,
           "stdev": 0.0
         },
         "arc_easy": {
-          "mean": 0.5290404040404041,
+          "mean": 0.5332491582491582,
           "stdev": 0.0
         },
         "boolq": {
-          "mean": 0.7036697247706422,
+          "mean": 0.7045871559633028,
           "stdev": 0.0
         },
         "hellaswag": {
-          "mean": 0.686018721370245,
+          "mean": 0.6935869348735312,
           "stdev": 0.0
         },
         "nq_open": {
-          "mean": 0.15373961218836565,
+          "mean": 0.15706371191135735,
           "stdev": 0.0
         },
         "openbookqa": {
-          "mean": 0.436,
+          "mean": 0.438,
           "stdev": 0.0
         },
         "piqa": {
-          "mean": 0.7377584330794341,
+          "mean": 0.7410228509249184,
           "stdev": 0.0
         },
         "triviaqa": {
-          "mean": 0.3630740080249666,
+          "mean": 0.36084485064645566,
           "stdev": 0.0
         },
         "winogrande": {
-          "mean": 0.6440410418310971,
+          "mean": 0.6582478295185478,
           "stdev": 0.0
         }
       },
-      "avg": 0.5156,
+      "avg": 0.5185,
       "complete": true,
       "tasks_completed": 9,
       "tasks_total": 9,

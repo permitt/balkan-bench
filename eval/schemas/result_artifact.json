@@ -17,9 +17,6 @@
     "image_digest",
     "config_hash",
     "selection_metric",
-    "hp_search",
-    "seeds",
-    "seed_results",
     "aggregate",
     "task_score",
     "rankable",
@@ -82,6 +79,20 @@
             "additionalProperties": { "type": "number" }
           }
         }
+      }
+    },
+    "run_config": {
+      "type": "object",
+      "required": ["protocol", "num_fewshot", "access"],
+      "additionalProperties": false,
+      "properties": {
+        "protocol":           { "type": "string", "enum": ["loglikelihood", "generative"] },
+        "num_fewshot":        { "type": "integer", "minimum": 0 },
+        "access":             { "type": "string", "enum": ["open_weights", "api"] },
+        "provider":           { "type": "string" },
+        "generation":         { "type": "object", "additionalProperties": true },
+        "api_cost_usd":       { "type": "number", "minimum": 0 },
+        "unparsed_responses": { "type": "integer", "minimum": 0 }
       }
     },
     "aggregate": {

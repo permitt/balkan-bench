@@ -1,0 +1,12 @@
+name: sle-slava-qwen3-14b-sr
+access: open_weights
+hf_repo: IvanCvetanovic/Slava-Qwen3-14B-Serbian
+family: qwen3
+# Serbian-specialized fine-tune (academic, CC-BY-NC-SA weights; evaluation
+# and score listing only, no redistribution).
+params_hint: 14.8B
+tier: official
+generation:
+  batch_size: 8
+  dtype: bfloat16
+  device_map: auto

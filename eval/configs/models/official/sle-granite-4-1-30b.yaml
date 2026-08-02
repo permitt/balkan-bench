@@ -1,0 +1,10 @@
+name: sle-granite-4-1-30b
+access: open_weights
+hf_repo: ibm-granite/granite-4.1-30b
+family: granite
+params_hint: 28.9B
+tier: official
+generation:
+  batch_size: 4
+  dtype: bfloat16
+  device_map: auto

@@ -1,0 +1,11 @@
+name: sle-gemini-3-5-flash
+access: api
+provider: gemini
+api_model_id: gemini-3.5-flash
+family: gemini
+params_hint: API
+tier: official
+generation:
+  temperature: 0.0
+  max_tokens: 64
+  concurrency: 8

@@ -1,0 +1,11 @@
+name: sle-qwen3-6-35b-a3b
+access: open_weights
+hf_repo: Qwen/Qwen3.6-35B-A3B
+family: qwen3.6
+# MoE: 36B total params (~72GB bf16), 3B active - tight on 80GB, small batch.
+params_hint: 36.0B
+tier: official
+generation:
+  batch_size: 2
+  dtype: bfloat16
+  device_map: auto

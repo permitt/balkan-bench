@@ -7,6 +7,11 @@ from typing import Any
 
 import typer
 
+from balkanbench.cli._generative import (
+    GENERATIVE_TASK_TYPES,
+    GenerativeModelConstructionError,
+    run_generative_dispatch,
+)
 from balkanbench.cli._paths import resolve_model_config, resolve_task_config, schemas_root
 from balkanbench.config import load_yaml_with_schema
 from balkanbench.data.repo import DatasetRepoError, resolve_dataset_repo, resolve_hf_token
@@ -77,6 +82,12 @@ def eval_cmd(
         help="Skip Trainer.train() and evaluate the loaded checkpoint as-is. "
         "Automatic for tasks with status='diagnostic' (no train split).",
     ),
+    limit: int | None = typer.Option(
+        None,
+        "--limit",
+        help="Generative (SLE) tasks only: evaluate only the first N examples. "
+        "The artifact gets run_type=experimental regardless of --run-type.",
+    ),
 ) -> None:
     """Train on train, evaluate on validation, write a result artifact."""
     try:
@@ -92,6 +103,30 @@ def eval_cmd(
     except Exception as exc:  # noqa: BLE001
         typer.echo(_red(str(exc)))
         raise typer.Exit(code=1) from exc
+
+    if task_cfg["task_type"] in GENERATIVE_TASK_TYPES:
+        from balkanbench.cli import eval as _self
+
+        typer.echo(_green(f"Running {model} (generative) on {benchmark}.{task}.{language}"))
+        try:
+            artifact_path = run_generative_dispatch(
+                task_cfg=task_cfg,
+                model_cfg=model_cfg,
+                language=language,
+                out_dir=out,
+                api_cache_dir=out / ".api_cache" / model_cfg["name"],
+                dataset_revision=dataset_revision,
+                benchmark_version=benchmark_version,
+                run_type=run_type,
+                limit=limit,
+                load_dataset=_self.load_dataset,
+                token=resolve_hf_token(),
+            )
+        except (DatasetRepoError, GenerativeModelConstructionError) as exc:
+            typer.echo(_red(str(exc)))
+            raise typer.Exit(code=1) from exc
+        typer.echo(_green(f"Artifact: {artifact_path}"))
+        return
 
     chosen_seeds: list[int] = list(seeds) if seeds else list(model_cfg.get("seeds") or [])
     if not chosen_seeds:

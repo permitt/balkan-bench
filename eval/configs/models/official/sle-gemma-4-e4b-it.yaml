@@ -1,0 +1,14 @@
+name: sle-gemma-4-e4b-it
+access: open_weights
+hf_repo: google/gemma-4-E4B-it
+family: gemma4
+# Safetensors total (raw on-disk weights), not the E4B effective-params
+# marketing figure - same convention as sle-gemma-4-e2b-it.
+params_hint: 8.0B
+tier: official
+generation:
+  batch_size: 4
+  dtype: bfloat16
+  # Gemma is trained with <bos> always present (Google documents it);
+  # screening: +8.8 openbookqa, +14.8 arc_challenge.
+  prepend_bos: true

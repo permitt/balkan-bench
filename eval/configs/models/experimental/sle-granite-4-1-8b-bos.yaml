@@ -1,0 +1,12 @@
+name: sle-granite-4-1-8b-bos
+access: open_weights
+hf_repo: ibm-granite/granite-4.1-8b
+family: granite
+# BOS-prepending A/B twin: screens whether scoring without <bos>
+# depressed this model's published score (see gemma-4-E2B: +10 points).
+params_hint: 8.8B
+tier: experimental
+generation:
+  batch_size: 8
+  dtype: bfloat16
+  prepend_bos: true

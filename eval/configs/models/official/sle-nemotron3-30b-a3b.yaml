@@ -1,0 +1,12 @@
+name: sle-nemotron3-30b-a3b
+access: open_weights
+hf_repo: nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-BF16
+family: nemotron3
+params_hint: 31.6B
+tier: official
+generation:
+  batch_size: 1
+  dtype: bfloat16
+  device_map: auto
+  # batch_size 1: hybrid Mamba2+MoE activations OOM a single 24GB shard
+  # at larger batches even with layers sharded across 8 cards.

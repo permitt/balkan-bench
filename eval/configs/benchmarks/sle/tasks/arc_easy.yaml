@@ -1,0 +1,34 @@
+benchmark: sle
+task: arc_easy
+status: ranked
+task_type: multiple_choice_loglikelihood
+languages:
+  available: [sr]
+  ranked: [sr]
+dataset:
+  source_type: huggingface
+  config: arc_easy
+  per_language:
+    sr: { public_repo: permitt/serbian-llm-eval }
+  splits:
+    public: [test]
+    labeled_public: [test]
+inputs:
+  fields: [query, choices]
+  id_field: example_id
+metrics:
+  primary: [acc_norm]
+  report: [acc, acc_norm]
+  task_score: acc_norm
+prompts:
+  sr: { template_id: sle_mc_v1 }
+evaluation:
+  num_fewshot: 0
+  stop_sequences: []
+  max_gen_tokens: 16
+api_protocol:
+  reformulation: multiple_choice_generative
+  metrics:
+    primary: [acc]
+    report: [acc]
+    task_score: acc

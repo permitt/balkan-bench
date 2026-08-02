@@ -12,8 +12,7 @@
     "dataset",
     "inputs",
     "metrics",
-    "prompts",
-    "training"
+    "prompts"
   ],
   "additionalProperties": false,
   "properties": {
@@ -31,7 +30,9 @@
         "multiple_choice",
         "grouped_binary_classification",
         "wsc",
-        "diagnostic"
+        "diagnostic",
+        "multiple_choice_loglikelihood",
+        "generative_qa"
       ]
     },
     "languages": {
@@ -62,7 +63,7 @@
           "description": "BCMS-language-keyed map of HF repo pairs. The runtime selects the entry that matches the requested --language at call time.",
           "additionalProperties": {
             "type": "object",
-            "required": ["public_repo", "private_repo"],
+            "required": ["public_repo"],
             "additionalProperties": false,
             "properties": {
               "public_repo":  { "type": "string", "minLength": 1 },
@@ -156,6 +157,47 @@
         "padding":    { "type": "string" },
         "truncation": { "type": "boolean" }
       }
+    },
+    "variant": {
+      "type": "string",
+      "enum": ["winogrande_partial", "boolq_da_ne"],
+      "description": "Scoring variant for multiple_choice_loglikelihood tasks with special context construction."
+    },
+    "evaluation": {
+      "type": "object",
+      "required": ["num_fewshot", "stop_sequences", "max_gen_tokens"],
+      "additionalProperties": false,
+      "properties": {
+        "num_fewshot":    { "type": "integer", "minimum": 0 },
+        "fewshot_split":  { "type": "string" },
+        "stop_sequences": { "type": "array", "items": { "type": "string" } },
+        "max_gen_tokens": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "api_protocol": {
+      "type": "object",
+      "required": ["reformulation", "metrics"],
+      "additionalProperties": false,
+      "properties": {
+        "reformulation": { "type": "string", "enum": ["multiple_choice_generative", "generative_qa"] },
+        "metrics": {
+          "type": "object",
+          "required": ["primary", "report", "task_score"],
+          "additionalProperties": false,
+          "properties": {
+            "primary":    { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+            "report":     { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+            "task_score": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "task_type": { "enum": ["multiple_choice_loglikelihood", "generative_qa"] } } },
+      "then": { "required": ["evaluation"] },
+      "else": { "required": ["training"] }
+    }
+  ]
 }

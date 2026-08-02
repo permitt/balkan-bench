@@ -34,6 +34,7 @@ WORKDIR /workspace
 
 # Install dependencies first (layer caches across code edits).
 COPY pyproject.toml /workspace/pyproject.toml
+COPY uv.lock /workspace/uv.lock
 COPY README.md /workspace/README.md
 COPY src /workspace/src
 # configs/ + schemas/ are loaded at runtime by the CLI via paths relative
@@ -42,10 +43,15 @@ COPY src /workspace/src
 COPY configs /workspace/configs
 COPY schemas /workspace/schemas
 
-# Install with the [ml] extra (torch + transformers + datasets + optuna)
-# and the [publish] extra (huggingface_hub) since `balkanbench run` loads
-# datasets from HF and writes leaderboard artifacts.
-RUN uv pip install --system --no-cache -e ".[ml,publish]"
+# Install the [ml] + [publish] extras from uv.lock so the image carries the
+# exact dependency versions the test suite ran against. A bare
+# `uv pip install -e .[ml]` resolves fresh from PyPI at build time and can
+# produce an untested torch/transformers pairing (this bit us: a fresh
+# resolve crashed at import with a dynamo dispatch conflict on Vertex).
+RUN uv export --frozen --no-dev --no-emit-project \
+        --extra ml --extra publish -o /tmp/requirements.txt \
+    && uv pip install --system --no-cache -r /tmp/requirements.txt \
+    && uv pip install --system --no-cache --no-deps -e .
 
 # Vertex AI mounts the run's GCS output directory at $AIP_MODEL_DIR.
 # `balkanbench run --out $AIP_MODEL_DIR` is the canonical invocation.

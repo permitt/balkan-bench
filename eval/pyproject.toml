@@ -35,7 +35,7 @@ dev = [
     "huggingface_hub>=0.24",
     # ml extras: in dev so CI runs the eval pipeline tests end to end
     "torch>=2.1",
-    "transformers>=4.40",
+    "transformers>=5.14",
     "scikit-learn>=1.4",
     "numpy>=1.26",
     "optuna>=3.6",
@@ -48,10 +48,15 @@ publish = [
 ]
 ml = [
     "torch>=2.1",
-    "transformers>=4.40",
+    "transformers>=5.14",
     "scikit-learn>=1.4",
     "numpy>=1.26",
     "optuna>=3.6",
+]
+api = [
+    "anthropic>=0.40",
+    "openai>=1.50",
+    "google-genai>=1.0",
 ]
 
 [project.scripts]
@@ -100,6 +105,13 @@ module = [
     "transformers.*",
     "sklearn",
     "sklearn.*",
+    "anthropic",
+    "anthropic.*",
+    "openai",
+    "openai.*",
+    "google",
+    "google.genai",
+    "google.genai.*",
 ]
 ignore_missing_imports = true
 

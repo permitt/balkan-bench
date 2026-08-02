@@ -6,7 +6,7 @@ from pathlib import Path
 
 import typer
 
-from balkanbench.cli._paths import schemas_root
+from balkanbench.cli._paths import configs_root, schemas_root
 from balkanbench.config import load_yaml_with_schema
 from balkanbench.leaderboard.export import ExportError, write_leaderboard_export
 
@@ -41,17 +41,38 @@ def export_cmd(
         help="Directory containing {benchmark}-{language}/ subtree of result artifacts.",
     ),
     out: Path = typer.Option(..., "--out", help="Path to write benchmark_results.json."),
-    benchmark_version: str = typer.Option(
-        "0.1.0", "--benchmark-version", help="Benchmark version recorded in the export."
+    benchmark_version: str | None = typer.Option(
+        None,
+        "--benchmark-version",
+        help="Benchmark version recorded in the export. Defaults to the "
+        "`version` declared in configs/benchmarks/{benchmark}/benchmark.yaml.",
+    ),
+    access: str | None = typer.Option(
+        None,
+        "--access",
+        help=(
+            "Filter to one access mode (open_weights/api) and stamp it into the "
+            "export. Omit for the legacy, unfiltered export."
+        ),
     ),
 ) -> None:
     """Assemble `benchmark_results.json` from on-disk official artifacts."""
+    if access is not None and access not in {"open_weights", "api"}:
+        typer.echo(_red(f"--access must be one of open_weights, api (got {access!r})"))
+        raise typer.Exit(code=1)
+
     try:
-        ranked_tasks, primary_metrics = _collect_ranked_tasks(benchmark, language)
+        ranked_tasks, primary_metrics, task_types = _collect_ranked_tasks(
+            benchmark, language, access=access
+        )
+        resolved_version = benchmark_version or _default_benchmark_version(benchmark)
     except FileNotFoundError as exc:
         typer.echo(_red(str(exc)))
         raise typer.Exit(code=1) from exc
 
+    # Both access modes for a given benchmark/language share one results tree
+    # (see write_generative_result_artifact); the split happens in
+    # assemble_leaderboard via `access`, not via a different input directory.
     target_root = results_dir / f"{benchmark}-{language}"
 
     try:
@@ -61,9 +82,11 @@ def export_cmd(
             results_root=target_root,
             ranked_tasks=ranked_tasks,
             task_primary_metrics=primary_metrics,
-            benchmark_version=benchmark_version,
+            benchmark_version=resolved_version,
             out_path=out,
             seeds=_DEFAULT_SEEDS,
+            access=access,
+            task_types=task_types,
         )
     except ExportError as exc:
         typer.echo(_red(str(exc)))
@@ -72,8 +95,40 @@ def export_cmd(
     typer.echo(_green(f"Wrote leaderboard export to {out}"))
 
 
-def _collect_ranked_tasks(benchmark: str, language: str) -> tuple[list[str], dict[str, str]]:
-    """Walk the benchmark's task YAMLs, return (ranked_tasks, primary_metric map)."""
+def _default_benchmark_version(benchmark: str) -> str:
+    """Read ``version`` from ``configs/benchmarks/{benchmark}/benchmark.yaml``.
+
+    Used when ``--benchmark-version`` is omitted, so the export stays truthful
+    to the benchmark's declared manifest version instead of a stale hardcoded
+    default.
+    """
+    manifest = configs_root() / "benchmarks" / benchmark / "benchmark.yaml"
+    cfg = load_yaml_with_schema(manifest, schemas_root() / "benchmark_spec.json")
+    version = cfg["version"]
+    assert isinstance(version, str)
+    return version
+
+
+def _collect_ranked_tasks(
+    benchmark: str, language: str, *, access: str | None = None
+) -> tuple[list[str], dict[str, str], dict[str, str]]:
+    """Walk the benchmark's task YAMLs, return (ranked_tasks, primary_metric
+    map, task_type map).
+
+    The primary-metric column differs per board: an ``access="api"`` export
+    reads ``api_protocol.metrics.task_score`` (the metric produced by the
+    API-reformulated protocol, e.g. ``acc`` for a multiple-choice task scored
+    generatively) rather than ``metrics.task_score`` (the open-weights
+    loglikelihood metric, e.g. ``acc_norm``). Benchmarks without an
+    ``api_protocol`` block (e.g. superglue) fall back to ``metrics.task_score``
+    regardless of ``access``.
+
+    The task_type map (task -> declared ``task_type``, e.g.
+    ``"generative_qa"`` or ``"multiple_choice_loglikelihood"``) is collected
+    from the same YAML walk so ``assemble_leaderboard`` can validate each
+    included artifact's ``run_config.protocol`` per-task without re-reading
+    the config files.
+    """
     import os
 
     configs_dir = Path(
@@ -85,6 +140,7 @@ def _collect_ranked_tasks(benchmark: str, language: str) -> tuple[list[str], dic
 
     ranked: list[str] = []
     primary_map: dict[str, str] = {}
+    task_types: dict[str, str] = {}
     for task_yaml in sorted(tasks_dir.glob("*.yaml")):
         cfg = load_yaml_with_schema(task_yaml, schemas_root() / "task_spec.json")
         if cfg.get("status") != "ranked":
@@ -93,8 +149,12 @@ def _collect_ranked_tasks(benchmark: str, language: str) -> tuple[list[str], dic
             continue
         task = cfg["task"]
         ranked.append(task)
-        primary_map[task] = cfg["metrics"]["task_score"]
+        task_types[task] = cfg["task_type"]
+        api_metrics = cfg.get("api_protocol", {}).get("metrics") if access == "api" else None
+        primary_map[task] = (
+            api_metrics["task_score"] if api_metrics else cfg["metrics"]["task_score"]
+        )
 
     if not ranked:
         raise FileNotFoundError(f"no ranked tasks for {benchmark}/{language} under {tasks_dir}")
-    return ranked, primary_map
+    return ranked, primary_map, task_types

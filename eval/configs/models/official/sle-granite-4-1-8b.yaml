@@ -1,0 +1,12 @@
+name: sle-granite-4-1-8b
+access: open_weights
+hf_repo: ibm-granite/granite-4.1-8b
+family: granite
+params_hint: 8.8B
+tier: official
+generation:
+  batch_size: 8
+  dtype: bfloat16
+  # No prepend_bos: this family's bos_token is <|end_of_text|>, an end-of-text
+  # marker. BOS screening on this model measured -12.8 (openbookqa) and
+  # -13.9 (arc_challenge), so prepending it is actively wrong here.

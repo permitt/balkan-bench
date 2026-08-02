@@ -51,3 +51,6 @@ eval/results/submissions/
 
 # stray empty files from prior iterations
 /validation
+
+# Agent/session scratch (internal reports, never part of the public repo)
+.superpowers/

@@ -1,0 +1,400 @@
+"""Generative evaluator: EM generation + loglikelihood/API MC protocols + few-shot machinery.
+
+Covers three protocols, all driven through a
+:class:`~balkanbench.models.generative_base.GenerativeModel` (local
+open-weights or API-backed):
+
+- ``multiple_choice_loglikelihood`` (native, non-API models only): scores
+  choices via ``model.loglikelihood``. See :func:`_run_loglikelihood_protocol`.
+- ``generative_qa`` (native for open models, and the ``generative_qa``
+  API-protocol reformulation for API models - same code path either way):
+  greedy-generates via ``model.generate`` and scores exact match. See
+  :func:`_run_generative_qa_protocol`.
+- ``multiple_choice_generative`` (API-protocol reformulation only): 0-shot
+  greedy generation of a letter/da-ne answer via ``model.generate``, parsed
+  by the task's ``parse_api_response``. See
+  :func:`_run_api_multiple_choice_protocol`.
+
+Protocol selection lives in :func:`run_generative_eval`: ``model_cfg.get("access")
+== "api"`` routes through ``task_spec["api_protocol"]["reformulation"]``;
+otherwise the task's native ``task_spec["task_type"]`` is used directly.
+
+Few-shot policy (DELIBERATE deviation from the reference harness,
+lm-evaluation-harness v0.3.0): the fork draws a single, global set of shots
+per task from a fixed master RNG seeded once, so every example in a run
+shares the same shots and their order depends on how many prior
+``rng.sample`` calls happened before it. That makes results depend on
+sample order / concurrency and is awkward to reproduce for a single
+example in isolation. We instead give every example its **own**
+independent RNG, seeded deterministically from the task and example id
+(``random.Random(f"sle-{task.task_name}-{example_id}")``), and draw
+``num_fewshot`` *distinct* indices from the few-shot pool with it. This
+means: (a) any single example's shots can be reproduced without replaying
+the whole run, (b) shot selection is embarrassingly parallel, at the cost
+of (c) no longer matching the fork's shot sequence bit-for-bit. The MC
+loglikelihood tasks are all 0-shot in v1 (see the SLE task YAMLs), so this
+machinery is exercised here by tests and used for real by Task 11's
+generative_qa path (5-shot NQ-Open / TriviaQA).
+"""
+
+from __future__ import annotations
+
+import random
+from dataclasses import dataclass
+from typing import Any
+
+from balkanbench.metrics import get_metric
+from balkanbench.tasks import get_task_class
+
+
+@dataclass
+class GenerativeRunResult:
+    """Outcome of :func:`run_generative_eval`."""
+
+    metrics: dict[str, float]
+    per_example: list[dict[str, Any]]
+    protocol: str  # "loglikelihood" | "generative"
+    num_fewshot: int
+    unparsed_responses: int  # API multiple-choice only, else 0
+    api_cost_usd: float  # 0.0 for open (non-API) models
+
+
+def build_fewshot_prefix(
+    *,
+    task: Any,
+    fewshot_dataset: Any,
+    num_fewshot: int,
+    example_id: str,
+) -> str:
+    """Build the few-shot prefix for one example.
+
+    ``task`` is typed loosely (``Any``) rather than the ``Task`` ABC: the
+    only members used here (``task_name``, ``fewshot_example_text``) are
+    task-family-specific (currently only :class:`GenerativeQATask` defines
+    ``fewshot_example_text``), so no single base-class type covers every
+    caller.
+
+    Empty string when ``num_fewshot == 0``. Otherwise draws ``num_fewshot``
+    distinct indices from ``fewshot_dataset`` with a per-example RNG seeded
+    from ``f"sle-{task.task_name}-{example_id}"`` (see the module docstring
+    for why this deviates from the reference harness), and joins
+    ``task.fewshot_example_text(shot)`` for each drawn shot with a blank
+    line, plus a trailing blank line separating the prefix from the actual
+    example.
+    """
+    if num_fewshot == 0:
+        return ""
+    if fewshot_dataset is None:
+        raise ValueError("fewshot_dataset is required when num_fewshot > 0")
+
+    rng = random.Random(f"sle-{task.task_name}-{example_id}")
+    pool_size = len(fewshot_dataset)
+    indices = rng.sample(range(pool_size), num_fewshot)
+    shots = [fewshot_dataset[i] for i in indices]
+    return "\n\n".join(task.fewshot_example_text(shot) for shot in shots) + "\n\n"
+
+
+def run_generative_eval(
+    *,
+    task_spec: dict[str, Any],
+    model: Any,
+    model_cfg: dict[str, Any],
+    dataset: Any,
+    fewshot_dataset: Any = None,
+    limit: int | None = None,
+) -> GenerativeRunResult:
+    """Evaluate ``model`` on ``dataset`` per ``task_spec``.
+
+    Protocol selection: ``model_cfg.get("access") == "api"`` routes through
+    the task's ``api_protocol.reformulation``; otherwise the task's native
+    ``task_type`` is used directly.
+    """
+    if model_cfg.get("access") == "api":
+        reformulation = task_spec["api_protocol"]["reformulation"]
+        if reformulation == "multiple_choice_generative":
+            return _run_api_multiple_choice_protocol(
+                task_spec=task_spec,
+                model=model,
+                dataset=dataset,
+                limit=limit,
+            )
+        if reformulation == "generative_qa":
+            return _run_generative_qa_protocol(
+                task_spec=task_spec,
+                model=model,
+                dataset=dataset,
+                fewshot_dataset=fewshot_dataset,
+                limit=limit,
+                metrics_spec=task_spec["api_protocol"]["metrics"],
+            )
+        raise NotImplementedError(
+            f"API protocol reformulation {reformulation!r} is not supported "
+            "by the generative evaluator."
+        )
+
+    task_type = task_spec["task_type"]
+    if task_type == "generative_qa":
+        return _run_generative_qa_protocol(
+            task_spec=task_spec,
+            model=model,
+            dataset=dataset,
+            fewshot_dataset=fewshot_dataset,
+            limit=limit,
+            metrics_spec=task_spec["metrics"],
+        )
+    if task_type != "multiple_choice_loglikelihood":
+        raise NotImplementedError(
+            f"task_type {task_type!r} is not supported by the generative evaluator."
+        )
+
+    return _run_loglikelihood_protocol(
+        task_spec=task_spec,
+        model=model,
+        dataset=dataset,
+        fewshot_dataset=fewshot_dataset,
+        limit=limit,
+    )
+
+
+def _run_loglikelihood_protocol(
+    *,
+    task_spec: dict[str, Any],
+    model: Any,
+    dataset: Any,
+    fewshot_dataset: Any,
+    limit: int | None,
+) -> GenerativeRunResult:
+    language = task_spec["languages"]["available"][0]
+    # Typed Any: get_task_class returns a plain Task statically, but the
+    # loglikelihood-protocol members used below (loglikelihood_requests,
+    # gold_index, continuation_lengths) live on MultipleChoiceLoglikelihoodTask,
+    # not the Task ABC - see build_fewshot_prefix's docstring for the same
+    # rationale applied to fewshot_example_text.
+    task: Any = get_task_class(task_spec["task_type"])(task_spec, language)
+
+    id_field = task_spec["inputs"]["id_field"]
+    num_fewshot = int(task_spec["evaluation"]["num_fewshot"])
+    report_names = list(task_spec["metrics"]["report"])
+    task_score_metric = task_spec["metrics"]["task_score"]
+
+    examples = list(dataset)
+    if limit is not None:
+        examples = examples[:limit]
+
+    predictions_raw: list[int] = []
+    predictions_norm: list[int] = []
+    golds: list[int] = []
+    per_example: list[dict[str, Any]] = []
+
+    for ex in examples:
+        example_id = str(ex[id_field])
+        prefix = build_fewshot_prefix(
+            task=task,
+            fewshot_dataset=fewshot_dataset,
+            num_fewshot=num_fewshot,
+            example_id=example_id,
+        )
+
+        requests = task.loglikelihood_requests(ex)
+        if prefix:
+            requests = [(prefix + context, continuation) for context, continuation in requests]
+        lls = model.loglikelihood(requests)
+        lengths = task.continuation_lengths(ex)
+
+        pred_raw = lls.index(max(lls))
+        norm_scores = [ll / length for ll, length in zip(lls, lengths, strict=True)]
+        pred_norm = norm_scores.index(max(norm_scores))
+        gold = task.gold_index(ex)
+
+        predictions_raw.append(pred_raw)
+        predictions_norm.append(pred_norm)
+        golds.append(gold)
+        # per_example "prediction"/"correct" must reflect the task's scoring
+        # metric (task_spec["metrics"]["task_score"]): acc_norm -> the
+        # length-normalized argmax, anything else -> the raw argmax. This
+        # keeps per-example diagnostics consistent with the aggregate score
+        # actually used to rank the task (e.g. arc/hellaswag/openbookqa/piqa
+        # score on acc_norm, winogrande on acc).
+        pred = pred_norm if task_score_metric == "acc_norm" else pred_raw
+        per_example.append(
+            {
+                "example_id": example_id,
+                "prediction_raw": pred_raw,
+                "prediction_norm": pred_norm,
+                "prediction": pred,
+                "correct": pred == gold,
+            }
+        )
+
+    metrics: dict[str, float] = {}
+    for name in report_names:
+        fn = get_metric(name)
+        predictions = predictions_norm if name == "acc_norm" else predictions_raw
+        metrics[name] = fn(predictions=predictions, references=golds)
+
+    return GenerativeRunResult(
+        metrics=metrics,
+        per_example=per_example,
+        protocol="loglikelihood",
+        num_fewshot=num_fewshot,
+        unparsed_responses=0,
+        api_cost_usd=0.0,
+    )
+
+
+def _run_generative_qa_protocol(
+    *,
+    task_spec: dict[str, Any],
+    model: Any,
+    dataset: Any,
+    fewshot_dataset: Any,
+    limit: int | None,
+    metrics_spec: dict[str, Any],
+) -> GenerativeRunResult:
+    """Greedy-generation + exact-match protocol: NQ-Open / TriviaQA.
+
+    Shared by the native ``generative_qa`` task_type (open models) and the
+    ``generative_qa`` API-protocol reformulation (API models) - both drive
+    ``model.generate`` identically over ``fewshot_prefix + qa_prompt(ex)``.
+    The only difference between the two callers is which metrics block
+    ``metrics_spec`` is: ``task_spec["metrics"]`` for native,
+    ``task_spec["api_protocol"]["metrics"]`` for the API reformulation - the
+    caller (:func:`run_generative_eval`) picks the right one.
+    """
+    language = task_spec["languages"]["available"][0]
+    # Typed Any: get_task_class returns a plain Task statically, but the
+    # QA-protocol members used below (qa_prompt, qa_references) live on
+    # GenerativeQATask, not the Task ABC - see build_fewshot_prefix's
+    # docstring for the same rationale applied to fewshot_example_text.
+    task: Any = get_task_class(task_spec["task_type"])(task_spec, language)
+
+    id_field = task_spec["inputs"]["id_field"]
+    num_fewshot = int(task_spec["evaluation"]["num_fewshot"])
+    stop_sequences = list(task_spec["evaluation"]["stop_sequences"])
+    max_gen_tokens = int(task_spec["evaluation"]["max_gen_tokens"])
+    report_names = list(metrics_spec["report"])
+    task_score_metric = metrics_spec["task_score"]
+
+    examples = list(dataset)
+    if limit is not None:
+        examples = examples[:limit]
+
+    example_ids: list[str] = []
+    prompts: list[str] = []
+    references: list[list[str]] = []
+
+    for ex in examples:
+        example_id = str(ex[id_field])
+        prefix = build_fewshot_prefix(
+            task=task,
+            fewshot_dataset=fewshot_dataset,
+            num_fewshot=num_fewshot,
+            example_id=example_id,
+        )
+        example_ids.append(example_id)
+        prompts.append(prefix + task.qa_prompt(ex))
+        references.append(task.qa_references(ex))
+
+    predictions = model.generate(
+        prompts, stop_sequences=stop_sequences, max_gen_tokens=max_gen_tokens
+    )
+
+    metrics: dict[str, float] = {}
+    for name in report_names:
+        fn = get_metric(name)
+        metrics[name] = fn(predictions=predictions, references=references)
+
+    task_score_fn = get_metric(task_score_metric)
+    per_example: list[dict[str, Any]] = [
+        {
+            "example_id": example_id,
+            "prediction": prediction,
+            "correct": task_score_fn(predictions=[prediction], references=[refs]) == 1.0,
+        }
+        for example_id, prediction, refs in zip(example_ids, predictions, references, strict=True)
+    ]
+
+    return GenerativeRunResult(
+        metrics=metrics,
+        per_example=per_example,
+        protocol="generative",
+        num_fewshot=num_fewshot,
+        unparsed_responses=0,
+        api_cost_usd=getattr(model, "total_cost_usd", 0.0),
+    )
+
+
+def _run_api_multiple_choice_protocol(
+    *,
+    task_spec: dict[str, Any],
+    model: Any,
+    dataset: Any,
+    limit: int | None,
+) -> GenerativeRunResult:
+    """API multiple-choice reformulation: 0-shot greedy generation of a
+    letter (or da/ne) answer, parsed by the task's ``parse_api_response``.
+
+    Deliberately 0-shot regardless of ``task_spec["evaluation"]["num_fewshot"]``
+    (which is always 0 for the MC tasks this applies to anyway): prompts are
+    ``task.api_prompt(ex)`` with no few-shot prefix.
+    """
+    language = task_spec["languages"]["available"][0]
+    # Typed Any: see _run_generative_qa_protocol's comment - api_prompt/
+    # parse_api_response/gold_index live on MultipleChoiceLoglikelihoodTask,
+    # not the Task ABC.
+    task: Any = get_task_class(task_spec["task_type"])(task_spec, language)
+
+    id_field = task_spec["inputs"]["id_field"]
+    stop_sequences = list(task_spec["evaluation"]["stop_sequences"])
+    max_gen_tokens = int(task_spec["evaluation"]["max_gen_tokens"])
+    metrics_spec = task_spec["api_protocol"]["metrics"]
+    report_names = list(metrics_spec["report"])
+
+    examples = list(dataset)
+    if limit is not None:
+        examples = examples[:limit]
+
+    prompts = [task.api_prompt(ex) for ex in examples]
+    texts = model.generate(prompts, stop_sequences=stop_sequences, max_gen_tokens=max_gen_tokens)
+
+    predictions: list[int] = []
+    golds: list[int] = []
+    per_example: list[dict[str, Any]] = []
+    unparsed_responses = 0
+
+    for ex, text in zip(examples, texts, strict=True):
+        example_id = str(ex[id_field])
+        gold = task.gold_index(ex)
+        parsed = task.parse_api_response(text, ex)
+        if parsed is None:
+            unparsed_responses += 1
+            prediction = -1  # sentinel: never matches a real gold index
+        else:
+            prediction = parsed
+
+        predictions.append(prediction)
+        golds.append(gold)
+        per_example.append(
+            {
+                "example_id": example_id,
+                "prediction": prediction,
+                "correct": prediction == gold,
+            }
+        )
+
+    metrics: dict[str, float] = {}
+    for name in report_names:
+        fn = get_metric(name)
+        metrics[name] = fn(predictions=predictions, references=golds)
+
+    return GenerativeRunResult(
+        metrics=metrics,
+        per_example=per_example,
+        protocol="generative",
+        num_fewshot=0,
+        unparsed_responses=unparsed_responses,
+        api_cost_usd=getattr(model, "total_cost_usd", 0.0),
+    )
+
+
+__all__ = ["GenerativeRunResult", "build_fewshot_prefix", "run_generative_eval"]

@@ -1,0 +1,9 @@
+name: sle-smollm3-3b
+access: open_weights
+hf_repo: HuggingFaceTB/SmolLM3-3B
+family: smollm3
+params_hint: 3.1B
+tier: official
+generation:
+  batch_size: 8
+  dtype: bfloat16

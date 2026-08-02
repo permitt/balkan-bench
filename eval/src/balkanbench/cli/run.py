@@ -25,6 +25,11 @@ from typing import Any
 import typer
 import yaml
 
+from balkanbench.cli._generative import (
+    GENERATIVE_TASK_TYPES,
+    GenerativeModelConstructionError,
+    run_generative_dispatch,
+)
 from balkanbench.cli._paths import (
     configs_root,
     resolve_model_config,
@@ -98,6 +103,12 @@ def run_cmd(
     run_type: str = typer.Option(
         "official", "--run-type", help="'official' (rankable) or 'experimental'."
     ),
+    limit: int | None = typer.Option(
+        None,
+        "--limit",
+        help="Generative (SLE) tasks only: evaluate only the first N examples. "
+        "The artifact gets run_type=experimental regardless of --run-type.",
+    ),
 ) -> None:
     """End-to-end: HP search -> 5-seed eval on test -> leaderboard export."""
     schemas = schemas_root()
@@ -136,6 +147,7 @@ def run_cmd(
         benchmark_version=benchmark_version,
         dataset_revision=dataset_revision,
         run_type=run_type,
+        limit=limit,
         model_cfg=model_cfg_base,
     )
     _check_or_write_fingerprint(out / FINGERPRINT_FILE, fingerprint)
@@ -167,6 +179,30 @@ def run_cmd(
         artifact_path = results_dir / f"{benchmark}-{language}" / model / task / "result.json"
         if artifact_path.is_file():
             typer.echo(_yellow(f"skip {task}: result already at {artifact_path} (resume)"))
+            continue
+
+        if task_cfg["task_type"] in GENERATIVE_TASK_TYPES:
+            from balkanbench.cli import run as _self
+
+            typer.echo(_green(f"[{task}] generative eval (SLE)"))
+            try:
+                generative_artifact = run_generative_dispatch(
+                    task_cfg=task_cfg,
+                    model_cfg=model_cfg_base,
+                    language=language,
+                    out_dir=results_dir,
+                    api_cache_dir=out / ".api_cache" / model_cfg_base["name"],
+                    dataset_revision=dataset_revision,
+                    benchmark_version=benchmark_version,
+                    run_type=run_type,
+                    limit=limit,
+                    load_dataset=_self.load_dataset,
+                    token=token,
+                )
+            except (DatasetRepoError, GenerativeModelConstructionError) as exc:
+                typer.echo(_red(str(exc)))
+                raise typer.Exit(code=1) from exc
+            typer.echo(_green(f"[{task}] artifact: {generative_artifact}"))
             continue
 
         try:

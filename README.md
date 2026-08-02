@@ -47,9 +47,10 @@ BalkanBench is intended to become the central open-source benchmark hub for the
 BCMS AI ecosystem: one place to publish datasets, compare models, reproduce
 results, and collaborate on new evaluation tracks.
 
-The roadmap extends beyond SuperGLUE. Planned next steps include:
+The roadmap extends beyond SuperGLUE. Serbian-LLM-Eval (SLE) has shipped
+as a second track - see [below](#serbian-llm-eval-sle-track). Planned next
+steps include:
 
-- Serbian-LLM-Eval, with permission and guidance from Aleksa Gordić
 - retrieval and embedding evaluation tracks
 - Bosnian localization
 - community-submitted benchmarks such as sentiment, NER, and domain-specific
@@ -80,6 +81,84 @@ the Croatian and Montenegrin previews expose 5 ranked tasks each;
 Serbian is the full 6-task SuperGLUE track. Diagnostics (AX-b, AX-g)
 are Serbian-only and don't enter the ranked average.
 
+## Serbian LLM Eval (SLE) track
+
+BalkanBench ships a second Serbian track, adapted from
+[Aleksa Gordić](https://www.linkedin.com/in/aleksagordic)'s
+**Serbian LLM Eval** project (Apache 2.0), with permission and guidance
+from Aleksa. It is **9 generative tasks** - arc_challenge, arc_easy, boolq,
+hellaswag, openbookqa, piqa, winogrande, nq_open, triviaqa - translated and
+adapted from English QA / commonsense-reasoning benchmarks. Upstream data:
+[gordicaleksa/serbian-llm-eval-v1](https://huggingface.co/datasets/gordicaleksa/serbian-llm-eval-v1).
+Our re-hosted parquet copy (full attribution, labels public):
+[permitt/serbian-llm-eval](https://huggingface.co/datasets/permitt/serbian-llm-eval).
+If you use this data, please cite the upstream dataset card.
+
+SLE runs a **dual scoring protocol**, because open-weights and closed API
+models can't be scored the same way:
+
+- **Open-weights models** are scored via **loglikelihood** - a faithful
+  port of EleutherAI's `lm-evaluation-harness` v0.3.0 as vendored in
+  Gordić's fork, including its acc_norm character-length normalization,
+  BoolQ/WinoGrande prompt construction, and context/continuation
+  tokenization quirks.
+- **Closed API models** (Claude, GPT, Gemini) don't expose the
+  loglikelihood-over-continuation primitive that protocol needs, so they
+  are scored via a **generative** protocol instead: multiple-choice tasks
+  are reformulated as letter-choice prompts and the model's free-text
+  answer is parsed.
+
+These two protocols produce **two separate leaderboard tables that are
+never comparable to each other**, even where a column shares a name (an
+open-weights `acc_norm` and an API `acc` measure fundamentally different
+things).
+
+### Sequence-start tokens
+
+Loglikelihood scoring is sensitive to whether a `<bos>`-style token opens
+the sequence, and models disagree about what they expect. We therefore
+score every model with **the prefix its own publisher specifies**, set
+per model via `generation.prepend_bos`:
+
+- Gemma 4 (all sizes) is trained with `<bos>` always present, so it gets
+  one. Without it, every Gemma sits at chance on multiple choice: adding
+  it moved Gemma-4-E4B by +8.8 (OpenBookQA) and +14.8 (ARC-Challenge).
+- Mistral-derived models (Ministral, YugoGPT) declare
+  `add_bos_token: true`, so they get one too. Ministral gained +13.0 and
+  +10.8 on the same two tasks.
+- Everything else is scored without one, which is what those models
+  expect. This is not cosmetic: Granite's `bos_token` is an
+  end-of-text marker, and prepending it *costs* -12.8 and -13.9.
+
+Qwen, SmolLM3 and Slava define no BOS token at all and are unaffected
+either way. The flag never changes which items are scored or how metrics
+are computed - only the input format each model receives.
+
+The open-weights board is live with **16 models**; the closed-API board
+ships empty until those runs complete.
+
+### Known limitations
+
+- **Gemma-4-12B is deliberately excluded.** It is the only roster model
+  built on the `Gemma4UnifiedForConditionalGeneration` (any-to-any)
+  architecture, and it scores at chance on 5 of 9 tasks even with `<bos>`
+  prepended, while both its smaller (E2B, E4B) and larger (31B) siblings
+  clear chance on all 9. We treat that as an unresolved problem with our
+  text-only scoring path for that architecture rather than a property of
+  the model, so we do not publish a rank for it.
+- **Model weights are not revision-pinned.** Official rows record
+  `model_revision: unknown` because the model YAMLs reference HF repos
+  without an `hf_revision`. The dataset is pinned (`v1.0.0-sle-data`) and
+  the code revision is recorded, but a model re-uploaded upstream could
+  shift its score. Pinning revisions is planned.
+- **Few-shot selection deviates from the reference harness.** The two
+  5-shot EM tasks draw shots via a per-example seeded RNG rather than the
+  fork's shared stream, so EM values are internally consistent but not
+  directly comparable to published fork numbers.
+
+Official SLE runs pin the dataset to the `v1.0.0-sle-data` tag rather than
+`main` - pass `--dataset-revision v1.0.0-sle-data` to `balkanbench eval`.
+
 ## Why it exists
 
 BalkanBench started from a practical problem: we needed a reliable way to rank
@@ -92,12 +171,17 @@ benchmarks and public leaderboards, the BCMS ecosystem should have the same.
 
 ## Hidden test labels
 
-Each language track declares a public HuggingFace dataset for train/validation
-and public test inputs, plus a gated private sibling repo that carries the
-hidden test labels used for official scoring. Public users can tune and evaluate
-on labeled public train/validation data, generate public test predictions with
-`balkanbench predict`, and submit those predictions for trusted scoring.
-`balkanbench score` is the only path that needs the private test labels.
+Each SuperGLUE language track declares a public HuggingFace dataset for
+train/validation and public test inputs, plus a gated private sibling repo that
+carries the hidden test labels used for official scoring. Public users can tune
+and evaluate on labeled public train/validation data, generate public test
+predictions with `balkanbench predict`, and submit those predictions for
+trusted scoring. `balkanbench score` is the only path that needs the private
+test labels.
+
+The SLE track is the exception: its test labels were already public in the
+upstream dataset, so the re-hosted copy keeps them public and `balkanbench
+predict` is not supported for SLE tasks - `balkanbench eval` scores directly.
 
 ## Quickstart
 
@@ -164,6 +248,8 @@ scratch.
 - Serbian SuperGLUE dataset: <https://huggingface.co/datasets/permitt/superglue-sr>
 - Montenegrin SuperGLUE dataset: <https://huggingface.co/datasets/permitt/superglue-mne>
 - Croatian SuperGLUE dataset: <https://huggingface.co/datasets/permitt/superglue-hr>
+- Serbian LLM Eval dataset (re-host): <https://huggingface.co/datasets/permitt/serbian-llm-eval>
+- Serbian LLM Eval dataset (upstream, Aleksa Gordić): <https://huggingface.co/datasets/gordicaleksa/serbian-llm-eval-v1>
 - GitHub repository: <https://github.com/permitt/balkan-bench>
 
 ## License

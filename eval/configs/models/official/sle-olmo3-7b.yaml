@@ -1,0 +1,9 @@
+name: sle-olmo3-7b
+access: open_weights
+hf_repo: allenai/Olmo-3-7B-Instruct
+family: olmo3
+params_hint: 7.3B
+tier: official
+generation:
+  batch_size: 8
+  dtype: bfloat16

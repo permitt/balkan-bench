@@ -1,0 +1,35 @@
+benchmark: sle
+task: boolq
+status: ranked
+task_type: multiple_choice_loglikelihood
+variant: boolq_da_ne
+languages:
+  available: [sr]
+  ranked: [sr]
+dataset:
+  source_type: huggingface
+  config: boolq
+  per_language:
+    sr: { public_repo: permitt/serbian-llm-eval }
+  splits:
+    public: [test]
+    labeled_public: [test]
+inputs:
+  fields: [question, passage]
+  id_field: example_id
+metrics:
+  primary: [acc]
+  report: [acc]
+  task_score: acc
+prompts:
+  sr: { template_id: sle_boolq_v1 }
+evaluation:
+  num_fewshot: 0
+  stop_sequences: []
+  max_gen_tokens: 16
+api_protocol:
+  reformulation: multiple_choice_generative
+  metrics:
+    primary: [acc]
+    report: [acc]
+    task_score: acc

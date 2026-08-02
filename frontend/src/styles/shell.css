@@ -13,16 +13,44 @@
   display: flex; align-items: center; gap: var(--space-6);
   height: 52px;
 }
-.shell-brand { font-weight: 700; letter-spacing: -0.02em; font-size: 1.05rem; }
+.shell-brand { font-weight: 700; letter-spacing: -0.02em; font-size: 1.05rem; flex: none; }
 .shell-links { display: flex; gap: var(--space-5); margin-left: auto; font-size: 0.9rem; color: var(--text-3); }
-.shell-links a { transition: color 120ms ease-out; }
+.shell-links a {
+  transition: color 120ms ease-out;
+  /* 44px touch target inside the 52px bar, without changing the visual rhythm */
+  display: inline-flex; align-items: center; min-height: 44px; white-space: nowrap;
+}
 .shell-links a:hover { color: var(--text-1); }
 .shell-links a.active { color: var(--text-1); font-weight: 600; }
+
+/* Below ~720px the link set is wider than the viewport. Rather than hiding
+   destinations behind a menu, let the strip scroll under a fading edge: the
+   brand and theme toggle stay pinned, every link stays one tap away. */
+@media (max-width: 720px) {
+  .shell-nav-inner { gap: var(--space-4); }
+  .shell-links {
+    flex: 1 1 auto; min-width: 0; gap: var(--space-4);
+    overflow-x: auto; overscroll-behavior-x: contain;
+    scrollbar-width: none; -ms-overflow-style: none;
+    /* Fade the right edge only: the strip starts flush-left, so a left fade
+       would dim the first link at rest instead of signalling anything. */
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 20px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 20px), transparent);
+  }
+  .shell-links::-webkit-scrollbar { display: none; }
+}
 .shell-theme {
+  position: relative;
   width: 32px; height: 32px; border-radius: 50%;
-  display: grid; place-items: center;
+  display: grid; place-items: center; flex: none;
   color: var(--text-2); background: var(--surface-3);
   transition: transform 100ms ease-out;
+}
+/* Keep the 32px circle, extend the hit area to a full 44px square for thumbs.
+   Deliberately not rounded: a 50% radius here would clip the corners of the
+   target back out of reach, which is the whole point of the expansion. */
+.shell-theme::before {
+  content: ""; position: absolute; inset: -6px;
 }
 .shell-theme:active { transform: scale(0.94); }
 .shell-main { min-height: calc(100vh - 52px - 64px); }

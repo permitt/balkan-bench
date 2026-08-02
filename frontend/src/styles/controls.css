@@ -1,7 +1,14 @@
 .seg {
   display: inline-flex; gap: 2px; padding: 3px;
   background: var(--surface-3); border-radius: var(--radius-m);
+  /* The board switcher carries long labels (protocol + model count) and is far
+     wider than a phone. Cap it to the container and scroll within the pill so
+     it never pushes the page sideways. */
+  max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain;
+  scrollbar-width: none; -ms-overflow-style: none;
 }
+.seg::-webkit-scrollbar { display: none; }
+.seg-item { flex: none; }
 .seg-item {
   position: relative; display: inline-flex; align-items: baseline; gap: 6px;
   padding: 6px 14px; border-radius: calc(var(--radius-m) - 3px);
@@ -44,6 +51,16 @@
 }
 .rankmenu-item:hover { background: var(--surface-3); }
 .rankmenu-item.active { background: var(--accent-soft); }
+
+/* Touch input: give the discrete controls a 44px target. Scoped to coarse
+   pointers so the tighter desktop rhythm is untouched. Inline prose links are
+   deliberately excluded (WCAG 2.5.8 exempts them, and padding them out would
+   break sentence flow). */
+@media (pointer: coarse) {
+  .seg-item { min-height: 44px; align-items: center; }
+  .rankmenu-pill { min-height: 44px; }
+  .rankmenu-item { min-height: 44px; justify-content: center; }
+}
 .rankmenu-item-head { font-size: 0.9rem; font-weight: 600; display: flex; gap: 8px; align-items: baseline; }
 .rankmenu-metric { font-size: 0.7rem; color: var(--text-4); }
 .rankmenu-desc { font-size: 0.78rem; color: var(--text-3); }

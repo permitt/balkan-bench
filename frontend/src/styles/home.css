@@ -24,14 +24,24 @@
 }
 .home-preview-more { color: var(--accent); font-weight: 600; }
 .home-preview-row {
-  display: grid; grid-template-columns: 32px 1fr 80px 120px;
+  display: grid; grid-template-columns: 32px minmax(0, 1fr) 80px 120px;
   gap: var(--space-4); align-items: center;
   padding: var(--space-3) 0; border-bottom: 1px solid var(--line);
 }
 .home-preview-row:last-child { border-bottom: none; }
 .home-preview-rank { color: var(--text-4); }
-.home-preview-model { font-weight: 600; }
+.home-preview-model { font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
 .home-preview-params { color: var(--text-3); font-size: 0.8rem; text-align: right; }
+
+/* 232px of fixed columns plus a model name does not fit a phone. Params is the
+   least load-bearing value here, so it goes; rank/model/score stay. */
+@media (max-width: 560px) {
+  .home-preview-row {
+    grid-template-columns: 28px minmax(0, 1fr) 92px;
+    gap: var(--space-3);
+  }
+  .home-preview-params { display: none; }
+}
 .home-facts { display: flex; gap: var(--space-8); flex-wrap: wrap; }
 .home-fact { display: flex; flex-direction: column; gap: var(--space-1); }
 .home-fact-n { font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; }

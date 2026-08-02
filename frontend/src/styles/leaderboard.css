@@ -31,7 +31,11 @@
 .lb-model-name { font-weight: 600; }
 .lb-model-id { font-size: 0.75rem; color: var(--text-3); }
 .lb-model-id a:hover { color: var(--accent); }
-.lb-rank { color: var(--text-3); width: 40px; }
+/* Single source of truth: the sticky model column offsets by exactly this,
+   so the two columns can never drift apart (they did: 40px declared vs 37px
+   rendered, leaving a 3px seam of scrolling content between them). */
+:root { --lb-rank-w: 44px; }
+.lb-rank { color: var(--text-3); width: var(--lb-rank-w); min-width: var(--lb-rank-w); }
 .lb-avg { font-weight: 600; }
 .lb-flag { font-size: 0.65rem; color: var(--text-4); }
 .lb-empty { padding: var(--space-7); text-align: center; color: var(--text-3); }
@@ -45,7 +49,7 @@
     position: sticky; left: 0; background: var(--surface-2); z-index: 2;
   }
   .lb-table .lb-model, .lb-table th.lb-model {
-    position: sticky; left: 40px; background: var(--surface-2); z-index: 2;
+    position: sticky; left: var(--lb-rank-w); background: var(--surface-2); z-index: 2;
   }
   .lb-first td.lb-rank, .lb-first td.lb-model {
     background: linear-gradient(var(--accent-soft), var(--accent-soft)), var(--surface-2);

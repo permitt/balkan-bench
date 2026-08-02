@@ -2,7 +2,9 @@
 
 Normalization is ported verbatim from the ``serb_eval_run`` branch of
 gordicaleksa/serbian-llm-eval - the vendored harness the original Serbian
-LLM Eval used - so EM scores here are comparable to the original results.
+LLM Eval used - so EM scores here match the original implementation (note: few-shot example
+selection deviates deliberately, see evaluation/generative.py, so EM values
+are not directly comparable to published fork numbers).
 
 Ported from ``NQOpen._normalize_answer`` in
 https://raw.githubusercontent.com/gordicaleksa/serbian-llm-eval/serb_eval_run/lm_eval/tasks/nqopen.py::

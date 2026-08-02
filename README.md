@@ -134,8 +134,27 @@ Qwen, SmolLM3 and Slava define no BOS token at all and are unaffected
 either way. The flag never changes which items are scored or how metrics
 are computed - only the input format each model receives.
 
-The open-weights board is live with **17 models**; the closed-API board
+The open-weights board is live with **16 models**; the closed-API board
 ships empty until those runs complete.
+
+### Known limitations
+
+- **Gemma-4-12B is deliberately excluded.** It is the only roster model
+  built on the `Gemma4UnifiedForConditionalGeneration` (any-to-any)
+  architecture, and it scores at chance on 5 of 9 tasks even with `<bos>`
+  prepended, while both its smaller (E2B, E4B) and larger (31B) siblings
+  clear chance on all 9. We treat that as an unresolved problem with our
+  text-only scoring path for that architecture rather than a property of
+  the model, so we do not publish a rank for it.
+- **Model weights are not revision-pinned.** Official rows record
+  `model_revision: unknown` because the model YAMLs reference HF repos
+  without an `hf_revision`. The dataset is pinned (`v1.0.0-sle-data`) and
+  the code revision is recorded, but a model re-uploaded upstream could
+  shift its score. Pinning revisions is planned.
+- **Few-shot selection deviates from the reference harness.** The two
+  5-shot EM tasks draw shots via a per-example seeded RNG rather than the
+  fork's shared stream, so EM values are internally consistent but not
+  directly comparable to published fork numbers.
 
 Official SLE runs pin the dataset to the `v1.0.0-sle-data` tag rather than
 `main` - pass `--dataset-revision v1.0.0-sle-data` to `balkanbench eval`.

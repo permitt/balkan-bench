@@ -2,7 +2,7 @@
   "benchmark": "sle",
   "language": "sr",
   "benchmark_version": "1.0.0",
-  "generated_at": "2026-08-02T16:36:57Z",
+  "generated_at": "2026-08-02T16:46:22Z",
   "sponsor": "Recrewty",
   "ranked_tasks": [
     "arc_challenge",
@@ -27,56 +27,6 @@
     "winogrande": "acc"
   },
   "rows": [
-    {
-      "rank": 16,
-      "model": "sle-gemma-4-12b-it",
-      "model_id": "google/gemma-4-12B-it",
-      "params": 12000000000,
-      "params_display": "12.0B",
-      "results": {
-        "arc_challenge": {
-          "mean": 0.2431740614334471,
-          "stdev": 0.0
-        },
-        "arc_easy": {
-          "mean": 0.30134680134680136,
-          "stdev": 0.0
-        },
-        "boolq": {
-          "mean": 0.6584097859327217,
-          "stdev": 0.0
-        },
-        "hellaswag": {
-          "mean": 0.3528181637124079,
-          "stdev": 0.0
-        },
-        "nq_open": {
-          "mean": 0.003878116343490305,
-          "stdev": 0.0
-        },
-        "openbookqa": {
-          "mean": 0.302,
-          "stdev": 0.0
-        },
-        "piqa": {
-          "mean": 0.5217627856365615,
-          "stdev": 0.0
-        },
-        "triviaqa": {
-          "mean": 0.01487962550156041,
-          "stdev": 0.0
-        },
-        "winogrande": {
-          "mean": 0.5027624309392266,
-          "stdev": 0.0
-        }
-      },
-      "avg": 0.3223,
-      "complete": true,
-      "tasks_completed": 9,
-      "tasks_total": 9,
-      "model_revision": "unknown"
-    },
     {
       "rank": 11,
       "model": "sle-gemma-4-31b-it",
@@ -428,7 +378,7 @@
       "model_revision": "unknown"
     },
     {
-      "rank": 17,
+      "rank": 16,
       "model": "sle-olmo3-7b",
       "model_id": "allenai/Olmo-3-7B-Instruct",
       "params": 7300000000,

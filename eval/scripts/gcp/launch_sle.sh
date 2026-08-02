@@ -6,13 +6,21 @@
 # its result.json to a per-(model, task) GCS prefix, mirroring how
 # launch_batch.sh keeps partial fleets independent.
 #
-# Cost: 5 open-weights models * 9 tasks = 45 jobs on L4. Generative eval has
-# no training step, so jobs are short relative to the SuperGLUE HP-search
-# sweep - runtime scales with dataset size and each task's max_gen_tokens.
+# Cost: the default roster is 10 open-weights models * 9 tasks = 90 jobs on a
+# single L4 each. Generative eval has no training step, so jobs are short
+# relative to the SuperGLUE HP-search sweep - runtime scales with dataset size
+# and each task's max_gen_tokens. TriviaQA (17.9k items, 5-shot) dominates:
+# it is roughly 80% of the wall-clock and cost of a full sweep.
+#
+# Models above ~10B params do not fit a single 24GB L4 and are NOT in the
+# default roster; they need multi-GPU sharding (generation.device_map: auto in
+# the model YAML) plus machine overrides, e.g. for the 12-36B tier:
+#
+#   ACCELERATOR_COUNT=8 MACHINE_TYPE=g2-standard-96 \
+#     MODELS="sle-qwen3-6-27b sle-granite-4-1-30b" bash launch_sle.sh
 #
 # API models (sle-gpt-4-1, sle-claude-sonnet-5, etc.) are out of scope here:
-# they call out to their provider APIs and are scored off-GCP instead. The
-# default MODELS list below only contains the 5 open-weights models.
+# they call out to their provider APIs and are scored off-GCP instead.
 #
 # Usage:
 #   export PROJECT_ID=my-gcp-project
